@@ -332,38 +332,158 @@ function classifyDeterministic(input: ClassificationInput): ClassificationResult
 }
 
 function handoutFallback(patient: SamplePatient): HandoutContent {
+  // Phenotype-aware fallback templates. AI generation gives more
+  // personalization, but these are clinically reasonable defaults.
+  const irHeavy = patient.irLikelihood >= 60
+
+  if (patient.phenotype === "A" || patient.phenotype === "B") {
+    return {
+      title: `${patient.firstName}, here's what we think and what to do next.`,
+      intro:
+        irHeavy
+          ? "Based on your intake, your provider believes you most likely have a form of PCOS where insulin resistance is a major driver. This page summarizes what that means, what to test next, and what you can start doing today."
+          : `Based on your intake answers, your provider believes you most likely have a form of PCOS called Type ${patient.phenotype}. This page summarizes what that means, what to test next, and what you can start doing today.`,
+      phenotypeExplanation: irHeavy
+        ? "What we suspect is that your body is producing slightly higher levels of androgens (which explains the skin and hair changes), your cycles are not running on a regular ovulation schedule, and your insulin is likely working harder than it should to keep your blood sugar stable. The insulin part matters because it drives a lot of the symptoms you're noticing, and it's the most actionable piece."
+        : "What we suspect is happening: your ovaries are not releasing eggs as regularly as they should, and your body is producing slightly higher levels of androgens (which explains the skin and hair changes). Type B specifically means we did not see polycystic morphology on imaging or it wasn't required, but the clinical picture still fits PCOS.",
+      nextSteps: [
+        "Lab work this week: testosterone, DHEAS, fasting insulin and glucose, A1c, and a few others. We'll get them done in one blood draw.",
+        "Schedule a pelvic ultrasound in the next 2 to 4 weeks if your provider has ordered one.",
+        "Start tracking your cycles on your phone (any free period app is fine) so we have data when you come back.",
+        "Come back in 4 to 6 weeks to review the labs and decide on a treatment plan together.",
+      ],
+      questionsToAsk: [
+        irHeavy
+          ? "Based on my results, am I a candidate for metformin or inositol to help with insulin resistance?"
+          : "Based on my results, what treatment options should we discuss first?",
+        "If I'm not planning to get pregnant soon, what's your recommendation for managing my cycles?",
+        irHeavy
+          ? "Given my family history and the insulin pattern, how often should I screen for diabetes going forward?"
+          : "What lifestyle changes would have the highest impact for my specific case?",
+      ],
+      lifestyleIntro: irHeavy
+        ? "These suggestions are tailored to the insulin resistance pattern that's most likely driving your symptoms. They're not meant to be all-or-nothing."
+        : "These suggestions are tailored to your phenotype. Small changes compound over weeks.",
+      lifestyleRecommendations: [
+        {
+          title: "Anchor each meal around protein",
+          detail:
+            "Aim for 25 to 35 grams of protein per meal. This blunts the blood sugar spike that drives cravings two hours later.",
+        },
+        {
+          title: "Walk after meals",
+          detail:
+            "Even a 10-minute walk within 30 minutes of eating measurably lowers post-meal insulin. This is the single highest-leverage change for your phenotype.",
+        },
+        {
+          title: "Strength train twice a week",
+          detail:
+            "Building lean muscle improves insulin sensitivity faster than cardio alone. Bodyweight or beginner weights is fine.",
+        },
+        {
+          title: "Prioritize sleep over almost everything else",
+          detail:
+            "Less than 7 hours of sleep raises androgens and insulin both. If only one thing changes, make it this one.",
+        },
+        {
+          title: "Skip the 'lose weight first' framing",
+          detail:
+            "Weight may shift with the metabolic changes above, but weight is not the cause. Focus on the metabolism, the rest follows.",
+        },
+      ],
+    }
+  }
+
+  if (patient.phenotype === "C") {
+    return {
+      title: `${patient.firstName}, here's the plan to get clarity on your symptoms.`,
+      intro:
+        "Based on your intake, your provider wants to look into a form of PCOS called Ovulatory PCOS (Type C). Your cycles are regular, which is great, but the acne and hair pattern you described point toward higher androgen levels worth confirming.",
+      phenotypeExplanation:
+        "Ovulatory PCOS means your ovaries are releasing eggs on schedule, but your body may still be making higher levels of androgens than typical. That's what causes the acne pattern on your jawline and the coarse hair on your upper lip. Because your cycles are regular, this phenotype is often the most responsive to targeted treatment for the specific symptoms you care about.",
+      nextSteps: [
+        "Lab work this week: testosterone, DHEAS, SHBG, 17-OH progesterone in one blood draw.",
+        "Schedule a pelvic ultrasound in the next 2 to 4 weeks to look at your ovaries.",
+        "Take a few photos of your skin and hair pattern weekly. Helps us track response to whatever we try.",
+        "Come back in 4 to 6 weeks to review labs and decide on treatment.",
+      ],
+      questionsToAsk: [
+        "Could spironolactone help my acne and hair pattern, and what are the trade-offs?",
+        "Do my labs suggest the androgens are coming from my ovaries or my adrenal glands?",
+        "Would a low-dose combined birth control pill be a good fit for my specific case?",
+      ],
+      lifestyleIntro:
+        "Your cycles are working, so we're focused on the skin and hair symptoms. These suggestions support the medical treatment options we'll discuss.",
+      lifestyleRecommendations: [
+        {
+          title: "Build a simple, consistent skincare routine",
+          detail:
+            "Gentle cleanser, retinoid at night, sunscreen during the day. Skip the 7-step routines, they irritate hormonal acne more.",
+        },
+        {
+          title: "Reduce dairy for 6 weeks and watch the response",
+          detail:
+            "Dairy has been linked to androgen-driven acne in some women. Six weeks gives a fair test. Note any change with photos.",
+        },
+        {
+          title: "Manage stress through any sustainable method",
+          detail:
+            "Cortisol amplifies adrenal androgen output. Whatever method actually works for you, do that.",
+        },
+        {
+          title: "Avoid extreme low-carb diets",
+          detail:
+            "Very restrictive diets stress the cycle and can backfire. Your insulin is likely not the main driver here.",
+        },
+      ],
+    }
+  }
+
+  // Type D — non-hyperandrogenic / fertility-focused
   return {
-    title: `${patient.firstName}, here's a summary of today's visit.`,
-    intro: `This is a placeholder handout. Configure ANTHROPIC_API_KEY to enable personalized AI-generated content.`,
-    phenotypeExplanation: `Your provider is evaluating you for ${patient.phenotype === "Unlikely" ? "PCOS but the picture isn't clear yet" : `Type ${patient.phenotype} PCOS`}. The next steps below will help clarify the picture.`,
+    title: `${patient.firstName}, here's the plan to understand your cycles and prepare for pregnancy.`,
+    intro:
+      "Based on your intake, your provider believes you may have a form of PCOS called Non-Hyperandrogenic PCOS (Type D). Your cycles have been long and recently missed, and we want to identify exactly what's happening before you try to conceive.",
+    phenotypeExplanation:
+      "This form of PCOS means your ovaries may not be releasing eggs on a predictable schedule, even though you don't have the classic acne and hair pattern of other PCOS types. The most important thing for you right now is restoring regular ovulation so you have predictable opportunities to conceive. Many women with this phenotype respond very well to targeted treatment.",
     nextSteps: [
-      "Complete the lab work recommended by your provider in the next week.",
-      "Schedule a pelvic ultrasound if recommended.",
-      "Start tracking your cycles on a phone app.",
-      "Return for follow-up in 4 to 6 weeks to review labs.",
+      "Lab work this week: testosterone, DHEAS, AMH, fasting insulin, glucose, A1c, and a few more.",
+      "Schedule a pelvic ultrasound in the next 2 to 3 weeks.",
+      "Track basal body temperature daily (or use a fertility app you trust). We need a sense of whether you're ovulating at all right now.",
+      "Come back in 3 to 4 weeks to review labs and discuss next steps for fertility planning.",
     ],
     questionsToAsk: [
-      "Based on my results, what treatment options should we discuss?",
-      "Are there lifestyle changes that would have the highest impact for my specific case?",
-      "How often should we follow up going forward?",
+      "Am I a candidate for letrozole to induce ovulation, and what's the success rate for someone with my profile?",
+      "How long should we try ovulation induction before considering other fertility options?",
+      "Are there any preconception risks specific to PCOS I should know about?",
     ],
-    lifestyleIntro: "General PCOS lifestyle suggestions. Your provider can tailor these to your specific case.",
+    lifestyleIntro:
+      "These suggestions support the fertility-focused treatment plan we'll discuss. Small changes compound.",
     lifestyleRecommendations: [
       {
-        title: "Anchor each meal around protein",
-        detail: "25 to 35 grams of protein per meal supports blood sugar stability.",
+        title: "Continue the prenatal vitamin",
+        detail:
+          "Make sure it includes 400 to 800 mcg of folate. Start at least 3 months before trying to conceive.",
       },
       {
-        title: "Move after meals",
-        detail: "A 10-minute walk within 30 minutes of eating lowers post-meal insulin.",
+        title: "Anchor meals around protein and fiber",
+        detail:
+          "Stable blood sugar supports regular ovulation. Aim for 25 grams of protein per meal.",
       },
       {
-        title: "Prioritize sleep",
-        detail: "Less than 7 hours raises androgens and insulin both.",
+        title: "Consistent moderate exercise",
+        detail:
+          "30 minutes of walking 5 days a week is the sweet spot. Excessive exercise can suppress cycles, so don't overdo it.",
       },
       {
-        title: "Consider strength training",
-        detail: "Building lean muscle improves insulin sensitivity faster than cardio alone.",
+        title: "Limit alcohol",
+        detail:
+          "Both for fertility outcomes and because cycle tracking is more reliable when alcohol is minimized.",
+      },
+      {
+        title: "Sleep is a fertility intervention",
+        detail:
+          "Aim for 7 to 9 hours. Cycle regularity improves measurably with consistent sleep.",
       },
     ],
   }
