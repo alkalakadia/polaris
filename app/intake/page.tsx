@@ -88,6 +88,7 @@ export default function IntakePage() {
   const router = useRouter()
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({})
+  const [submitting, setSubmitting] = useState(false)
 
   const step = STEPS[stepIndex]
   const progress = ((stepIndex + 1) / STEPS.length) * 100
@@ -111,8 +112,18 @@ export default function IntakePage() {
     return true
   }
 
-  function advance() {
+  async function advance() {
     if (stepIndex === STEPS.length - 1) {
+      setSubmitting(true)
+      try {
+        await fetch("/api/intake", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers }),
+        })
+      } catch (err) {
+        console.error("Submit failed, continuing to confirmation:", err)
+      }
       router.push("/intake/complete")
       return
     }
@@ -224,10 +235,14 @@ export default function IntakePage() {
           <button
             type="button"
             onClick={advance}
-            disabled={!canAdvance()}
+            disabled={!canAdvance() || submitting}
             className="rounded-lg bg-slate-900 px-6 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {stepIndex === STEPS.length - 1 ? "Submit" : "Continue"}
+            {submitting
+              ? "Submitting..."
+              : stepIndex === STEPS.length - 1
+              ? "Submit"
+              : "Continue"}
           </button>
         </div>
       </footer>
