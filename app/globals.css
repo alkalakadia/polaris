@@ -1,26 +1,104 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------------------
+ * Polaris design tokens v2 — warm, sophisticated, femtech-coded
+ *
+ * Inspired by Allara, Tia, Modern Fertility, and Linear / Anthropic UI polish.
+ * Warm cream canvas, rose-coral primary, aubergine accents, generous radii.
+ * ------------------------------------------------------------------------- */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --canvas: #FAF6F1;
+  --canvas-tint: #FCEFE8;
+  --card: #FFFFFF;
+  --border-soft: #EFE5DD;
+  --border-strong: #E2D5CA;
+
+  --ink-primary: #2A2122;
+  --ink-secondary: #6B5757;
+  --ink-tertiary: #A09290;
+
+  --brand-coral: #E15A78;
+  --brand-coral-soft: #F8D7DF;
+  --brand-coral-deep: #C13E5C;
+
+  --brand-peach: #F4A988;
+  --brand-peach-soft: #FBDFCF;
+
+  --brand-plum: #5B3A52;
+  --brand-plum-soft: #E4D5DF;
+
+  --brand-sage: #7A9A87;
+  --brand-amber: #C49A4A;
+  --brand-rose: #B8546B;
+
+  --shadow-soft: 0 1px 2px rgba(45, 36, 36, 0.04), 0 4px 16px rgba(45, 36, 36, 0.04);
+  --shadow-card: 0 1px 2px rgba(45, 36, 36, 0.06), 0 8px 24px rgba(45, 36, 36, 0.06);
+  --shadow-pop: 0 2px 8px rgba(225, 90, 120, 0.10), 0 16px 40px rgba(91, 58, 82, 0.10);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-canvas: var(--canvas);
+  --color-canvas-tint: var(--canvas-tint);
+  --color-card: var(--card);
+  --color-border-soft: var(--border-soft);
+  --color-border-strong: var(--border-strong);
+  --color-ink: var(--ink-primary);
+  --color-ink-2: var(--ink-secondary);
+  --color-ink-3: var(--ink-tertiary);
+  --color-coral: var(--brand-coral);
+  --color-coral-soft: var(--brand-coral-soft);
+  --color-coral-deep: var(--brand-coral-deep);
+  --color-peach: var(--brand-peach);
+  --color-peach-soft: var(--brand-peach-soft);
+  --color-plum: var(--brand-plum);
+  --color-plum-soft: var(--brand-plum-soft);
+  --color-sage: var(--brand-sage);
+  --color-amber: var(--brand-amber);
+  --color-rose: var(--brand-rose);
+  --font-display: var(--font-fraunces);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+body {
+  background: var(--canvas);
+  color: var(--ink-primary);
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Display headlines use Fraunces — a sophisticated serif with character
+ * that codes "women's health" + "premium" without screaming either. */
+.font-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-feature-settings: "ss01", "ss02";
+  letter-spacing: -0.025em;
+}
+
+/* Subtle warm-tinted background gradient for hero sections. */
+.bg-hero {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(244, 169, 136, 0.18), transparent 60%),
+    radial-gradient(ellipse 60% 40% at 90% 20%, rgba(225, 90, 120, 0.12), transparent 60%),
+    var(--canvas);
+}
+
+/* Brand gradient — coral → plum, used on the logo + key CTAs */
+.bg-brand-gradient {
+  background: linear-gradient(135deg, #E15A78 0%, #C13E5C 50%, #5B3A52 100%);
+}
+.text-brand-gradient {
+  background: linear-gradient(135deg, #E15A78 0%, #5B3A52 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Print styles for the patient handout */
+@media print {
+  body {
+    background: white;
+  }
 }

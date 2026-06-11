@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { PolarisLogo } from "@/components/logo"
 import { generateHandout } from "@/lib/anthropic"
 import { getPatientById } from "@/lib/sample-data"
 
@@ -20,37 +21,37 @@ export default async function HandoutPage({
   const aiPowered = Boolean(process.env.ANTHROPIC_API_KEY)
 
   return (
-    <main className="min-h-screen bg-slate-100 text-slate-900">
-      <header className="sticky top-0 z-10 border-b border-slate-200 bg-white print:hidden">
+    <main className="min-h-screen bg-canvas-tint text-ink">
+      <header className="sticky top-0 z-10 border-b border-border-soft bg-canvas-tint/80 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
-            <Link href={`/provider/${patient.id}`} className="text-sm text-slate-500 hover:text-slate-900">
+            <Link href={`/provider/${patient.id}`} className="text-sm font-medium text-ink-3 transition hover:text-ink">
               ← Chart
             </Link>
-            <div className="h-5 w-px bg-slate-200" />
-            <span className="text-sm font-semibold tracking-tight">Polaris handout</span>
+            <div className="h-5 w-px bg-border-soft" />
+            <span className="font-display text-sm font-medium tracking-tight">Handout</span>
             <span
-              className={`rounded-md px-2 py-0.5 text-xs font-medium ${
+              className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                 aiPowered
-                  ? "bg-emerald-50 text-emerald-700"
-                  : "bg-amber-50 text-amber-700"
+                  ? "bg-sage/15 text-sage"
+                  : "bg-peach-soft text-coral-deep"
               }`}
             >
               {aiPowered
                 ? `generated in ${(generatedInMs / 1000).toFixed(1)}s`
-                : "demo template (no API key)"}
+                : "phenotype template"}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <a
               href={`mailto:?subject=Your visit summary&body=Hi ${patient.firstName}, attached is your visit summary.`}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-full border border-border-strong bg-card px-3.5 py-1.5 text-xs font-medium text-ink-2 shadow-soft transition hover:bg-canvas-tint"
             >
               Email
             </a>
             <button
               type="button"
-              className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800"
+              className="rounded-full bg-ink px-3.5 py-1.5 text-xs font-medium text-canvas shadow-pop transition hover:bg-plum"
             >
               Print
             </button>
@@ -59,85 +60,91 @@ export default async function HandoutPage({
       </header>
 
       <section className="mx-auto max-w-3xl px-6 py-10 print:px-0 print:py-0">
-        <article className="rounded-xl border border-slate-200 bg-white p-10 shadow-sm print:rounded-none print:border-0 print:shadow-none">
+        <article className="rounded-3xl border border-border-soft bg-card p-12 shadow-card print:rounded-none print:border-0 print:shadow-none">
           {/* Letterhead */}
-          <header className="flex items-center justify-between border-b border-slate-200 pb-6">
-            <div>
-              <div className="text-xl font-semibold tracking-tight">Polaris</div>
-              <div className="mt-0.5 text-xs text-slate-500">
-                UW Health Women's Clinic · Dr. Sarah Chen
+          <header className="flex items-center justify-between border-b border-border-soft pb-6">
+            <div className="flex items-center gap-2">
+              <PolarisLogo size={28} />
+              <div>
+                <div className="font-display text-lg font-medium tracking-tight">polaris</div>
+                <div className="text-[11px] text-ink-3">
+                  UW Health Women's Clinic · Dr. Sarah Chen
+                </div>
               </div>
             </div>
-            <div className="text-right text-xs text-slate-500">
+            <div className="text-right text-[11px] text-ink-3">
               For: {patient.firstName}, age {patient.age}
               <br />
               Visit date: Today
             </div>
           </header>
 
-          <div className="mt-8">
-            <h1 className="text-2xl font-semibold leading-tight">{content.title}</h1>
-            <p className="mt-3 text-sm text-slate-700">{content.intro}</p>
+          <div className="mt-10">
+            <h1 className="font-display text-3xl font-medium leading-tight tracking-tight">
+              {content.title}
+            </h1>
+            <p className="mt-4 text-sm leading-relaxed text-ink-2">{content.intro}</p>
           </div>
 
-          <section className="mt-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+          <section className="mt-10">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-coral-deep">
               What we think is going on
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-slate-800">{content.phenotypeExplanation}</p>
+            <p className="mt-3 text-sm leading-relaxed text-ink">{content.phenotypeExplanation}</p>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+          <section className="mt-10">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-coral-deep">
               Your next steps
             </h2>
-            <ol className="mt-3 space-y-2 text-sm text-slate-800">
+            <ol className="mt-4 space-y-3 text-sm text-ink">
               {content.nextSteps.map((s, i) => (
                 <li key={i} className="flex gap-3">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-semibold text-indigo-700">
+                  <span className="bg-brand-gradient mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold text-white">
                     {i + 1}
                   </span>
-                  <span>{s}</span>
+                  <span className="leading-relaxed">{s}</span>
                 </li>
               ))}
             </ol>
           </section>
 
-          <section className="mt-8">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
-              Three questions to bring back next visit
+          <section className="mt-10">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-coral-deep">
+              Three questions to bring to your next visit
             </h2>
-            <ul className="mt-3 space-y-2 text-sm text-slate-800">
+            <ul className="mt-4 space-y-3 text-sm text-ink">
               {content.questionsToAsk.map((q, i) => (
                 <li key={i} className="flex gap-3">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
-                  <span>{q}</span>
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-coral" />
+                  <span className="leading-relaxed">{q}</span>
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="mt-8 rounded-lg bg-slate-50 p-5">
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+          <section className="mt-10 rounded-2xl bg-canvas-tint p-6">
+            <h2 className="text-[10px] font-semibold uppercase tracking-[0.18em] text-coral-deep">
               Lifestyle, matched to your phenotype
             </h2>
-            <p className="mt-2 text-sm text-slate-700">{content.lifestyleIntro}</p>
-            <ul className="mt-3 space-y-2 text-sm text-slate-800">
+            <p className="mt-3 text-sm leading-relaxed text-ink-2">{content.lifestyleIntro}</p>
+            <ul className="mt-4 space-y-3 text-sm text-ink">
               {content.lifestyleRecommendations.map((r, i) => (
                 <li key={i} className="flex gap-3">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" />
-                  <span>
-                    <span className="font-medium">{r.title}.</span> {r.detail}
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-plum" />
+                  <span className="leading-relaxed">
+                    <span className="font-semibold">{r.title}.</span> {r.detail}
                   </span>
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="mt-8 border-t border-slate-200 pt-5 text-xs text-slate-500">
+          <section className="mt-10 border-t border-border-soft pt-5 text-[11px] leading-relaxed text-ink-3">
             <p>
               <strong>Sources:</strong> Endocrine Society Clinical Practice Guidelines 2023,
-              Rotterdam ESHRE/ASRM-Sponsored PCOS Consensus Workshop Group 2018, AE-PCOS Society 2009.
+              Rotterdam ESHRE/ASRM-Sponsored PCOS Consensus Workshop Group 2018, AE-PCOS Society
+              2009.
             </p>
             <p className="mt-2">
               This handout is a summary of today's discussion. It is not a substitute for medical
