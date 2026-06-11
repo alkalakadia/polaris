@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Polaris
 
-## Getting Started
+**PCOS clinical decision support for OB/GYNs and endocrinologists.**
 
-First, run the development server:
+Built at UW Madison Summer of AI Lab 2026.
+
+---
+
+## What this is
+
+The PCOS workflow tool every OB/GYN should already have:
+
+- **Patient intake** on her phone (5 minutes, mobile-first)
+- **Phenotype classification** using Rotterdam 2003/2018 criteria
+- **Insulin resistance likelihood** with reasoning
+- **Recommended workup** prioritized and cited
+- **Personalized patient handout** generated in seconds, matched to phenotype
+
+V1 ships a clickable prototype using three hardcoded sample patients (Sarah, Maya, Aisha) spanning the most common PCOS phenotypes (Types A, C, D). V2 will swap the hardcoded outputs for real AI-driven classification and handout generation.
+
+## Routes
+
+- `/` — landing page
+- `/intake` — patient pre-visit intake (5 steps, mobile-first)
+- `/intake/complete` — submission confirmation
+- `/provider` — provider dashboard (today's PCOS suspects)
+- `/provider/[patientId]` — single-patient view (phenotype + workup + reasoning)
+- `/provider/[patientId]/handout` — printable personalized patient handout
+
+Try: `/provider/sarah`, `/provider/maya`, `/provider/aisha`.
+
+## Stack
+
+- Next.js 16 (App Router)
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Vercel hosting
+
+## Running locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Status
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Early prototype. Built to show real OB/GYNs at UW Health what the workflow looks like before formal user interviews. Not a clinical tool, not for production use.
 
-## Learn More
+## Team
 
-To learn more about Next.js, take a look at the following resources:
+- **Alka Lakadia** — engineering lead, product
+- TBD — frontend, patient experience
+- TBD — clinical content + research (Global Health certificate program)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Disclaimer
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Polaris is a clinical decision support prototype. It does not diagnose or treat. Always apply clinical judgment.
