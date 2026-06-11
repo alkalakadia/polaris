@@ -12,7 +12,7 @@
 
 import { NextResponse } from "next/server"
 import { classifyPhenotype, type ClassificationInput } from "@/lib/anthropic"
-import { saveIntake } from "@/lib/supabase"
+import { saveIntake, saveClassification } from "@/lib/supabase"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -27,6 +27,18 @@ export async function POST(req: Request) {
 
   const intakeId = await saveIntake(body.answers)
   const classification = await classifyPhenotype(toClassificationInput(body.answers))
+
+  // Persist classification so the provider dashboard can show it without
+  // re-running the classifier on every page load.
+  if (intakeId) {
+    await saveClassification(intakeId, {
+      phenotype: classification.phenotype,
+      irLikelihood: classification.irLikelihood,
+      confidence: classification.confidence,
+      reasoning: classification.reasoning,
+      aiPowered: Boolean(process.env.ANTHROPIC_API_KEY),
+    })
+  }
 
   return NextResponse.json({
     intakeId,

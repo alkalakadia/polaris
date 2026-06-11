@@ -79,3 +79,140 @@ export async function saveIntake(
   }
   return data?.id ?? null
 }
+
+/**
+ * Saves a classification result tied to an intake. Returns the new
+ * classification row id, or null when Supabase isn't configured.
+ */
+export async function saveClassification(
+  intakeId: string,
+  classification: {
+    phenotype: string
+    irLikelihood: number
+    confidence: string
+    reasoning: string[]
+    model?: string
+    aiPowered: boolean
+  }
+): Promise<string | null> {
+  const client = serverClient()
+  if (!client) return null
+  const { data, error } = await client
+    .from("classifications")
+    .insert({
+      intake_id: intakeId,
+      phenotype: classification.phenotype,
+      ir_likelihood: classification.irLikelihood,
+      confidence: classification.confidence,
+      reasoning: classification.reasoning,
+      model: classification.model ?? null,
+      ai_powered: classification.aiPowered,
+    })
+    .select("id")
+    .single()
+  if (error) {
+    console.error("saveClassification error:", error)
+    return null
+  }
+  return data?.id ?? null
+}
+
+/**
+ * Returns recent intakes joined with their latest classification.
+ * Used by the provider dashboard to show real submissions.
+ */
+export interface RealIntakeRow {
+  id: string
+  created_at: string
+  intake_data: Record<string, string | string[]>
+  classification: {
+    phenotype: string
+    ir_likelihood: number
+    confidence: string
+    reasoning: string[]
+  } | null
+}
+
+export async function getRecentIntakes(limit = 20): Promise<RealIntakeRow[]> {
+  const client = serverClient()
+  if (!client) return []
+  const { data, error } = await client
+    .from("intakes")
+    .select(
+      `id, created_at, intake_data,
+       classifications ( phenotype, ir_likelihood, confidence, reasoning, created_at )`
+    )
+    .order("created_at", { ascending: false })
+    .limit(limit)
+  if (error) {
+    console.error("getRecentIntakes error:", error)
+    return []
+  }
+  return (data ?? []).map((row) => {
+    const c = (row as { classifications?: unknown }).classifications
+    const latest =
+      Array.isArray(c) && c.length > 0
+        ? (c as Array<{
+            phenotype: string
+            ir_likelihood: number
+            confidence: string
+            reasoning: string[]
+            created_at: string
+          }>).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0]
+        : null
+    return {
+      id: row.id as string,
+      created_at: row.created_at as string,
+      intake_data: row.intake_data as Record<string, string | string[]>,
+      classification: latest
+        ? {
+            phenotype: latest.phenotype,
+            ir_likelihood: latest.ir_likelihood,
+            confidence: latest.confidence,
+            reasoning: latest.reasoning,
+          }
+        : null,
+    }
+  })
+}
+
+export async function getIntakeById(id: string): Promise<RealIntakeRow | null> {
+  const client = serverClient()
+  if (!client) return null
+  const { data, error } = await client
+    .from("intakes")
+    .select(
+      `id, created_at, intake_data,
+       classifications ( phenotype, ir_likelihood, confidence, reasoning, created_at )`
+    )
+    .eq("id", id)
+    .single()
+  if (error) {
+    console.error("getIntakeById error:", error)
+    return null
+  }
+  const c = (data as { classifications?: unknown }).classifications
+  const latest =
+    Array.isArray(c) && c.length > 0
+      ? (c as Array<{
+          phenotype: string
+          ir_likelihood: number
+          confidence: string
+          reasoning: string[]
+          created_at: string
+        }>).sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0]
+      : null
+  return {
+    id: data.id as string,
+    created_at: data.created_at as string,
+    intake_data: data.intake_data as Record<string, string | string[]>,
+    classification: latest
+      ? {
+          phenotype: latest.phenotype,
+          ir_likelihood: latest.ir_likelihood,
+          confidence: latest.confidence,
+          reasoning: latest.reasoning,
+        }
+      : null,
+  }
+}
