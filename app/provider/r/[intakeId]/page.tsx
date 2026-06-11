@@ -21,6 +21,7 @@ export default async function RealIntakeChart({
   const symptoms = (intake.intake_data["symptoms"] as string[]) ?? []
   const familyHistory = (intake.intake_data["family_history"] as string[]) ?? []
   const goals = (intake.intake_data["goals"] as string) ?? "Not specified"
+  const labPhotos = (intake.intake_data["lab_photos"] as string[]) ?? []
 
   const c = intake.classification
   const phenotype = (c?.phenotype ?? "Unlikely") as Phenotype
@@ -196,6 +197,46 @@ export default async function RealIntakeChart({
             </p>
           </div>
         </div>
+
+        {labPhotos.length > 0 && (
+          <div className="mt-6 rounded-2xl border border-border-soft bg-card p-6 shadow-soft">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="font-display text-xl font-medium tracking-tight">
+                  Patient-uploaded lab photos
+                </h2>
+                <p className="mt-1 text-xs text-ink-3">
+                  Captured during intake on her phone. V2 will OCR + structure these automatically.
+                </p>
+              </div>
+              <span className="rounded-full bg-coral-soft px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-coral-deep">
+                {labPhotos.length} photo{labPhotos.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+              {labPhotos.map((url, i) => (
+                <a
+                  key={i}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative aspect-square overflow-hidden rounded-2xl border border-border-strong bg-canvas-tint"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt={`Lab result ${i + 1}`}
+                    className="h-full w-full object-cover transition group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-ink/0 transition group-hover:bg-ink/20" />
+                  <div className="absolute bottom-2 left-2 rounded-md bg-card/95 px-2 py-0.5 text-[10px] font-semibold text-ink shadow-soft">
+                    Open
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         <p className="mt-10 text-xs leading-relaxed text-ink-3">
           Polaris is a clinical decision support prototype. It does not diagnose or treat.
