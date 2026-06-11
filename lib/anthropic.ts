@@ -18,9 +18,18 @@
 import Anthropic from "@anthropic-ai/sdk"
 import type { Phenotype, SamplePatient } from "./sample-data"
 
-const MODEL = "claude-opus-4-5"
+// Default to Sonnet for cost reasons (~5x cheaper than Opus, similar
+// quality on structured-output tasks like this one). Override with
+// ANTHROPIC_MODEL env var if you want to upgrade for demo days.
+const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6"
 
 let client: Anthropic | null = null
+
+// Simple in-memory cache so the same sample patient doesn't generate
+// a new handout on every page load. Cleared on every server restart.
+// Sized to comfortably fit all 8 sample patients + a few real ones.
+const handoutCache = new Map<string, HandoutContent>()
+const classificationCache = new Map<string, ClassificationResult>()
 
 function getClient(): Anthropic | null {
   if (!process.env.ANTHROPIC_API_KEY) return null
@@ -58,6 +67,12 @@ export async function classifyPhenotype(
   const c = getClient()
   if (!c) return classifyDeterministic(input)
 
+  // Cache key off the structured input — same inputs return the cached
+  // classification, no API call. Sample patients hit cache after first run.
+  const cacheKey = JSON.stringify(input)
+  const cached = classificationCache.get(cacheKey)
+  if (cached) return cached
+
   const prompt = buildClassificationPrompt(input)
   try {
     const message = await c.messages.create({
@@ -68,7 +83,9 @@ export async function classifyPhenotype(
     })
     const text =
       message.content[0]?.type === "text" ? message.content[0].text : ""
-    return parseClassificationJSON(text) ?? classifyDeterministic(input)
+    const result = parseClassificationJSON(text) ?? classifyDeterministic(input)
+    classificationCache.set(cacheKey, result)
+    return result
   } catch (err) {
     console.error("classifyPhenotype error, falling back:", err)
     return classifyDeterministic(input)
@@ -97,6 +114,11 @@ export async function generateHandout(
   const c = getClient()
   if (!c) return handoutFallback(patient)
 
+  // Cache by patient id — same sample patient's handout never regenerates
+  // after the first request. Real patients in V2 would key by intake_id.
+  const cached = handoutCache.get(patient.id)
+  if (cached) return cached
+
   const prompt = buildHandoutPrompt(patient)
   try {
     const message = await c.messages.create({
@@ -107,7 +129,9 @@ export async function generateHandout(
     })
     const text =
       message.content[0]?.type === "text" ? message.content[0].text : ""
-    return parseHandoutJSON(text) ?? handoutFallback(patient)
+    const result = parseHandoutJSON(text) ?? handoutFallback(patient)
+    handoutCache.set(patient.id, result)
+    return result
   } catch (err) {
     console.error("generateHandout error, falling back:", err)
     return handoutFallback(patient)
