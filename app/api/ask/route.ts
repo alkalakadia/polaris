@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { POLARIS_SYSTEM, askGemini, isGeminiConfigured } from "@/lib/gemini"
+import { POLARIS_SYSTEM, askGemini, askGeminiGrounded, isGeminiConfigured } from "@/lib/gemini"
 
 export const runtime = "nodejs"
 
@@ -20,7 +20,22 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Bad request." }, { status: 400 })
   }
 
-  const mode = payload.mode === "explainer" ? "explainer" : "qa"
+  const mode =
+    payload.mode === "explainer" ? "explainer" : payload.mode === "research" ? "research" : "qa"
+
+  // Live, credible, cited research from the web (Google Search grounding).
+  if (mode === "research") {
+    const topics = ((payload as { topics?: string }).topics || "").trim().slice(0, 300)
+    const { text, sources, error } = await askGeminiGrounded({
+      system: POLARIS_SYSTEM,
+      prompt: `Share 2-3 recent, credible, noteworthy findings or guidance about PCOS${
+        topics ? `, especially relevant to someone who: ${topics}` : ""
+      }. Use ONLY reputable sources (peer-reviewed journals, ACOG, the Endocrine Society, NIH/NICHD, major health institutions, or reputable medical news). For each: a short "**Bold title**" line, then 1-2 plain, encouraging sentences. Keep it clear and warm. Do not diagnose.`,
+      maxTokens: 1000,
+    })
+    if (error) return NextResponse.json({ error }, { status: 502 })
+    return NextResponse.json({ answer: text, sources: sources ?? [] })
+  }
 
   if (mode === "qa") {
     const question = (payload.question || "").trim()

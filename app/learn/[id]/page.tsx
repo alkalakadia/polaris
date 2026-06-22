@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { RichText } from "@/components/rich-text"
 import { cn } from "@/lib/cn"
-import { getArticle } from "@/lib/learn"
+import { getArticle, markRead } from "@/lib/learn"
 
 export default function ArticlePage() {
   const params = useParams<{ id: string }>()
@@ -51,7 +51,8 @@ export default function ArticlePage() {
 
   useEffect(() => {
     generate()
-  }, [generate])
+    if (article) markRead(params.id)
+  }, [generate, article, params.id])
 
   if (!article) {
     return (

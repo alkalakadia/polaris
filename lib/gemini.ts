@@ -51,6 +51,55 @@ export async function askGemini(opts: {
 }
 
 /**
+ * Grounded generation with Google Search, for live, CREDIBLE, cited content.
+ * Returns the text plus the web sources Gemini used.
+ */
+export async function askGeminiGrounded(opts: {
+  system?: string
+  prompt: string
+  maxTokens?: number
+  temperature?: number
+}): Promise<{ text?: string; sources?: { title: string; url: string }[]; error?: string }> {
+  if (!KEY) return { error: "AI isn't connected yet." }
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${KEY}`
+  const body = {
+    contents: [{ parts: [{ text: opts.prompt }] }],
+    ...(opts.system ? { systemInstruction: { parts: [{ text: opts.system }] } } : {}),
+    tools: [{ google_search: {} }],
+    generationConfig: {
+      temperature: opts.temperature ?? 0.4,
+      maxOutputTokens: opts.maxTokens ?? 1200,
+      thinkingConfig: { thinkingBudget: 0 },
+    },
+  }
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+    const data = await res.json()
+    if (!res.ok) return { error: data?.error?.message || `Gemini error ${res.status}` }
+    const cand = data?.candidates?.[0]
+    const text = (cand?.content?.parts ?? []).map((p: { text?: string }) => p.text).filter(Boolean).join("").trim()
+    const chunks = cand?.groundingMetadata?.groundingChunks ?? []
+    const seen = new Set<string>()
+    const sources: { title: string; url: string }[] = []
+    for (const c of chunks) {
+      const u = c?.web?.uri
+      if (u && !seen.has(u)) {
+        seen.add(u)
+        sources.push({ title: c.web.title || "source", url: u })
+      }
+    }
+    if (!text) return { error: "No findings came back. Try again?" }
+    return { text, sources }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Network error" }
+  }
+}
+
+/**
  * Shared safety system prompt. Educational only, never diagnostic, always
  * points to a real clinician. Warm + girly in tone, hyphens not em-dashes.
  */
