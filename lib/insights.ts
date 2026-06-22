@@ -11,6 +11,8 @@ import {
   type ChipOption,
   type TrackEntry,
 } from "@/lib/tracker"
+import { computeCycle, deriveLastPeriodStart } from "@/lib/cycle"
+import type { CycleProfile } from "@/lib/profile"
 
 export interface CountItem {
   option: ChipOption
@@ -57,6 +59,60 @@ function topFromGroup(entries: TrackEntry[], groupKey: keyof TrackEntry, n: numb
     .filter((x): x is CountItem => x !== null)
     .sort((a, b) => b.count - a.count)
     .slice(0, n)
+}
+
+export interface CyclePattern {
+  emoji: string
+  label: string
+  count: number
+  phaseHint: string
+}
+
+/**
+ * Cycle-relative patterns: "your cramps cluster ~2 days before your period."
+ * For each symptom, computes when in the cycle it tends to occur (days before
+ * the next period) and surfaces tight, repeated clusters. Estimates only.
+ */
+export function buildCyclePatterns(entries: TrackEntry[], profile: CycleProfile): CyclePattern[] {
+  if (!profile.completedAt) return []
+  const anchor = deriveLastPeriodStart(entries) ?? profile.lastPeriodStart ?? null
+  if (!anchor) return []
+
+  const symGroup = CHIP_GROUPS.find((g) => g.key === "symptoms")
+  if (!symGroup) return []
+
+  const buckets = new Map<string, number[]>()
+  for (const e of entries) {
+    const syms = e.symptoms as string[] | undefined
+    if (!syms || syms.length === 0) continue
+    const cs = computeCycle(profile, anchor, e.date)
+    if (cs.cycleDay === null || cs.nextPeriodInDays === null) continue
+    const daysBefore = cs.isLate ? 0 : cs.nextPeriodInDays
+    for (const s of syms) {
+      const arr = buckets.get(s) ?? []
+      arr.push(daysBefore)
+      buckets.set(s, arr)
+    }
+  }
+
+  const cycleLen = profile.cycleLength || 28
+  const out: CyclePattern[] = []
+  for (const [id, arr] of buckets) {
+    if (arr.length < 3) continue
+    const sorted = [...arr].sort((a, b) => a - b)
+    const median = sorted[Math.floor(sorted.length / 2)]
+    const within = arr.filter((v) => Math.abs(v - median) <= 4).length
+    if (within / arr.length < 0.6) continue // not a tight cluster
+    const opt = symGroup.options.find((o) => o.id === id)
+    if (!opt) continue
+    const phaseHint =
+      median <= 2 ? "right before your period"
+      : median <= 6 ? `about ${median} days before your period`
+      : median >= cycleLen - 6 ? "around the start of your cycle"
+      : "in the middle of your cycle"
+    out.push({ emoji: opt.emoji, label: opt.label, count: arr.length, phaseHint })
+  }
+  return out.sort((a, b) => b.count - a.count).slice(0, 3)
 }
 
 export function buildInsights(entries: TrackEntry[]): InsightSummary {

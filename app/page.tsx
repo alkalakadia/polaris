@@ -14,6 +14,20 @@ import {
   toDateKey,
   type TrackEntry,
 } from "@/lib/tracker"
+import {
+  getProfile,
+  hasOnboarded,
+  hydrateProfileFromMetadata,
+  type CycleProfile,
+} from "@/lib/profile"
+import {
+  PHASE_META,
+  computeCycle,
+  deriveLastPeriodStart,
+  phaseTip,
+  type CycleStatus,
+} from "@/lib/cycle"
+import { cn } from "@/lib/cn"
 
 function greeting(): string {
   const h = new Date().getHours()
@@ -26,19 +40,31 @@ export default function TodayPage() {
   const { user } = useAuth()
   const [entry, setEntry] = useState<TrackEntry | null>(null)
   const [streak, setStreak] = useState(0)
+  const [profile, setProfile] = useState<CycleProfile>({})
+  const [cycle, setCycle] = useState<CycleStatus | null>(null)
 
   useEffect(() => {
     let active = true
+    // Pull a cloud-synced profile down after sign-in, then read it.
+    if (user?.user_metadata?.cycle) hydrateProfileFromMetadata(user.user_metadata.cycle)
+    const prof = getProfile()
+    if (active) setProfile(prof)
+
     getAllEntriesAsync().then((all) => {
       if (!active) return
       const tk = toDateKey(new Date())
       setEntry(all.find((e) => e.date === tk) ?? { date: tk })
       setStreak(getStreak(all))
+      // Anchor predictions to the most recent real logged period when available.
+      const loggedStart = deriveLastPeriodStart(all)
+      setCycle(computeCycle(prof, loggedStart, tk))
     })
     return () => {
       active = false
     }
   }, [user])
+
+  const onboarded = hasOnboarded(profile)
 
   const filled = entry ? entryFilledCount(entry) : 0
   const flowLabel = entry?.flow ? FLOW_OPTIONS.find((f) => f.id === entry.flow) : undefined
@@ -63,7 +89,9 @@ export default function TodayPage() {
       {/* Greeting */}
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-sm font-bold text-g-ink-3">{greeting()} 🌷</p>
+          <p className="text-sm font-bold text-g-ink-3">
+            {greeting()}{profile.name ? `, ${profile.name}` : ""} 🌷
+          </p>
           <h1 className="font-cute text-3xl font-bold text-g-ink">How are you feeling?</h1>
         </div>
         <div className="flex flex-col items-center rounded-3xl bg-white px-4 py-2 shadow-girly">
@@ -72,6 +100,26 @@ export default function TodayPage() {
           <span className="text-[0.6rem] font-bold text-g-ink-3">day streak</span>
         </div>
       </div>
+
+      {/* Personalized cycle card — or an invite to personalize */}
+      {onboarded ? (
+        cycle && <CycleCard cycle={cycle} profile={profile} />
+      ) : (
+        <Link
+          href="/onboarding"
+          className="mt-5 block overflow-hidden rounded-[2rem] bg-candy p-5 shadow-girly-pop transition active:scale-[0.98]"
+        >
+          <div className="flex items-center justify-between">
+            <div className="pr-3">
+              <p className="font-cute text-xl font-bold text-white">Personalize Polaris ✨</p>
+              <p className="text-sm font-semibold text-white/90">
+                Tell us about your cycle to unlock daily, tailored guidance.
+              </p>
+            </div>
+            <span className="animate-float text-4xl">🌸</span>
+          </div>
+        </Link>
+      )}
 
       {/* Big log CTA */}
       <Link
@@ -120,6 +168,69 @@ export default function TodayPage() {
         concerns, please see a healthcare provider. 💗
       </p>
     </PatientShell>
+  )
+}
+
+function fmtDate(d: string): string {
+  return new Date(d + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })
+}
+
+function CycleCard({ cycle, profile }: { cycle: CycleStatus; profile: CycleProfile }) {
+  const meta = PHASE_META[cycle.phase]
+
+  // Onboarded but no period date yet → invite them to add it.
+  if (cycle.cycleDay === null) {
+    return (
+      <Link
+        href="/onboarding"
+        className="mt-5 block rounded-[2rem] border border-g-border bg-white p-5 shadow-girly transition active:scale-[0.99]"
+      >
+        <p className="font-cute text-lg font-bold text-g-ink">🌸 Add your last period</p>
+        <p className="mt-1 text-sm font-semibold text-g-ink-3">
+          Pop in when your last period started and Polaris will show your cycle day + what to expect.
+        </p>
+      </Link>
+    )
+  }
+
+  const pct = Math.min(100, Math.round((cycle.cycleDay / cycle.cycleLength) * 100))
+  const nextLine = cycle.isLate
+    ? `Period was expected ~${cycle.daysLate} day${cycle.daysLate === 1 ? "" : "s"} ago`
+    : `Period in ~${cycle.nextPeriodInDays} day${cycle.nextPeriodInDays === 1 ? "" : "s"}${
+        cycle.nextPeriodDate ? ` · around ${fmtDate(cycle.nextPeriodDate)}` : ""
+      }`
+
+  return (
+    <section className="mt-5 rounded-[2rem] border border-g-border bg-white p-5 shadow-girly">
+      <div className="flex items-center gap-3">
+        <span className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-3xl", meta.tint)}>
+          {meta.emoji}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-cute text-xl font-bold leading-tight text-g-ink">
+            Day {cycle.cycleDay} · {meta.label}
+          </p>
+          <p className="text-sm font-semibold text-g-ink-3">{nextLine}</p>
+        </div>
+        {cycle.fertileWindow && !cycle.isLate && (
+          <span className="shrink-0 rounded-full bg-g-peach-soft px-2.5 py-1 text-xs font-bold text-g-ink">
+            ✨ Fertile
+          </span>
+        )}
+      </div>
+
+      {/* cycle progress */}
+      <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-g-canvas-2">
+        <div className="h-full rounded-full bg-candy" style={{ width: `${pct}%` }} />
+      </div>
+
+      <p className="mt-3 text-sm font-medium text-g-ink-2">{phaseTip(cycle.phase, profile.goal)}</p>
+
+      <p className="mt-3 text-[0.7rem] font-semibold text-g-ink-3">
+        Estimate from your average{cycle.irregular ? ", and your cycles vary so it's a rough guide" : ""}.
+        Not medical advice. 💗
+      </p>
+    </section>
   )
 }
 

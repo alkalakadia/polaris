@@ -3,23 +3,38 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
+import { CycleCalendar } from "@/components/cycle-calendar"
 import { useAuth } from "@/lib/auth"
-import { buildInsights, type InsightSummary } from "@/lib/insights"
+import { buildCyclePatterns, buildInsights, type CyclePattern, type InsightSummary } from "@/lib/insights"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
+import { deriveLastPeriodStart } from "@/lib/cycle"
+import { getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
+import type { TrackEntry } from "@/lib/tracker"
 
 export default function InsightsPage() {
   const { user } = useAuth()
   const [summary, setSummary] = useState<InsightSummary | null>(null)
+  const [entries, setEntries] = useState<TrackEntry[]>([])
+  const [profile, setProfile] = useState<CycleProfile>({})
+  const [patterns, setPatterns] = useState<CyclePattern[]>([])
 
   useEffect(() => {
     let active = true
+    if (user?.user_metadata?.cycle) hydrateProfileFromMetadata(user.user_metadata.cycle)
+    const prof = getProfile()
+    if (active) setProfile(prof)
     getAllEntriesAsync().then((all) => {
-      if (active) setSummary(buildInsights(all))
+      if (!active) return
+      setEntries(all)
+      setSummary(buildInsights(all))
+      setPatterns(buildCyclePatterns(all, prof))
     })
     return () => {
       active = false
     }
   }, [user])
+
+  const anchor = deriveLastPeriodStart(entries) ?? profile.lastPeriodStart ?? null
 
   return (
     <PatientShell>
@@ -39,10 +54,35 @@ export default function InsightsPage() {
         </p>
       </div>
 
+      {/* History calendar — always available */}
+      <div className="mt-4">
+        <CycleCalendar entries={entries} profile={profile} anchor={anchor} />
+      </div>
+
+      {/* Cycle-relative patterns */}
+      {patterns.length > 0 && (
+        <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
+          <h2 className="mb-3 font-cute text-base font-bold text-g-ink">🔮 Your cycle patterns</h2>
+          <div className="space-y-2.5">
+            {patterns.map((p) => (
+              <div key={p.label} className="rounded-2xl bg-candy-soft px-4 py-3">
+                <p className="text-sm font-bold text-g-ink">
+                  {p.emoji} You often log {p.label.toLowerCase()} {p.phaseHint}.
+                </p>
+                <p className="text-xs font-semibold text-g-ink-3">Seen {p.count} times in your logs</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-[0.7rem] font-semibold text-g-ink-3">
+            Estimated from your own logs. Patterns get sharper the more you track. Not medical advice. 💗
+          </p>
+        </section>
+      )}
+
       {!summary || !summary.enoughData ? (
-        <div className="mt-6 rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
+        <div className="mt-4 rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
           <span className="text-4xl">🌱</span>
-          <p className="mt-3 font-cute text-lg font-bold text-g-ink">Track a few days to unlock insights</p>
+          <p className="mt-3 font-cute text-lg font-bold text-g-ink">Track a few days to unlock more insights</p>
           <p className="mt-1 text-sm font-semibold text-g-ink-3">
             The more you log, the more patterns Polaris can gently show you.
           </p>

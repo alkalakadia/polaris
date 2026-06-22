@@ -294,6 +294,7 @@ function AccountHub({ user }: { user: User }) {
       <h2 className="mt-6 px-1 font-cute text-base font-bold text-g-ink">Settings</h2>
       <div className="mt-2 overflow-hidden rounded-3xl border border-g-border bg-white shadow-girly">
         <SettingRow emoji="✏️" label="Edit name" onClick={() => setEditing(true)} />
+        <SettingRow emoji="🌙" label="Edit cycle & goals" href="/onboarding" />
         <SettingRow emoji="📄" label="Export my data (Gyno PDF)" href="/export" />
         <SettingRow emoji="💬" label="Browse community" href="/community" />
         <SettingRow emoji="🚪" label="Sign out" onClick={() => void signOut()} danger />

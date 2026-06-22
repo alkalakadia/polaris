@@ -4,13 +4,14 @@ import { useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
-import { buildInsights, type InsightSummary } from "@/lib/insights"
+import { buildCyclePatterns, buildInsights, type CyclePattern, type InsightSummary } from "@/lib/insights"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
 import {
   CHIP_GROUPS,
   FLOW_OPTIONS,
   type TrackEntry,
 } from "@/lib/tracker"
+import { GOALS, getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
 
 // Cute color themes for the album cover/accents.
 const THEMES = [
@@ -26,6 +27,8 @@ interface ExportConfig {
   name: string
   theme: ThemeId
   sections: Record<string, boolean>
+  chiefConcern: string
+  tried: string
   questions: string[]
   notes: string
 }
@@ -46,6 +49,8 @@ function loadConfig(): ExportConfig {
     name: "",
     theme: "pink",
     sections: Object.fromEntries(SECTION_DEFS.map((s) => [s.key, true])),
+    chiefConcern: "",
+    tried: "",
     questions: ["Could my symptoms be PCOS-related?", "Should I get bloodwork done?"],
     notes: "",
   }
@@ -62,20 +67,50 @@ export default function ExportPage() {
   const [cfg, setCfg] = useState<ExportConfig>(loadConfig)
   const [entries, setEntries] = useState<TrackEntry[]>([])
   const [summary, setSummary] = useState<InsightSummary | null>(null)
+  const [profile, setProfile] = useState<CycleProfile>({})
+  const [patterns, setPatterns] = useState<CyclePattern[]>([])
   const [newQ, setNewQ] = useState("")
   const { user } = useAuth()
 
   useEffect(() => {
     let active = true
+    if (user?.user_metadata?.cycle) hydrateProfileFromMetadata(user.user_metadata.cycle)
+    const prof = getProfile()
+    if (active) setProfile(prof)
     getAllEntriesAsync().then((all) => {
       if (!active) return
       setEntries(all)
       setSummary(buildInsights(all))
+      setPatterns(buildCyclePatterns(all, prof))
     })
     return () => {
       active = false
     }
   }, [user])
+
+  // Meds/supplements the user has actually logged — handy for "what I've tried".
+  const loggedMeds = (() => {
+    const medGroup = CHIP_GROUPS.find((g) => g.key === "meds")
+    if (!medGroup) return [] as string[]
+    const ids = new Set<string>()
+    for (const e of entries) for (const id of (e.meds as string[] | undefined) ?? []) ids.add(id)
+    return [...ids].map((id) => medGroup.options.find((o) => o.id === id)?.label).filter(Boolean) as string[]
+  })()
+
+  const goalLabel = GOALS.find((g) => g.id === profile.goal)?.label
+
+  const snapshot = [
+    profile.cycleLength
+      ? `Cycle ~${profile.cycleLength} days${profile.cycleIrregular ? " (reports irregular)" : ""}`
+      : null,
+    profile.lastPeriodStart
+      ? `last period ${new Date(profile.lastPeriodStart + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+      : null,
+    goalLabel ? `goal: ${goalLabel}` : null,
+    summary ? `${summary.daysTracked} days tracked` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ")
 
   // Persist customization as it changes.
   useEffect(() => {
@@ -124,6 +159,35 @@ export default function ExportPage() {
             placeholder="e.g. Sarah"
             className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
+        </section>
+
+        {/* Pre-visit summary inputs — these land at the TOP of the PDF for your doctor */}
+        <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
+          <p className="font-cute text-sm font-bold text-g-ink">For your doctor 🩺</p>
+          <p className="mb-3 text-xs font-semibold text-g-ink-3">
+            This goes right at the top so your gyno sees the important stuff first.
+          </p>
+          <label className="text-sm font-bold text-g-ink">Why are you going in? (main concern)</label>
+          <textarea
+            value={cfg.chiefConcern}
+            onChange={(e) => update({ chiefConcern: e.target.value })}
+            rows={2}
+            placeholder="e.g. irregular periods and new chin hair for ~6 months"
+            className="mt-1.5 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+          />
+          <label className="mt-3 block text-sm font-bold text-g-ink">What have you already tried?</label>
+          <textarea
+            value={cfg.tried}
+            onChange={(e) => update({ tried: e.target.value })}
+            rows={2}
+            placeholder="e.g. cut back on sugar, started walking, tried inositol"
+            className="mt-1.5 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+          />
+          {loggedMeds.length > 0 && (
+            <p className="mt-2 text-xs font-semibold text-g-ink-3">
+              We'll also include what you logged: {loggedMeds.join(", ")}
+            </p>
+          )}
         </section>
 
         {/* Theme */}
@@ -247,6 +311,42 @@ export default function ExportPage() {
         </div>
 
         <div className="space-y-5 p-6">
+          {/* Pre-visit summary — surfaced FIRST so the clinician sees what matters */}
+          <section className="rounded-2xl border-2 p-4" style={{ borderColor: theme.to }}>
+            <p className="text-[0.65rem] font-extrabold uppercase tracking-wider" style={{ color: theme.to }}>
+              For your provider
+            </p>
+            <h3 className="font-cute text-lg font-bold text-g-ink">Pre-visit summary</h3>
+
+            {cfg.chiefConcern.trim() && (
+              <PreItem label="Why I'm here">{cfg.chiefConcern}</PreItem>
+            )}
+            {snapshot && <PreItem label="Snapshot">{snapshot}</PreItem>}
+            {(cfg.tried.trim() || loggedMeds.length > 0) && (
+              <PreItem label="What I've tried">
+                {[cfg.tried.trim(), loggedMeds.join(", ")].filter(Boolean).join(" · ")}
+              </PreItem>
+            )}
+            {patterns.length > 0 && (
+              <PreItem label="Patterns I've noticed">
+                <ul className="space-y-0.5">
+                  {patterns.map((p) => (
+                    <li key={p.label}>• {p.label} {p.phaseHint}</li>
+                  ))}
+                </ul>
+              </PreItem>
+            )}
+            {cfg.sections.questions && cfg.questions.length > 0 && (
+              <PreItem label="My questions">
+                <ul className="space-y-0.5">
+                  {cfg.questions.map((q, i) => (
+                    <li key={i} className="font-semibold text-g-ink">💬 {q}</li>
+                  ))}
+                </ul>
+              </PreItem>
+            )}
+          </section>
+
           {cfg.sections.summary && summary && (
             <AlbumSection title="Tracking summary" emoji="📅" soft={theme.soft}>
               <div className="grid grid-cols-2 gap-3">
@@ -300,16 +400,6 @@ export default function ExportPage() {
             </AlbumSection>
           )}
 
-          {cfg.sections.questions && cfg.questions.length > 0 && (
-            <AlbumSection title="My questions" emoji="❓" soft={theme.soft}>
-              <ul className="space-y-1.5">
-                {cfg.questions.map((q, i) => (
-                  <li key={i} className="text-sm font-semibold text-g-ink">💬 {q}</li>
-                ))}
-              </ul>
-            </AlbumSection>
-          )}
-
           {cfg.sections.notes && (cfg.notes.trim() || notesEntries.length > 0) && (
             <AlbumSection title="Notes" emoji="📝" soft={theme.soft}>
               {cfg.notes.trim() && <p className="text-sm font-medium text-g-ink">{cfg.notes}</p>}
@@ -328,6 +418,15 @@ export default function ExportPage() {
         </div>
       </div>
     </PatientShell>
+  )
+}
+
+function PreItem({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="mt-2.5">
+      <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">{label}</p>
+      <div className="text-sm font-medium text-g-ink-2">{children}</div>
+    </div>
   )
 }
 
