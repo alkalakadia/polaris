@@ -35,6 +35,37 @@
   --shadow-soft: 0 1px 2px rgba(45, 36, 36, 0.04), 0 4px 16px rgba(45, 36, 36, 0.04);
   --shadow-card: 0 1px 2px rgba(45, 36, 36, 0.06), 0 8px 24px rgba(45, 36, 36, 0.06);
   --shadow-pop: 0 2px 8px rgba(225, 90, 120, 0.10), 0 16px 40px rgba(91, 58, 82, 0.10);
+
+  /* -------------------------------------------------------------------------
+   * Polaris GIRLY theme — the patient app. Soft, cute, fun, pastel.
+   * Bubblegum + lavender + peach + mint + butter on a pink-cream canvas.
+   * ----------------------------------------------------------------------- */
+  --g-canvas: #FFF5F9;       /* pink-cream */
+  --g-canvas-2: #FBF1FF;     /* lilac-cream */
+  --g-card: #FFFFFF;
+  --g-border: #FCE0EC;
+  --g-border-2: #F1E2FB;
+
+  --g-ink: #4A2C3E;          /* soft plum-ink */
+  --g-ink-2: #8A6A7C;
+  --g-ink-3: #B9A2AE;
+
+  --g-pink: #FF6FA5;         /* bubblegum */
+  --g-pink-soft: #FFD9E7;
+  --g-pink-deep: #F2478A;
+  --g-lavender: #B79CED;
+  --g-lavender-soft: #E7DBFB;
+  --g-peach: #FFB38A;
+  --g-peach-soft: #FFE2CF;
+  --g-mint: #8FE0C2;
+  --g-mint-soft: #D6F6EA;
+  --g-butter: #FFD972;
+  --g-butter-soft: #FFF0C2;
+  --g-sky: #8FC9FF;
+  --g-sky-soft: #D8ECFF;
+
+  --g-shadow: 0 2px 6px rgba(255, 111, 165, 0.10), 0 14px 36px rgba(183, 156, 237, 0.14);
+  --g-shadow-pop: 0 4px 12px rgba(255, 111, 165, 0.22), 0 18px 44px rgba(183, 156, 237, 0.22);
 }
 
 @theme inline {
@@ -59,6 +90,31 @@
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-round: var(--font-quicksand);
+  --font-cute: var(--font-baloo);
+
+  /* Girly theme colors, exposed as Tailwind utilities (bg-g-pink, text-g-ink, …) */
+  --color-g-canvas: var(--g-canvas);
+  --color-g-canvas-2: var(--g-canvas-2);
+  --color-g-card: var(--g-card);
+  --color-g-border: var(--g-border);
+  --color-g-border-2: var(--g-border-2);
+  --color-g-ink: var(--g-ink);
+  --color-g-ink-2: var(--g-ink-2);
+  --color-g-ink-3: var(--g-ink-3);
+  --color-g-pink: var(--g-pink);
+  --color-g-pink-soft: var(--g-pink-soft);
+  --color-g-pink-deep: var(--g-pink-deep);
+  --color-g-lavender: var(--g-lavender);
+  --color-g-lavender-soft: var(--g-lavender-soft);
+  --color-g-peach: var(--g-peach);
+  --color-g-peach-soft: var(--g-peach-soft);
+  --color-g-mint: var(--g-mint);
+  --color-g-mint-soft: var(--g-mint-soft);
+  --color-g-butter: var(--g-butter);
+  --color-g-butter-soft: var(--g-butter-soft);
+  --color-g-sky: var(--g-sky);
+  --color-g-sky-soft: var(--g-sky-soft);
 }
 
 body {
@@ -96,9 +152,64 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+/* ---------------------------------------------------------------------------
+ * GIRLY app helpers — used by the patient experience (Today / Track / etc.)
+ * ------------------------------------------------------------------------- */
+
+/* Rounded friendly UI font + playful cute display font. */
+.font-round { font-family: var(--font-quicksand), ui-rounded, "Segoe UI", sans-serif; }
+.font-cute  { font-family: var(--font-baloo), var(--font-quicksand), ui-rounded, sans-serif; }
+
+/* The patient app's dreamy pastel background — soft blobs of pink/lavender/peach. */
+.bg-girly {
+  background:
+    radial-gradient(ellipse 70% 40% at 0% 0%, rgba(255, 111, 165, 0.16), transparent 60%),
+    radial-gradient(ellipse 70% 40% at 100% 5%, rgba(183, 156, 237, 0.18), transparent 60%),
+    radial-gradient(ellipse 80% 50% at 50% 100%, rgba(255, 179, 138, 0.12), transparent 60%),
+    var(--g-canvas);
+}
+
+/* Soft candy gradients for cute buttons + accents. */
+.bg-candy        { background: linear-gradient(135deg, #FF8FB8 0%, #FF6FA5 45%, #B79CED 100%); }
+.bg-candy-soft   { background: linear-gradient(135deg, var(--g-pink-soft) 0%, var(--g-lavender-soft) 100%); }
+.text-candy {
+  background: linear-gradient(135deg, #FF6FA5 0%, #B79CED 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.shadow-girly     { box-shadow: var(--g-shadow); }
+.shadow-girly-pop { box-shadow: var(--g-shadow-pop); }
+
+/* A gentle float for sparkles / cute graphics. */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(6deg); }
+}
+.animate-float { animation: float-soft 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-float { animation: none; }
+}
+
+/* A soft pop when something gets selected/saved. */
+@keyframes pop-in {
+  0%   { transform: scale(0.9); opacity: 0; }
+  60%  { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop { animation: pop-in 0.25s ease-out; }
+
+/* Hide scrollbars on horizontal chip rows while keeping them scrollable. */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Print styles for the patient handout */
 @media print {
   body {
     background: white;
   }
+  /* Scoped print hiding so the girly app chrome + controls drop out of the PDF,
+   * without touching the provider handout's own print layout. */
+  .print-hide { display: none !important; }
+  .print-area { box-shadow: none !important; }
+  .bg-girly { background: white !important; }
 }

@@ -1,0 +1,121 @@
+/**
+ * Polaris insights — honest, NON-diagnostic pattern summaries computed from the
+ * user's own tracked data. These are gentle observations and prompts to talk to
+ * a doctor. Nothing here is a diagnosis, a medical claim, or a substitute for
+ * care. Every "watch-out" is framed as "worth mentioning to your gyno."
+ */
+
+import {
+  CHIP_GROUPS,
+  entryFilledCount,
+  type ChipOption,
+  type TrackEntry,
+} from "@/lib/tracker"
+
+export interface CountItem {
+  option: ChipOption
+  count: number
+  group: string
+}
+
+export interface InsightSummary {
+  daysTracked: number
+  flowDays: number
+  avgPain: number | null
+  avgSleep: number | null
+  topSymptoms: CountItem[]
+  topMoods: CountItem[]
+  watchOuts: WatchOut[]
+  enoughData: boolean
+}
+
+export interface WatchOut {
+  emoji: string
+  title: string
+  body: string
+}
+
+function tally(entries: TrackEntry[], key: keyof TrackEntry): Map<string, number> {
+  const m = new Map<string, number>()
+  for (const e of entries) {
+    const v = e[key]
+    if (Array.isArray(v)) for (const id of v) m.set(id, (m.get(id) ?? 0) + 1)
+    else if (typeof v === "string") m.set(v, (m.get(v) ?? 0) + 1)
+  }
+  return m
+}
+
+function topFromGroup(entries: TrackEntry[], groupKey: keyof TrackEntry, n: number): CountItem[] {
+  const group = CHIP_GROUPS.find((g) => g.key === groupKey)
+  if (!group) return []
+  const counts = tally(entries, groupKey)
+  return [...counts.entries()]
+    .map(([id, count]) => {
+      const option = group.options.find((o) => o.id === id)
+      return option ? { option, count, group: group.title } : null
+    })
+    .filter((x): x is CountItem => x !== null)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, n)
+}
+
+export function buildInsights(entries: TrackEntry[]): InsightSummary {
+  const logged = entries.filter((e) => entryFilledCount(e) > 0)
+  const daysTracked = logged.length
+
+  const flowDays = logged.filter((e) => e.flow && e.flow !== "none").length
+
+  const pains = logged.map((e) => e.pain).filter((p): p is number => typeof p === "number")
+  const avgPain = pains.length ? pains.reduce((a, b) => a + b, 0) / pains.length : null
+
+  const sleeps = logged.map((e) => e.sleepHours).filter((s): s is number => typeof s === "number" && s > 0)
+  const avgSleep = sleeps.length ? sleeps.reduce((a, b) => a + b, 0) / sleeps.length : null
+
+  const topSymptoms = topFromGroup(logged, "symptoms", 3)
+  const topMoods = topFromGroup(logged, "moods", 3)
+
+  // --- gentle, non-diagnostic "worth mentioning to your gyno" prompts -------
+  const watchOuts: WatchOut[] = []
+  const skinHair = tally(logged, "skinHair")
+  const symptoms = tally(logged, "symptoms")
+
+  if ((skinHair.get("newhair") ?? 0) >= 2 || (skinHair.get("darkpatches") ?? 0) >= 2) {
+    watchOuts.push({
+      emoji: "💛",
+      title: "Skin & hair changes you've noted",
+      body: "You've logged new hair growth or dark skin patches a few times. These are common things to bring up at a gyno visit — your PDF can help you remember.",
+    })
+  }
+  if ((skinHair.get("acne") ?? 0) >= 3) {
+    watchOuts.push({
+      emoji: "🌸",
+      title: "Breakouts showing up often",
+      body: "Persistent breakouts are worth a chat with a dermatologist or gyno, especially alongside cycle changes.",
+    })
+  }
+  if (daysTracked >= 35 && flowDays === 0) {
+    watchOuts.push({
+      emoji: "🗓️",
+      title: "No period logged in a while",
+      body: "It's been over a month of tracking with no period logged. Cycle gaps are something a doctor can help you understand.",
+    })
+  }
+  if ((symptoms.get("fatigue") ?? 0) >= 4 || (symptoms.get("brainfog") ?? 0) >= 4) {
+    watchOuts.push({
+      emoji: "🫧",
+      title: "Low energy keeps coming up",
+      body: "Frequent fatigue or brain fog has its own list of possible causes. A doctor can check what's going on for you.",
+    })
+  }
+
+  return {
+    daysTracked,
+    flowDays,
+    avgPain,
+    avgSleep,
+    topSymptoms,
+    topMoods,
+    watchOuts,
+    enoughData: daysTracked >= 3,
+  }
+}

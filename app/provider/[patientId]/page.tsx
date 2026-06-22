@@ -16,23 +16,24 @@ export default async function PatientChart({
     <main className="min-h-screen bg-canvas text-ink">
       <header className="sticky top-0 z-10 border-b border-border-soft bg-canvas/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/provider" className="text-sm font-medium text-ink-3 transition hover:text-ink">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+            <Link href="/provider" className="shrink-0 text-sm font-medium text-ink-3 transition hover:text-ink">
               ← Schedule
             </Link>
-            <div className="h-5 w-px bg-border-soft" />
-            <Link href="/">
+            <div className="hidden h-5 w-px bg-border-soft sm:block" />
+            <Link href="/" className="hidden sm:block">
               <PolarisLogo size={26} withWordmark wordmarkClassName="text-base" />
             </Link>
           </div>
           <Link
             href={`/provider/${patient.id}/handout`}
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-canvas shadow-pop transition hover:bg-plum"
+            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-sm font-medium text-canvas shadow-pop transition hover:bg-plum"
           >
             <svg className="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M8 2v6m0 0 3-3M8 8 5 5m-3 8h12" />
             </svg>
-            Generate patient handout
+            <span className="sm:hidden">Handout</span>
+            <span className="hidden sm:inline">Generate patient handout</span>
           </Link>
         </div>
       </header>

@@ -1,172 +1,149 @@
+"use client"
+
 import Link from "next/link"
-import { PolarisLogo } from "@/components/logo"
+import { useEffect, useState } from "react"
+import { PatientShell } from "@/components/patient-shell"
+import { useAuth } from "@/lib/auth"
+import { getAllEntriesAsync } from "@/lib/tracker-store"
+import {
+  CHIP_GROUPS,
+  FLOW_OPTIONS,
+  ENERGY_OPTIONS,
+  entryFilledCount,
+  getStreak,
+  toDateKey,
+  type TrackEntry,
+} from "@/lib/tracker"
 
-export default function LandingPage() {
+function greeting(): string {
+  const h = new Date().getHours()
+  if (h < 12) return "Good morning"
+  if (h < 18) return "Hey there"
+  return "Good evening"
+}
+
+export default function TodayPage() {
+  const { user } = useAuth()
+  const [entry, setEntry] = useState<TrackEntry | null>(null)
+  const [streak, setStreak] = useState(0)
+
+  useEffect(() => {
+    let active = true
+    getAllEntriesAsync().then((all) => {
+      if (!active) return
+      const tk = toDateKey(new Date())
+      setEntry(all.find((e) => e.date === tk) ?? { date: tk })
+      setStreak(getStreak(all))
+    })
+    return () => {
+      active = false
+    }
+  }, [user])
+
+  const filled = entry ? entryFilledCount(entry) : 0
+  const flowLabel = entry?.flow ? FLOW_OPTIONS.find((f) => f.id === entry.flow) : undefined
+  const energyLabel = entry?.energy ? ENERGY_OPTIONS.find((e) => e.id === entry.energy) : undefined
+
+  // A friendly list of what's been logged today, for the summary card.
+  const loggedTags: string[] = []
+  if (entry) {
+    if (flowLabel) loggedTags.push(`${flowLabel.emoji} ${flowLabel.label}`)
+    if (energyLabel) loggedTags.push(`${energyLabel.emoji} ${energyLabel.label}`)
+    for (const g of CHIP_GROUPS) {
+      const v = entry[g.key] as string[] | undefined
+      if (v && v.length) {
+        const opt = g.options.find((o) => o.id === v[0])
+        if (opt) loggedTags.push(`${opt.emoji} ${opt.label}${v.length > 1 ? ` +${v.length - 1}` : ""}`)
+      }
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-canvas text-ink">
-      {/* Top nav */}
-      <header className="absolute inset-x-0 top-0 z-20">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-          <PolarisLogo size={32} withWordmark />
-          <nav className="flex items-center gap-2 text-sm">
-            <Link
-              href="/intake"
-              className="rounded-full px-4 py-2 text-ink-2 transition hover:bg-canvas-tint hover:text-ink"
-            >
-              Patient intake
-            </Link>
-            <Link
-              href="/provider"
-              className="rounded-full bg-ink px-4 py-2 text-sm text-canvas shadow-soft transition hover:bg-plum"
-            >
-              Provider view
-            </Link>
-          </nav>
+    <PatientShell>
+      {/* Greeting */}
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-sm font-bold text-g-ink-3">{greeting()} 🌷</p>
+          <h1 className="font-cute text-3xl font-bold text-g-ink">How are you feeling?</h1>
         </div>
-      </header>
-
-      {/* Hero */}
-      <section className="bg-hero pt-32 pb-24 sm:pt-40 sm:pb-32">
-        <div className="mx-auto max-w-5xl px-6 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-border-strong bg-card/60 px-3.5 py-1 text-xs font-medium text-plum backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-coral" />
-            UW Madison SAIL 2026 · Built for OB/GYNs
-          </div>
-
-          <h1 className="font-display mt-7 text-5xl font-medium leading-[1.05] sm:text-6xl md:text-7xl">
-            The PCOS workflow tool every OB/GYN <span className="text-brand-gradient italic">should already have</span>.
-          </h1>
-
-          <p className="mx-auto mt-7 max-w-2xl text-lg leading-relaxed text-ink-2">
-            One in ten women have PCOS. The average diagnosis takes four to seven years.
-            Polaris turns a five-minute intake into a single screen with phenotype, recommended
-            workup, and a personalized handout, ready before she sits down.
-          </p>
-
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/provider"
-              className="group inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3.5 text-sm font-medium text-canvas shadow-pop transition hover:bg-plum"
-            >
-              See the provider view
-              <svg
-                className="h-3.5 w-3.5 transition group-hover:translate-x-0.5"
-                viewBox="0 0 16 16"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M3 8h10M9 4l4 4-4 4" />
-              </svg>
-            </Link>
-            <Link
-              href="/intake"
-              className="rounded-full border border-border-strong bg-card px-6 py-3.5 text-sm font-medium text-ink shadow-soft transition hover:bg-canvas-tint"
-            >
-              Try the patient intake
-            </Link>
-          </div>
+        <div className="flex flex-col items-center rounded-3xl bg-white px-4 py-2 shadow-girly">
+          <span className="text-2xl leading-none">🔥</span>
+          <span className="text-lg font-extrabold leading-none text-g-pink-deep">{streak}</span>
+          <span className="text-[0.6rem] font-bold text-g-ink-3">day streak</span>
         </div>
-      </section>
+      </div>
 
-      {/* Feature bento */}
-      <section className="bg-canvas px-6 pb-24">
-        <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 md:grid-cols-3">
-          <FeatureCard
-            stage="01"
-            stageColor="from-peach to-coral"
-            title="Patient intake, on her phone"
-            description="A five-minute SMS-linked questionnaire covering cycle history, symptoms, family history, and existing labs. Mobile-first. No app install."
-          />
-          <FeatureCard
-            stage="02"
-            stageColor="from-coral to-rose"
-            title="Phenotype + workup in one screen"
-            description="Rotterdam classification with reasoning, insulin resistance likelihood, and a prioritized lab workup with evidence citations. Ready before you walk in the room."
-          />
-          <FeatureCard
-            stage="03"
-            stageColor="from-rose to-plum"
-            title="Personalized patient handout"
-            description="A one-click handout matched to her phenotype, lifestyle, and goals. Printable, emailable, ready to hand off at the end of the appointment."
-          />
-        </div>
-      </section>
-
-      {/* Why this exists */}
-      <section className="bg-canvas-tint px-6 py-24">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-coral-deep">
-            Why we are building this
-          </p>
-          <h2 className="font-display mt-3 text-4xl font-medium leading-tight tracking-tight md:text-5xl">
-            The OB/GYN front door is the bottleneck.
-          </h2>
-          <div className="mt-8 space-y-5 text-base leading-relaxed text-ink-2">
-            <p>
-              The OB/GYN sees three to five possible PCOS cases a week with twelve minutes per visit
-              and no decision support built for the condition. UpToDate is a reference book. Epic
-              has no PCOS module. The Endocrine Society guideline is forty-seven pages. Meanwhile
-              her patient walked in with a TikTok-driven hypothesis.
+      {/* Big log CTA */}
+      <Link
+        href="/track"
+        className="mt-5 block overflow-hidden rounded-[2rem] bg-candy p-5 shadow-girly-pop transition active:scale-[0.98]"
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-cute text-xl font-bold text-white">
+              {filled === 0 ? "Log today 💕" : "Add to today ✨"}
             </p>
-            <p>
-              Polaris is not a consumer app. It is the workflow tool that captures structured
-              patient input before the visit, runs Rotterdam classification and an insulin
-              resistance likelihood score against published criteria, and generates a personalized
-              patient handout in seconds. The doctor looks smart. The patient feels heard. The path
-              to evidence-based care collapses from fourteen weeks to one visit.
-            </p>
-            <p>
-              We are looking for ten OB/GYNs to give us twenty-five minutes of feedback on this
-              prototype this summer. If that is you,{" "}
-              <a
-                href="mailto:alka.lakadia@wiscai.com"
-                className="font-medium text-coral-deep underline decoration-coral decoration-2 underline-offset-4 transition hover:text-plum"
-              >
-                say hello
-              </a>
-              .
+            <p className="text-sm font-semibold text-white/90">
+              {filled === 0
+                ? "Tap to track how you feel right now"
+                : `${filled} things logged so far — keep going!`}
             </p>
           </div>
+          <span className="animate-float text-4xl">🌸</span>
         </div>
-      </section>
+      </Link>
 
-      {/* Footer */}
-      <footer className="border-t border-border-soft bg-canvas px-6 py-10">
-        <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <PolarisLogo size={24} withWordmark wordmarkClassName="text-base" />
-          <p className="max-w-md text-xs leading-relaxed text-ink-3">
-            Polaris is a clinical decision support prototype. It does not diagnose or treat.
-            Always apply clinical judgment. Built at UW Madison Summer of AI Lab 2026.
-          </p>
-        </div>
-      </footer>
-    </main>
+      {/* Today summary */}
+      {loggedTags.length > 0 && (
+        <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
+          <h2 className="mb-2 font-cute text-base font-bold text-g-ink">Today so far</h2>
+          <div className="flex flex-wrap gap-2">
+            {loggedTags.map((t, i) => (
+              <span key={i} className="rounded-full bg-candy-soft px-3 py-1.5 text-sm font-bold text-g-ink">
+                {t}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Quick links to the rest of the app */}
+      <div className="mt-5 grid grid-cols-2 gap-3">
+        <FeatureCard href="/insights" emoji="✨" title="Insights" sub="Your patterns" tint="bg-g-lavender-soft" />
+        <FeatureCard href="/community" emoji="💬" title="Community" sub="Ask the girls" tint="bg-g-pink-soft" />
+        <FeatureCard href="/learn" emoji="📚" title="Learn" sub="Real research" tint="bg-g-mint-soft" />
+        <FeatureCard href="/export" emoji="📄" title="Gyno PDF" sub="Visit-ready" tint="bg-g-peach-soft" />
+      </div>
+
+      <p className="mt-6 px-2 text-center text-xs font-semibold text-g-ink-3">
+        Polaris is your companion, not a doctor. We never diagnose. For medical
+        concerns, please see a healthcare provider. 💗
+      </p>
+    </PatientShell>
   )
 }
 
 function FeatureCard({
-  stage,
-  stageColor,
+  href,
+  emoji,
   title,
-  description,
+  sub,
+  tint,
 }: {
-  stage: string
-  stageColor: string
+  href: string
+  emoji: string
   title: string
-  description: string
+  sub: string
+  tint: string
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-border-soft bg-card p-7 shadow-soft transition hover:shadow-card">
-      <div className="flex items-start justify-between">
-        <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br ${stageColor} text-[10px] font-semibold text-white`}>
-          {stage}
-        </span>
-      </div>
-      <h3 className="font-display mt-5 text-xl font-medium tracking-tight">{title}</h3>
-      <p className="mt-3 text-sm leading-relaxed text-ink-2">{description}</p>
-    </div>
+    <Link
+      href={href}
+      className="rounded-3xl border border-g-border bg-white p-4 shadow-girly transition active:scale-[0.97]"
+    >
+      <span className={`grid h-11 w-11 place-items-center rounded-2xl text-xl ${tint}`}>{emoji}</span>
+      <p className="mt-3 font-cute text-base font-bold text-g-ink">{title}</p>
+      <p className="text-sm font-semibold text-g-ink-3">{sub}</p>
+    </Link>
   )
 }
