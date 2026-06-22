@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { cn } from "@/lib/cn"
@@ -55,6 +56,17 @@ export default function HealthPage() {
       <p className="mt-3 rounded-2xl bg-g-lavender-soft px-4 py-2.5 text-xs font-bold text-g-ink">
         This stays private to you. It's used for your Gyno PDF and to personalize your insights. Never a diagnosis.
       </p>
+
+      <Link
+        href="/symptoms"
+        className="mt-3 flex items-center justify-between rounded-3xl bg-candy px-4 py-3.5 shadow-girly-pop active:scale-[0.99]"
+      >
+        <span>
+          <span className="block font-cute text-base font-bold text-white">My symptom profile 📝</span>
+          <span className="text-xs font-semibold text-white/90">Tap anything you experience — covers the full picture</span>
+        </span>
+        <span className="text-xl text-white">›</span>
+      </Link>
 
       {/* Units */}
       <Section title="Units" emoji="📐">

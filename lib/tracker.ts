@@ -17,6 +17,8 @@ export interface TrackEntry {
   moods?: string[]
   energy?: "high" | "ok" | "low" | "drained"
   symptoms?: string[]
+  symptomSeverity?: Record<string, 1 | 2 | 3> // 1 mild · 2 moderate · 3 severe
+
   discharge?: string[]
   sleepHours?: number
   sleepQuality?: "great" | "ok" | "rough"

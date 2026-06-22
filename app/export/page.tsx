@@ -106,7 +106,9 @@ export default function ExportPage() {
     clinical.body.length > 0 ||
     clinical.history.length > 0 ||
     clinical.meds.length > 0 ||
-    clinical.labs.length > 0
+    clinical.labs.length > 0 ||
+    clinical.symptomsByCategory.length > 0 ||
+    clinical.screening.length > 0
 
   const snapshot = [
     profile.cycleLength
@@ -367,6 +369,30 @@ export default function ExportPage() {
               {clinical.measurements.length > 0 && <ClinList label="Measurements" items={clinical.measurements} />}
               {clinical.labs.length > 0 && (
                 <ClinList label="Lab results (self-reported)" items={clinical.labs.filter((l) => l.name).map((l) => `${l.name}: ${l.value}`)} />
+              )}
+              {clinical.symptomsByCategory.length > 0 && (
+                <div className="mb-2">
+                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Symptoms reported</p>
+                  <ul className="mt-0.5 space-y-0.5">
+                    {clinical.symptomsByCategory.map((c) => (
+                      <li key={c.title} className="text-sm font-medium text-g-ink-2">
+                        <span className="font-bold text-g-ink">{c.title}:</span> {c.items.join(", ")}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {clinical.screening.length > 0 && (
+                <div className="mb-2 rounded-xl p-2.5" style={{ background: theme.soft }}>
+                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Worth discussing / screening</p>
+                  <ul className="mt-0.5 space-y-0.5">
+                    {clinical.screening.map((s) => (
+                      <li key={s.label} className="text-xs font-medium text-g-ink-2">
+                        <span className="font-bold text-g-ink">{s.label}:</span> {s.detail}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               <div className="mt-2 rounded-xl bg-white/70 p-2.5">
                 <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Signals (data, not a diagnosis)</p>

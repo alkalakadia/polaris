@@ -296,6 +296,7 @@ function AccountHub({ user }: { user: User }) {
         <SettingRow emoji="✏️" label="Edit name" onClick={() => setEditing(true)} />
         <SettingRow emoji="🌙" label="Edit cycle & goals" href="/onboarding" />
         <SettingRow emoji="🩺" label="My health profile" href="/health" />
+        <SettingRow emoji="📝" label="My symptom profile" href="/symptoms" />
         <SettingRow emoji="📄" label="Export my data (Gyno PDF)" href="/export" />
         <SettingRow emoji="💬" label="Browse community" href="/community" />
         <SettingRow emoji="🚪" label="Sign out" onClick={() => void signOut()} danger />

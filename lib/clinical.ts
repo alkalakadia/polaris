@@ -19,6 +19,55 @@ import {
   type CycleProfile,
   type LabResult,
 } from "@/lib/profile"
+import { SYMPTOM_CATEGORIES, hasSensitiveSelected, labelForItem } from "@/lib/symptom-profile"
+
+export interface ScreeningPrompt {
+  label: string
+  detail: string
+}
+
+/**
+ * Layer 3 — gentle "worth asking your doctor to screen for" prompts. Built from
+ * the symptom profile + logged data + family history. Never says "you have X".
+ */
+export function buildScreening(profile: CycleProfile, entries: TrackEntry[]): {
+  prompts: ScreeningPrompt[]
+  sensitive: boolean
+} {
+  const sp = profile.symptomProfile ?? {}
+  const anyIn = (cat: string, ids: string[]) => ids.some((id) => (sp[cat] ?? []).includes(id))
+  const fam = new Set(profile.familyHistory ?? [])
+  const prompts: ScreeningPrompt[] = []
+
+  const w = latestNumber(entries, "weightKg")
+  const b = bmi(profile.heightCm, w?.value)
+  if (anyIn("insulin", ["acanthosis", "skintags", "postmeal", "shaky", "hunger", "cravings", "bellyfat"]) || fam.has("diabetes") || (b != null && b >= 30)) {
+    prompts.push({
+      label: "Blood sugar",
+      detail: "Worth asking your doctor about screening for prediabetes or type 2 diabetes (an A1c or fasting glucose test).",
+    })
+  }
+  const sys = latestNumber(entries, "bpSys")
+  if ((sys && sys.value >= 130) || fam.has("heart")) {
+    prompts.push({
+      label: "Heart health",
+      detail: "A blood pressure and cholesterol check could be worth bringing up at your visit.",
+    })
+  }
+  if (anyIn("sleep", ["snoring", "daysleepy", "morningheadache"])) {
+    prompts.push({
+      label: "Sleep",
+      detail: "Snoring or daytime sleepiness can be worth asking your doctor to screen for sleep apnea.",
+    })
+  }
+  if (anyIn("mood", ["anxiety", "depression"])) {
+    prompts.push({
+      label: "Mood",
+      detail: "It can really help to talk with your doctor or a therapist about how you have been feeling.",
+    })
+  }
+  return { prompts, sensitive: hasSensitiveSelected(sp) }
+}
 
 export interface RotterdamSignal {
   label: string
@@ -33,6 +82,8 @@ export interface ClinicalSummary {
   measurements: string[]
   labs: LabResult[]
   rotterdam: RotterdamSignal[]
+  symptomsByCategory: { title: string; emoji: string; items: string[] }[]
+  screening: ScreeningPrompt[]
 }
 
 function fmt(d?: string): string {
@@ -136,7 +187,27 @@ export function buildClinicalSummary(profile: CycleProfile, entries: TrackEntry[
     },
   ]
 
-  return { menstrual, body, history, meds, measurements, labs: profile.labs ?? [], rotterdam }
+  // --- symptom profile (Layer 2), grouped for the clinician ---
+  const sp = profile.symptomProfile ?? {}
+  const symptomsByCategory = SYMPTOM_CATEGORIES.map((cat) => ({
+    title: cat.title,
+    emoji: cat.emoji,
+    items: (sp[cat.id] ?? []).map((id) => labelForItem(cat.id, id)).filter(Boolean) as string[],
+  })).filter((c) => c.items.length > 0)
+
+  const { prompts: screening } = buildScreening(profile, entries)
+
+  return {
+    menstrual,
+    body,
+    history,
+    meds,
+    measurements,
+    labs: profile.labs ?? [],
+    rotterdam,
+    symptomsByCategory,
+    screening,
+  }
 }
 
 /** Compact, non-identifying context string for personalizing AI answers. */
@@ -162,5 +233,13 @@ export function healthContext(profile: CycleProfile, entries: TrackEntry[]): str
     const fh = profile.familyHistory.map((id) => labelFor(FAMILY_HISTORY, id)?.toLowerCase()).filter(Boolean)
     if (fh.length) bits.push(`family history of ${fh.join(", ")}`)
   }
+  // experienced symptoms from the profile (Layer 2)
+  const sp = profile.symptomProfile ?? {}
+  const spLabels: string[] = []
+  for (const cat of SYMPTOM_CATEGORIES) for (const id of sp[cat.id] ?? []) {
+    const l = labelForItem(cat.id, id)
+    if (l) spLabels.push(l.toLowerCase())
+  }
+  if (spLabels.length) bits.push(`reports experiencing: ${spLabels.slice(0, 8).join(", ")}`)
   return bits.join("; ")
 }

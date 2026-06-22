@@ -4,8 +4,10 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { CycleCalendar } from "@/components/cycle-calendar"
+import { SupportResource } from "@/components/support-resource"
 import { useAuth } from "@/lib/auth"
 import { buildCyclePatterns, buildInsights, type CyclePattern, type InsightSummary } from "@/lib/insights"
+import { buildScreening, type ScreeningPrompt } from "@/lib/clinical"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
 import { deriveLastPeriodStart } from "@/lib/cycle"
 import { getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
@@ -17,6 +19,8 @@ export default function InsightsPage() {
   const [entries, setEntries] = useState<TrackEntry[]>([])
   const [profile, setProfile] = useState<CycleProfile>({})
   const [patterns, setPatterns] = useState<CyclePattern[]>([])
+  const [screening, setScreening] = useState<ScreeningPrompt[]>([])
+  const [sensitive, setSensitive] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -28,6 +32,9 @@ export default function InsightsPage() {
       setEntries(all)
       setSummary(buildInsights(all))
       setPatterns(buildCyclePatterns(all, prof))
+      const sc = buildScreening(prof, all)
+      setScreening(sc.prompts)
+      setSensitive(sc.sensitive)
     })
     return () => {
       active = false
@@ -75,6 +82,32 @@ export default function InsightsPage() {
           </div>
           <p className="mt-3 text-[0.7rem] font-semibold text-g-ink-3">
             Estimated from your own logs. Patterns get sharper the more you track. Not medical advice. 💗
+          </p>
+        </section>
+      )}
+
+      {/* Sensitive flags → warm support, never a silent checkbox */}
+      {sensitive && (
+        <div className="mt-4">
+          <SupportResource />
+        </div>
+      )}
+
+      {/* Gentle screening prompts (Layer 3) — never "you have this" */}
+      {screening.length > 0 && (
+        <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
+          <h2 className="mb-3 font-cute text-base font-bold text-g-ink">💛 Worth chatting with your doctor about</h2>
+          <div className="space-y-2.5">
+            {screening.map((s) => (
+              <div key={s.label} className="rounded-2xl bg-g-butter-soft px-4 py-3">
+                <p className="font-cute text-sm font-bold text-g-ink">{s.label}</p>
+                <p className="mt-0.5 text-sm font-medium text-g-ink-2">{s.detail}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-[0.7rem] font-semibold text-g-ink-3">
+            These are gentle suggestions based on what you logged, not a diagnosis. Your doctor can
+            guide what's right for you. 💗
           </p>
         </section>
       )}

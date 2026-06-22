@@ -35,6 +35,7 @@ export interface CycleProfile {
   contraception?: string
   pregnancyIntent?: string
   labs?: LabResult[]
+  symptomProfile?: Record<string, string[]> // Layer 2: categoryId -> item ids
 }
 
 export const DIAGNOSIS_OPTIONS = [

@@ -81,6 +81,16 @@ export default function TrackPage() {
     update({ [key]: current[0] === id ? [] : [id] } as Partial<TrackEntry>)
   }
 
+  // Symptoms cycle through severity: off → mild → moderate → severe → off.
+  function cycleSeverity(id: string) {
+    const cur = entry.symptomSeverity?.[id] ?? 0
+    const next = (cur + 1) % 4
+    const sev: Record<string, 1 | 2 | 3> = { ...(entry.symptomSeverity ?? {}) }
+    if (next === 0) delete sev[id]
+    else sev[id] = next as 1 | 2 | 3
+    update({ symptomSeverity: sev, symptoms: Object.keys(sev) })
+  }
+
   const filled = useMemo(() => entryFilledCount(entry), [entry])
   const { big, small, isToday } = prettyDate(dateKey)
   const units = (typeof window !== "undefined" ? getProfile().units : "us") ?? "us"
@@ -208,18 +218,27 @@ export default function TrackPage() {
       </Card>
 
       {/* All the multi/single chip groups — the breadth */}
-      {CHIP_GROUPS.map((group) => (
-        <ChipGroupCard
-          key={group.key as string}
-          group={group}
-          entry={entry}
-          onToggle={(id) =>
-            group.multi
-              ? toggleMulti(group.key, id)
-              : toggleSingleArray(group.key, id)
-          }
-        />
-      ))}
+      {CHIP_GROUPS.map((group) =>
+        group.key === "symptoms" ? (
+          <SeverityGroupCard
+            key={group.key as string}
+            group={group}
+            entry={entry}
+            onCycle={(id) => cycleSeverity(id)}
+          />
+        ) : (
+          <ChipGroupCard
+            key={group.key as string}
+            group={group}
+            entry={entry}
+            onToggle={(id) =>
+              group.multi
+                ? toggleMulti(group.key, id)
+                : toggleSingleArray(group.key, id)
+            }
+          />
+        )
+      )}
 
       {/* Water */}
       <Card title="Water" emoji="💦" accent="sky">
@@ -442,6 +461,49 @@ function ChipGroupCard({
             onClick={() => onToggle(o.id)}
           />
         ))}
+      </div>
+    </Card>
+  )
+}
+
+/** Symptoms with tap-to-cycle severity: mild → moderate → severe. */
+function SeverityGroupCard({
+  group,
+  entry,
+  onCycle,
+}: {
+  group: ChipGroup
+  entry: TrackEntry
+  onCycle: (id: string) => void
+}) {
+  const sev = entry.symptomSeverity ?? {}
+  return (
+    <Card title={group.title} emoji={group.emoji} accent={group.accent}>
+      <p className="mb-2.5 text-xs font-semibold text-g-ink-3">Tap to set how strong: mild → moderate → severe</p>
+      <div className="flex flex-wrap gap-2">
+        {group.options.map((o) => {
+          const level: number = sev[o.id] ?? 0
+          return (
+            <button
+              key={o.id}
+              onClick={() => onCycle(o.id)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-bold transition active:scale-95",
+                level === 0
+                  ? "border-g-border bg-g-canvas text-g-ink-2"
+                  : level === 1
+                    ? "border-transparent bg-g-pink-soft text-g-pink-deep"
+                    : level === 2
+                      ? "border-transparent bg-g-pink text-white"
+                      : "border-transparent bg-g-pink-deep text-white"
+              )}
+            >
+              <span>{o.emoji}</span>
+              <span>{o.label}</span>
+              {level > 0 && <span className="ml-0.5 text-[0.6rem] font-extrabold tracking-tight">{"●".repeat(level)}</span>}
+            </button>
+          )
+        })}
       </div>
     </Card>
   )
