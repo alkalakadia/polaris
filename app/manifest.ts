@@ -1,0 +1,21 @@
+import type { MetadataRoute } from "next"
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: "Polaris — your PCOS bestie",
+    short_name: "Polaris",
+    description:
+      "Track everything, spot your patterns, ask the girls, and walk into your gyno visit ready. Your soft, smart companion for PCOS and your cycle.",
+    start_url: "/",
+    display: "standalone",
+    orientation: "portrait",
+    background_color: "#FFF5F9",
+    theme_color: "#FF6FA5",
+    categories: ["health", "lifestyle", "medical"],
+    icons: [
+      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "/icons/maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    ],
+  }
+}

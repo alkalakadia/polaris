@@ -18,6 +18,7 @@ import {
 } from "@/lib/community"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
 import { entryFilledCount, getStreak } from "@/lib/tracker"
+import { ReminderToggle } from "@/components/reminder-toggle"
 
 export default function AccountPage() {
   const { user, configured, loading, signIn, signUp, signOut } = useAuth()
@@ -236,6 +237,11 @@ function AccountHub({ user }: { user: User }) {
           <span>✨</span>
           <p className="text-xs font-bold text-g-ink">Synced across all your devices</p>
         </div>
+      </div>
+
+      {/* Daily reminders (free web push) */}
+      <div className="mt-4">
+        <ReminderToggle />
       </div>
 
       {/* Stats — everything important in one place */}
