@@ -21,7 +21,37 @@ export async function POST(req: Request) {
   }
 
   const mode =
-    payload.mode === "explainer" ? "explainer" : payload.mode === "research" ? "research" : "qa"
+    payload.mode === "explainer"
+      ? "explainer"
+      : payload.mode === "research"
+        ? "research"
+        : payload.mode === "freshtopics"
+          ? "freshtopics"
+          : "qa"
+
+  // Fresh, personalized article ideas (regenerated on demand) — the main feed
+  // keeps producing new things to read.
+  if (mode === "freshtopics") {
+    const topics = ((payload as { topics?: string }).topics || "").trim().slice(0, 300)
+    const seed = ((payload as { seed?: string }).seed || "").slice(0, 20)
+    const { text, error } = await askGemini({
+      system: POLARIS_SYSTEM,
+      json: true,
+      temperature: 0.9,
+      maxTokens: 900,
+      prompt: `Suggest 4 fresh, specific, genuinely useful PCOS article ideas${
+        topics ? ` for someone who ${topics}` : ""
+      }. Vary them (seed ${seed}). Each needs: "title" (catchy, specific), "blurb" (one warm line), "brief" (one sentence describing what the article should cover, grounded in mainstream research, non-diagnostic), "topic" (one of: PCOS 101, Insulin & food, Skin & hair, Fertility, Mental health, New research), and "emoji" (one). Return ONLY a JSON array of 4 objects with keys: title, blurb, brief, topic, emoji.`,
+    })
+    if (error) return NextResponse.json({ error }, { status: 502 })
+    let articles: unknown = []
+    try {
+      articles = JSON.parse(text || "[]")
+    } catch {
+      articles = []
+    }
+    return NextResponse.json({ articles })
+  }
 
   // Live, credible, cited research from the web (Google Search grounding).
   if (mode === "research") {

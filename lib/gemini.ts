@@ -18,6 +18,7 @@ export async function askGemini(opts: {
   prompt: string
   maxTokens?: number
   temperature?: number
+  json?: boolean
 }): Promise<{ text?: string; error?: string }> {
   if (!KEY) return { error: "AI isn't connected yet." }
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${KEY}`
@@ -29,6 +30,7 @@ export async function askGemini(opts: {
       maxOutputTokens: opts.maxTokens ?? 900,
       // Disable "thinking" so tokens go to the answer, not hidden reasoning.
       thinkingConfig: { thinkingBudget: 0 },
+      ...(opts.json ? { responseMimeType: "application/json" } : {}),
     },
   }
   try {

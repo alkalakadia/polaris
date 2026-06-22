@@ -7,10 +7,13 @@ import { RichText } from "@/components/rich-text"
 import { cn } from "@/lib/cn"
 import {
   ARTICLES,
+  FRESH_TINTS,
   TOPICS,
+  getFreshArticles,
   getReadIds,
   interestTopics,
   rankArticles,
+  setFreshArticles,
   toggleRead,
   type Article,
 } from "@/lib/learn"
@@ -50,6 +53,9 @@ export default function LearnPage() {
   const [resLoading, setResLoading] = useState(true)
   const [resError, setResError] = useState<string | null>(null)
 
+  // Fresh AI-generated articles (regenerate on Refresh / new session)
+  const [fresh, setFresh] = useState<Article[]>([])
+
   useEffect(() => {
     if (user?.user_metadata?.cycle) hydrateProfileFromMetadata(user.user_metadata.cycle)
     const prof = getProfile()
@@ -60,11 +66,58 @@ export default function LearnPage() {
       if (active) setContext(healthContext(prof, all))
     })
     loadResearch(prof, false)
+    const cachedFresh = getFreshArticles()
+    if (cachedFresh.length) setFresh(cachedFresh)
+    else loadFresh(prof, false)
     return () => {
       active = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  async function loadFresh(prof: CycleProfile, force: boolean) {
+    if (!force) {
+      const cached = getFreshArticles()
+      if (cached.length) {
+        setFresh(cached)
+        return
+      }
+    }
+    try {
+      const res = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "freshtopics", topics: interestTopics(prof), seed: String(Date.now() % 100000) }),
+      })
+      const data = await res.json()
+      const raw: { title?: string; blurb?: string; brief?: string; topic?: string; emoji?: string }[] = data.articles || []
+      const stamp = Date.now()
+      const items: Article[] = raw
+        .filter((a) => a.title)
+        .slice(0, 4)
+        .map((a, i) => ({
+          id: `fresh-${stamp}-${i}`,
+          topic: a.topic && TOPICS.includes(a.topic) ? a.topic : "New research",
+          emoji: a.emoji || "✨",
+          title: a.title!,
+          blurb: a.blurb || "",
+          brief: a.brief || a.title!,
+          read: "4 min",
+          tags: [],
+          fresh: true,
+          tint: FRESH_TINTS[i % FRESH_TINTS.length],
+        }))
+      setFresh(items)
+      setFreshArticles(items)
+    } catch {
+      /* keep existing */
+    }
+  }
+
+  function refreshAll() {
+    loadResearch(profile, true)
+    loadFresh(profile, true)
+  }
 
   async function loadResearch(prof: CycleProfile, force: boolean) {
     setResError(null)
@@ -130,12 +183,13 @@ export default function LearnPage() {
     setReadIds(toggleRead(id))
   }
 
-  // Build the visible list: ranked for "For you", read-only for "Read", else by topic.
+  // Build the visible list: fresh AI picks first, then ranked curated articles.
   const ranked = rankArticles(profile)
+  const allArticles = [...fresh, ...ranked]
   let list: Article[]
-  if (topic === "Read") list = ranked.filter((a) => readIds.includes(a.id))
-  else if (topic === "For you") list = ranked
-  else list = ranked.filter((a) => a.topic === topic)
+  if (topic === "Read") list = allArticles.filter((a) => readIds.includes(a.id))
+  else if (topic === "For you") list = allArticles
+  else list = allArticles.filter((a) => a.topic === topic)
 
   return (
     <PatientShell>
@@ -196,8 +250,9 @@ export default function LearnPage() {
         <div className="flex items-center justify-between">
           <h2 className="font-cute text-base font-bold text-g-ink">🔬 Latest research for you</h2>
           <button
-            onClick={() => loadResearch(profile, true)}
+            onClick={refreshAll}
             disabled={resLoading}
+            title="Refresh research + articles"
             className="rounded-full bg-candy-soft px-3 py-1.5 text-xs font-bold text-g-pink-deep active:scale-95 disabled:opacity-50"
           >
             {resLoading ? "…" : "Refresh ✨"}

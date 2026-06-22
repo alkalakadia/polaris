@@ -103,8 +103,26 @@ export const ARTICLES: Article[] = [
   },
 ]
 
+// --- fresh, AI-generated articles (regenerated on Refresh / new session) -----
+
+const FRESH_KEY = "polaris.learn.fresh.items"
+export const FRESH_TINTS = ["bg-g-pink-soft", "bg-g-lavender-soft", "bg-g-mint-soft", "bg-g-peach-soft", "bg-g-sky-soft"]
+
+export function getFreshArticles(): Article[] {
+  if (typeof window === "undefined") return []
+  try {
+    return JSON.parse(window.sessionStorage.getItem(FRESH_KEY) || "[]") as Article[]
+  } catch {
+    return []
+  }
+}
+
+export function setFreshArticles(items: Article[]): void {
+  if (typeof window !== "undefined") window.sessionStorage.setItem(FRESH_KEY, JSON.stringify(items))
+}
+
 export function getArticle(id: string): Article | undefined {
-  return ARTICLES.find((a) => a.id === id)
+  return ARTICLES.find((a) => a.id === id) ?? getFreshArticles().find((a) => a.id === id)
 }
 
 // --- read state (on-device) --------------------------------------------------
