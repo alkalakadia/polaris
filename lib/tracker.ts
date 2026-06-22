@@ -28,8 +28,20 @@ export interface TrackEntry {
   water?: number // glasses
   movement?: string[]
   notes?: string
+  // --- clinical measurements (optional, for trends + the gyno summary) ---
+  weightKg?: number
+  bbt?: number // basal body temp, °C
+  bpSys?: number
+  bpDia?: number
+  ovTest?: "negative" | "high" | "peak"
   updatedAt?: number
 }
+
+export const OV_TEST_OPTIONS: ChipOption[] = [
+  { id: "negative", label: "Negative", emoji: "⚪️" },
+  { id: "high", label: "High", emoji: "🟡" },
+  { id: "peak", label: "Peak", emoji: "🔴" },
+]
 
 export interface ChipOption {
   id: string
@@ -258,6 +270,10 @@ export function entryFilledCount(e: TrackEntry): number {
   if (e.sleepQuality || e.sleepHours) n++
   if (typeof e.pain === "number") n++
   if (e.notes && e.notes.trim()) n++
+  if (typeof e.weightKg === "number") n++
+  if (typeof e.bbt === "number") n++
+  if (typeof e.bpSys === "number") n++
+  if (e.ovTest) n++
   for (const g of CHIP_GROUPS) {
     const v = e[g.key]
     if (Array.isArray(v) ? v.length > 0 : Boolean(v)) n++

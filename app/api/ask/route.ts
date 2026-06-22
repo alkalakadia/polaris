@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "AI isn't connected yet." }, { status: 503 })
   }
 
-  let payload: { mode?: string; question?: string; title?: string; topic?: string }
+  let payload: { mode?: string; question?: string; title?: string; topic?: string; context?: string }
   try {
     payload = await req.json()
   } catch {
@@ -27,9 +27,15 @@ export async function POST(req: Request) {
     if (!question) return NextResponse.json({ error: "Ask a question first 💕" }, { status: 400 })
     if (question.length > 1000) return NextResponse.json({ error: "That's a bit long — try a shorter question." }, { status: 400 })
 
+    // Optional, non-identifying health context to personalize the answer.
+    const ctx = (payload.context || "").trim().slice(0, 600)
+    const contextBlock = ctx
+      ? `\n\nContext about the person asking (use it to tailor your answer, but do NOT restate it as established fact or diagnose): ${ctx}`
+      : ""
+
     const { text, error } = await askGemini({
       system: POLARIS_SYSTEM,
-      prompt: `A user of the Polaris app asks: "${question}"\n\nAnswer helpfully in under ~180 words. End with one short line reminding her this is general info, not medical advice, and to check with her doctor.`,
+      prompt: `A user of the Polaris app asks: "${question}"${contextBlock}\n\nAnswer helpfully in under ~180 words, gently personalized to her context where relevant. End with one short line reminding her this is general info, not medical advice, and to check with her doctor.`,
       maxTokens: 700,
       temperature: 0.5,
     })

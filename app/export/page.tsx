@@ -12,6 +12,7 @@ import {
   type TrackEntry,
 } from "@/lib/tracker"
 import { GOALS, getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
+import { buildClinicalSummary } from "@/lib/clinical"
 
 // Cute color themes for the album cover/accents.
 const THEMES = [
@@ -34,6 +35,7 @@ interface ExportConfig {
 }
 
 const SECTION_DEFS = [
+  { key: "clinical", label: "Clinical summary (for your doctor)", emoji: "🩺" },
   { key: "summary", label: "Tracking summary", emoji: "📅" },
   { key: "symptoms", label: "Top symptoms & moods", emoji: "🩷" },
   { key: "cycle", label: "Period & pain", emoji: "🌷" },
@@ -98,6 +100,13 @@ export default function ExportPage() {
   })()
 
   const goalLabel = GOALS.find((g) => g.id === profile.goal)?.label
+  const clinical = buildClinicalSummary(profile, entries)
+  const hasClinical =
+    clinical.menstrual.length > 0 ||
+    clinical.body.length > 0 ||
+    clinical.history.length > 0 ||
+    clinical.meds.length > 0 ||
+    clinical.labs.length > 0
 
   const snapshot = [
     profile.cycleLength
@@ -347,6 +356,34 @@ export default function ExportPage() {
             )}
           </section>
 
+          {cfg.sections.clinical && hasClinical && (
+            <AlbumSection title="Clinical summary" emoji="🩺" soft={theme.soft}>
+              {clinical.menstrual.length > 0 && <ClinList label="Menstrual history" items={clinical.menstrual} />}
+              {clinical.body.length > 0 && <ClinList label="Body & vitals" items={clinical.body} />}
+              {clinical.history.length > 0 && <ClinList label="Relevant history" items={clinical.history} />}
+              {clinical.meds.length > 0 && (
+                <ClinList label="Meds & supplements (days logged)" items={clinical.meds.map((m) => `${m.label}: ${m.days} day${m.days === 1 ? "" : "s"}`)} />
+              )}
+              {clinical.measurements.length > 0 && <ClinList label="Measurements" items={clinical.measurements} />}
+              {clinical.labs.length > 0 && (
+                <ClinList label="Lab results (self-reported)" items={clinical.labs.filter((l) => l.name).map((l) => `${l.name}: ${l.value}`)} />
+              )}
+              <div className="mt-2 rounded-xl bg-white/70 p-2.5">
+                <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Signals (data, not a diagnosis)</p>
+                <ul className="mt-1 space-y-0.5">
+                  {clinical.rotterdam.map((r) => (
+                    <li key={r.label} className="text-xs font-medium text-g-ink-2">
+                      <span className="font-bold text-g-ink">{r.label}:</span> {r.detail}
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-1.5 text-[0.65rem] font-semibold text-g-ink-3">
+                  These are patient-logged data points, not a diagnosis. PCOS diagnosis requires clinical evaluation.
+                </p>
+              </div>
+            </AlbumSection>
+          )}
+
           {cfg.sections.summary && summary && (
             <AlbumSection title="Tracking summary" emoji="📅" soft={theme.soft}>
               <div className="grid grid-cols-2 gap-3">
@@ -418,6 +455,19 @@ export default function ExportPage() {
         </div>
       </div>
     </PatientShell>
+  )
+}
+
+function ClinList({ label, items }: { label: string; items: string[] }) {
+  return (
+    <div className="mb-2">
+      <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">{label}</p>
+      <ul className="mt-0.5 space-y-0.5">
+        {items.map((it, i) => (
+          <li key={i} className="text-sm font-medium text-g-ink-2">{it}</li>
+        ))}
+      </ul>
+    </div>
   )
 }
 

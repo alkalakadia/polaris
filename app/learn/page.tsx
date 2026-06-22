@@ -1,11 +1,15 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { RichText } from "@/components/rich-text"
 import { cn } from "@/lib/cn"
 import { ARTICLES, TOPICS } from "@/lib/learn"
+import { useAuth } from "@/lib/auth"
+import { getAllEntriesAsync } from "@/lib/tracker-store"
+import { getProfile, hydrateProfileFromMetadata } from "@/lib/profile"
+import { healthContext } from "@/lib/clinical"
 
 const SUGGESTIONS = [
   "Is dairy bad for PCOS?",
@@ -18,10 +22,25 @@ export default function LearnPage() {
   const [topic, setTopic] = useState("For you")
   const list = topic === "For you" ? ARTICLES : ARTICLES.filter((a) => a.topic === topic)
 
+  const { user } = useAuth()
   const [q, setQ] = useState("")
   const [answer, setAnswer] = useState<string | null>(null)
   const [asking, setAsking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [context, setContext] = useState("")
+
+  // Build a compact, non-identifying health context so answers personalize.
+  useEffect(() => {
+    let active = true
+    if (user?.user_metadata?.cycle) hydrateProfileFromMetadata(user.user_metadata.cycle)
+    const prof = getProfile()
+    getAllEntriesAsync().then((all) => {
+      if (active) setContext(healthContext(prof, all))
+    })
+    return () => {
+      active = false
+    }
+  }, [user])
 
   async function ask(question: string) {
     const text = question.trim()
@@ -34,7 +53,7 @@ export default function LearnPage() {
       const res = await fetch("/api/ask", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "qa", question: text }),
+        body: JSON.stringify({ mode: "qa", question: text, context }),
       })
       const data = await res.json()
       if (!res.ok) setError(data.error || "Something went wrong.")

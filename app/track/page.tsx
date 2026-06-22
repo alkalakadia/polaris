@@ -10,6 +10,7 @@ import {
   CHIP_GROUPS,
   ENERGY_OPTIONS,
   FLOW_OPTIONS,
+  OV_TEST_OPTIONS,
   SLEEP_QUALITY_OPTIONS,
   TRACKABLE_CATEGORIES,
   entryFilledCount,
@@ -19,6 +20,7 @@ import {
   type GirlyAccent,
   type TrackEntry,
 } from "@/lib/tracker"
+import { getProfile } from "@/lib/profile"
 
 function prettyDate(key: string): { big: string; small: string; isToday: boolean } {
   const today = toDateKey(new Date())
@@ -81,6 +83,14 @@ export default function TrackPage() {
 
   const filled = useMemo(() => entryFilledCount(entry), [entry])
   const { big, small, isToday } = prettyDate(dateKey)
+  const units = (typeof window !== "undefined" ? getProfile().units : "us") ?? "us"
+  const wUnit = units === "metric" ? "kg" : "lb"
+  const tUnit = units === "metric" ? "°C" : "°F"
+  const toKg = (v: number) => (units === "metric" ? v : v * 0.453592)
+  const fromKg = (v: number) => (units === "metric" ? v : v / 0.453592)
+  const toC = (v: number) => (units === "metric" ? v : ((v - 32) * 5) / 9)
+  const fromC = (v: number) => (units === "metric" ? v : (v * 9) / 5 + 32)
+  const r1 = (v: number) => Math.round(v * 10) / 10
 
   function shiftDay(delta: number) {
     const d = new Date(dateKey + "T00:00:00")
@@ -233,6 +243,59 @@ export default function TrackPage() {
         </div>
       </Card>
 
+      {/* Measurements — for trends + the gyno summary */}
+      <Card title="Measurements" emoji="📏" accent="sky">
+        <div className="grid grid-cols-2 gap-3">
+          <NumField
+            label={`Weight (${wUnit})`}
+            value={entry.weightKg != null ? r1(fromKg(entry.weightKg)) : ""}
+            onChange={(v) => update({ weightKg: v === "" ? undefined : toKg(Number(v)) })}
+          />
+          <NumField
+            label={`Basal temp (${tUnit})`}
+            step="0.1"
+            value={entry.bbt != null ? r1(fromC(entry.bbt)) : ""}
+            onChange={(v) => update({ bbt: v === "" ? undefined : toC(Number(v)) })}
+          />
+        </div>
+        <div className="mt-3">
+          <p className="mb-1.5 text-xs font-bold text-g-ink-3">Blood pressure (mmHg)</p>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="120"
+              value={entry.bpSys ?? ""}
+              onChange={(e) => update({ bpSys: e.target.value === "" ? undefined : Number(e.target.value) })}
+              className="w-20 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-bold text-g-ink outline-none focus:border-g-pink"
+            />
+            <span className="font-bold text-g-ink-3">/</span>
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="80"
+              value={entry.bpDia ?? ""}
+              onChange={(e) => update({ bpDia: e.target.value === "" ? undefined : Number(e.target.value) })}
+              className="w-20 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-bold text-g-ink outline-none focus:border-g-pink"
+            />
+          </div>
+        </div>
+        <div className="mt-3">
+          <p className="mb-1.5 text-xs font-bold text-g-ink-3">Ovulation test</p>
+          <div className="flex flex-wrap gap-2">
+            {OV_TEST_OPTIONS.map((o) => (
+              <Chip
+                key={o.id}
+                option={o}
+                accent="sky"
+                selected={entry.ovTest === o.id}
+                onClick={() => update({ ovTest: entry.ovTest === o.id ? undefined : (o.id as TrackEntry["ovTest"]) })}
+              />
+            ))}
+          </div>
+        </div>
+      </Card>
+
       {/* Notes */}
       <Card title="Notes" emoji="📝" accent="mint">
         <textarea
@@ -253,6 +316,32 @@ export default function TrackPage() {
 }
 
 // --- cute building blocks ----------------------------------------------------
+
+function NumField({
+  label,
+  value,
+  onChange,
+  step,
+}: {
+  label: string
+  value: number | string
+  onChange: (v: string) => void
+  step?: string
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-bold text-g-ink-3">{label}</span>
+      <input
+        type="number"
+        inputMode="decimal"
+        step={step}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-bold text-g-ink outline-none focus:border-g-pink"
+      />
+    </label>
+  )
+}
 
 function Card({
   title,

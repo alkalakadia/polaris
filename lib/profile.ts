@@ -9,6 +9,12 @@ import { browserClient } from "@/lib/supabase"
 
 export type Goal = "ttc" | "regulate" | "symptoms" | "understand" | "weight"
 
+export interface LabResult {
+  name: string
+  value: string
+  date?: string
+}
+
 export interface CycleProfile {
   name?: string
   lastPeriodStart?: string // YYYY-MM-DD
@@ -18,6 +24,62 @@ export interface CycleProfile {
   goal?: Goal
   concerns?: string[]
   completedAt?: number
+
+  // --- richer health profile (clinical context for the PDF + AI) ---
+  units?: "us" | "metric"
+  heightCm?: number
+  menarcheAge?: number // age of first period
+  longestGapDays?: number // longest gap between periods
+  diagnosis?: "diagnosed" | "suspected" | "exploring" | "no"
+  familyHistory?: string[]
+  contraception?: string
+  pregnancyIntent?: string
+  labs?: LabResult[]
+}
+
+export const DIAGNOSIS_OPTIONS = [
+  { id: "diagnosed", label: "Diagnosed with PCOS" },
+  { id: "suspected", label: "Suspected / in workup" },
+  { id: "exploring", label: "Just exploring" },
+  { id: "no", label: "Not PCOS-related" },
+]
+
+export const FAMILY_HISTORY = [
+  { id: "pcos", label: "PCOS" },
+  { id: "diabetes", label: "Type 2 diabetes" },
+  { id: "thyroid", label: "Thyroid issues" },
+  { id: "infertility", label: "Infertility" },
+  { id: "heart", label: "Early heart disease" },
+  { id: "none", label: "None known" },
+]
+
+export const CONTRACEPTION = [
+  { id: "none", label: "None" },
+  { id: "pill", label: "The pill" },
+  { id: "iud_h", label: "Hormonal IUD" },
+  { id: "iud_c", label: "Copper IUD" },
+  { id: "implant", label: "Implant" },
+  { id: "ring", label: "Ring" },
+  { id: "other", label: "Other" },
+]
+
+export const PREGNANCY_INTENT = [
+  { id: "ttc", label: "Trying now" },
+  { id: "soon", label: "Hoping soon" },
+  { id: "avoiding", label: "Avoiding pregnancy" },
+  { id: "notnow", label: "Not right now" },
+  { id: "unsure", label: "Unsure" },
+]
+
+export function labelFor(list: { id: string; label: string }[], id?: string): string | undefined {
+  return list.find((x) => x.id === id)?.label
+}
+
+/** BMI from stored metric values + a logged weight in kg. */
+export function bmi(heightCm?: number, weightKg?: number): number | null {
+  if (!heightCm || !weightKg) return null
+  const m = heightCm / 100
+  return Math.round((weightKg / (m * m)) * 10) / 10
 }
 
 export const GOALS: { id: Goal; label: string; emoji: string; blurb: string }[] = [
