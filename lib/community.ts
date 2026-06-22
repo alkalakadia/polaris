@@ -48,9 +48,17 @@ export interface Post {
 export interface Comment {
   id: string
   post_id: string
+  user_id: string
   author_name: string
   body: string
   created_at: string
+}
+
+/** Posts are editable by their author for this long after posting. */
+export const EDIT_WINDOW_MS = 60 * 60 * 1000 // 1 hour
+
+export function isEditable(createdAt: string): boolean {
+  return Date.now() - new Date(createdAt).getTime() < EDIT_WINDOW_MS
 }
 
 /** A friendly handle for the signed-in user. */
@@ -261,11 +269,41 @@ export async function listComments(postId: string): Promise<Comment[]> {
   if (!c) return []
   const { data, error } = await c
     .from("comments")
-    .select("id,post_id,author_name,body,created_at")
+    .select("id,post_id,user_id,author_name,body,created_at")
     .eq("post_id", postId)
     .order("created_at", { ascending: true })
   if (error || !data) return []
   return data as Comment[]
+}
+
+/** Edit a post's title/body (RLS + the time-window policy enforce ownership). */
+export async function updatePost(
+  id: string,
+  input: { title: string; body: string },
+  user: User
+): Promise<{ error?: string }> {
+  const c = browserClient()
+  if (!c) return { error: "Community isn't connected." }
+  const { error } = await c
+    .from("posts")
+    .update({ title: input.title.trim(), body: input.body.trim() || null })
+    .eq("id", id)
+    .eq("user_id", user.id)
+  return error ? { error: error.message } : {}
+}
+
+export async function deletePost(id: string, user: User): Promise<{ error?: string }> {
+  const c = browserClient()
+  if (!c) return { error: "Community isn't connected." }
+  const { error } = await c.from("posts").delete().eq("id", id).eq("user_id", user.id)
+  return error ? { error: error.message } : {}
+}
+
+export async function deleteComment(id: string, user: User): Promise<{ error?: string }> {
+  const c = browserClient()
+  if (!c) return { error: "Community isn't connected." }
+  const { error } = await c.from("comments").delete().eq("id", id).eq("user_id", user.id)
+  return error ? { error: error.message } : {}
 }
 
 export async function addComment(postId: string, body: string, user: User): Promise<{ error?: string }> {

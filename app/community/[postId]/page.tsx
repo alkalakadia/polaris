@@ -8,10 +8,14 @@ import { useAuth } from "@/lib/auth"
 import {
   addComment,
   ago,
+  deleteComment,
+  deletePost,
   getPost,
+  isEditable,
   listComments,
   subName,
   toggleLike,
+  updatePost,
   type Comment,
   type Post,
 } from "@/lib/community"
@@ -26,6 +30,9 @@ export default function PostDetailPage() {
   const [comments, setComments] = useState<Comment[] | null>(null)
   const [draft, setDraft] = useState("")
   const [busy, setBusy] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editTitle, setEditTitle] = useState("")
+  const [editBody, setEditBody] = useState("")
 
   const load = useCallback(async () => {
     const p = await getPost(postId)
@@ -57,6 +64,37 @@ export default function PostDetailPage() {
     if (p) setPost(p)
   }
 
+  function startEdit() {
+    if (!post || post === "missing") return
+    setEditTitle(post.title)
+    setEditBody(post.body ?? "")
+    setEditing(true)
+  }
+  async function saveEdit() {
+    if (!user || !post || post === "missing" || !editTitle.trim()) return
+    setBusy(true)
+    const res = await updatePost(post.id, { title: editTitle, body: editBody }, user)
+    setBusy(false)
+    if (!res.error) {
+      setEditing(false)
+      await load()
+    }
+  }
+  async function removePost() {
+    if (!user || !post || post === "missing") return
+    if (!window.confirm("Delete this post? This can't be undone.")) return
+    await deletePost(post.id, user)
+    router.push("/community")
+  }
+  async function removeComment(id: string) {
+    if (!user) return
+    if (!window.confirm("Delete this reply?")) return
+    await deleteComment(id, user)
+    setComments(await listComments(postId))
+    const p = await getPost(postId)
+    if (p) setPost(p)
+  }
+
   return (
     <PatientShell>
       <Link href="/community" className="text-sm font-bold text-g-ink-3 active:scale-95">
@@ -83,14 +121,53 @@ export default function PostDetailPage() {
               <span>@{post.author_name}</span>
               <span>· {ago(post.created_at)}</span>
             </div>
-            <h1 className="mt-2 font-cute text-2xl font-bold leading-snug text-g-ink">{post.title}</h1>
-            {post.body && <p className="mt-2 whitespace-pre-wrap text-sm font-medium text-g-ink-2">{post.body}</p>}
+
+            {editing ? (
+              <div className="mt-3">
+                <input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 font-cute text-base font-bold text-g-ink outline-none focus:border-g-pink"
+                />
+                <textarea
+                  value={editBody}
+                  onChange={(e) => setEditBody(e.target.value)}
+                  rows={4}
+                  className="mt-2 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none focus:border-g-pink"
+                />
+                <div className="mt-2 flex gap-2">
+                  <button onClick={saveEdit} disabled={busy || !editTitle.trim()} className="rounded-full bg-candy px-5 py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-50">
+                    Save
+                  </button>
+                  <button onClick={() => setEditing(false)} className="rounded-full border border-g-border bg-white px-5 py-2.5 text-sm font-bold text-g-ink-2 active:scale-95">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h1 className="mt-2 font-cute text-2xl font-bold leading-snug text-g-ink">{post.title}</h1>
+                {post.body && <p className="mt-2 whitespace-pre-wrap text-sm font-medium text-g-ink-2">{post.body}</p>}
+              </>
+            )}
+
             <div className="mt-4 flex items-center gap-4 text-sm font-bold text-g-ink-3">
               <button onClick={onLike} className="inline-flex items-center gap-1.5 active:scale-90">
                 <span className={post.liked_by_me ? "" : "grayscale"}>💗</span> {post.hearts}
               </button>
               <span className="inline-flex items-center gap-1.5">💬 {post.comment_count}</span>
+              {user && post.user_id === user.id && !editing && (
+                <span className="ml-auto flex items-center gap-3">
+                  {isEditable(post.created_at) && (
+                    <button onClick={startEdit} className="text-g-ink-3 active:scale-95">✏️ Edit</button>
+                  )}
+                  <button onClick={removePost} className="text-g-pink-deep active:scale-95">🗑 Delete</button>
+                </span>
+              )}
             </div>
+            {user && post.user_id === user.id && !isEditable(post.created_at) && !editing && (
+              <p className="mt-1.5 text-[0.7rem] font-semibold text-g-ink-3">Posts can be edited for 1 hour after posting.</p>
+            )}
           </article>
 
           {/* Comments */}
@@ -100,8 +177,13 @@ export default function PostDetailPage() {
           <div className="mt-2 space-y-2.5">
             {comments?.map((c) => (
               <div key={c.id} className="rounded-2xl border border-g-border bg-white p-3.5 shadow-girly">
-                <div className="text-xs font-bold text-g-ink-3">
-                  @{c.author_name} · {ago(c.created_at)}
+                <div className="flex items-center text-xs font-bold text-g-ink-3">
+                  <span>@{c.author_name} · {ago(c.created_at)}</span>
+                  {user && c.user_id === user.id && (
+                    <button onClick={() => removeComment(c.id)} className="ml-auto text-g-pink-deep active:scale-90" aria-label="Delete reply">
+                      🗑
+                    </button>
+                  )}
                 </div>
                 <p className="mt-1 whitespace-pre-wrap text-sm font-medium text-g-ink">{c.body}</p>
               </div>
