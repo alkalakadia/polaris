@@ -50,6 +50,25 @@ export default function InsightsPage() {
     await reload(profile)
   }
 
+  // Log a whole period as a range of days (start → end inclusive).
+  async function logRange(start: string, end: string) {
+    const dates: string[] = []
+    let d = start
+    let guard = 0
+    while (d <= end && guard < 60) {
+      dates.push(d)
+      const nd = new Date(d + "T00:00:00")
+      nd.setDate(nd.getDate() + 1)
+      d = toDateKey(nd)
+      guard++
+    }
+    for (const date of dates) {
+      const existing = entries.find((e) => e.date === date) ?? { date }
+      await saveEntryAsync({ ...existing, date, flow: "medium" })
+    }
+    await reload(profile)
+  }
+
   const anchor = deriveLastPeriodStart(entries) ?? profile.lastPeriodStart ?? null
 
   return (
@@ -75,7 +94,7 @@ export default function InsightsPage() {
         <p className="mb-2 px-1 text-xs font-semibold text-g-ink-3">
           Tap any day to add or remove a period — backfill past months to sharpen your predictions.
         </p>
-        <CycleCalendar entries={entries} profile={profile} anchor={anchor} onTogglePeriod={togglePeriod} />
+        <CycleCalendar entries={entries} profile={profile} anchor={anchor} onTogglePeriod={togglePeriod} onLogRange={logRange} />
       </div>
 
       {/* Cycle history — your real cycle lengths + how regular */}

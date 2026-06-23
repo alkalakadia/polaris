@@ -14,6 +14,12 @@ import type { CycleProfile } from "@/lib/profile"
 
 const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"]
 
+function addDaysKey(key: string, n: number): string {
+  const d = new Date(key + "T00:00:00")
+  d.setDate(d.getDate() + n)
+  return toDateKey(d)
+}
+
 /**
  * Scrollable month calendar: real logged period days (solid), predicted period
  * (outline), predicted fertile window (peach), and any logged day (dot). Tap a
@@ -24,14 +30,18 @@ export function CycleCalendar({
   profile,
   anchor,
   onTogglePeriod,
+  onLogRange,
 }: {
   entries: TrackEntry[]
   profile: CycleProfile
   anchor: string | null
   onTogglePeriod?: (date: string, makePeriod: boolean) => void
+  onLogRange?: (start: string, end: string) => void
 }) {
   const [offset, setOffset] = useState(0) // months from current
   const [selected, setSelected] = useState<string | null>(null)
+  const [rangeMode, setRangeMode] = useState(false)
+  const [rangeStart, setRangeStart] = useState<string | null>(null)
 
   const byDate = new Map(entries.map((e) => [e.date, e]))
   const now = new Date()
@@ -67,6 +77,37 @@ export function CycleCalendar({
   }
 
   const selEntry = selected ? byDate.get(selected) : undefined
+
+  const isFlowDay = (k: string) => {
+    const e = byDate.get(k)
+    return Boolean(e?.flow && e.flow !== "none")
+  }
+  // How many consecutive period days the run containing `key` spans.
+  function periodRunLength(key: string): number {
+    if (!isFlowDay(key)) return 0
+    let len = 1
+    for (let b = addDaysKey(key, -1); isFlowDay(b); b = addDaysKey(b, -1)) len++
+    for (let f = addDaysKey(key, 1); isFlowDay(f); f = addDaysKey(f, 1)) len++
+    return len
+  }
+
+  function handleDayClick(key: string) {
+    if (rangeMode && onLogRange) {
+      if (!rangeStart) {
+        setRangeStart(key)
+        return
+      }
+      let s = rangeStart
+      let e = key
+      if (s > e) [s, e] = [e, s]
+      if (e > todayKey) e = todayKey // never log a future period
+      onLogRange(s, e)
+      setRangeMode(false)
+      setRangeStart(null)
+      return
+    }
+    setSelected(selected === key ? null : key)
+  }
 
   return (
     <section className="rounded-3xl border border-g-border bg-white p-4 shadow-girly">
@@ -104,7 +145,7 @@ export function CycleCalendar({
           return (
             <button
               key={i}
-              onClick={() => setSelected(isSel ? null : d.key)}
+              onClick={() => handleDayClick(d.key)}
               className={cn(
                 "relative mx-auto grid h-9 w-9 place-items-center rounded-full text-sm font-bold transition active:scale-90",
                 d.realPeriod
@@ -115,7 +156,7 @@ export function CycleCalendar({
                       ? "bg-g-peach-soft text-g-ink"
                       : "text-g-ink-2",
                 d.isToday && !d.realPeriod && "ring-2 ring-g-ink ring-offset-1",
-                isSel && "ring-2 ring-g-lavender ring-offset-1"
+                (isSel || rangeStart === d.key) && "ring-2 ring-g-pink ring-offset-1"
               )}
             >
               {date.getDate()}
@@ -126,6 +167,35 @@ export function CycleCalendar({
           )
         })}
       </div>
+
+      {/* Log a period as a range of days */}
+      {onLogRange && (
+        <div className="mt-3">
+          {!rangeMode ? (
+            <button
+              onClick={() => {
+                setRangeMode(true)
+                setRangeStart(null)
+                setSelected(null)
+              }}
+              className="w-full rounded-full border border-g-pink/40 bg-g-pink-soft/50 py-2 text-sm font-bold text-g-pink-deep active:scale-95"
+            >
+              🩸 Log a period (pick start + end)
+            </button>
+          ) : (
+            <div className="rounded-2xl bg-g-pink-soft/60 px-3 py-2.5">
+              <p className="text-sm font-bold text-g-ink">
+                {rangeStart
+                  ? `Now tap the LAST day (started ${new Date(rangeStart + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })})`
+                  : "Tap the FIRST day of your period"}
+              </p>
+              <button onClick={() => { setRangeMode(false); setRangeStart(null) }} className="mt-1 text-xs font-bold text-g-ink-3">
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Legend */}
       <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.65rem] font-bold text-g-ink-3">
@@ -141,6 +211,9 @@ export function CycleCalendar({
           <p className="font-cute text-sm font-bold text-g-ink">
             {new Date(selected + "T00:00:00").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
           </p>
+          {isFlowDay(selected) && (
+            <p className="text-xs font-bold text-g-pink-deep">🩸 Part of a {periodRunLength(selected)}-day period</p>
+          )}
           {selEntry && entryFilledCount(selEntry) > 0 ? (
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {selEntry.flow && selEntry.flow !== "none" && (
