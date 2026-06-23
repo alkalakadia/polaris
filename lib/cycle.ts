@@ -38,29 +38,68 @@ function diffDays(a: string, b: string): number {
   return Math.round((parse(a).getTime() - parse(b).getTime()) / 86_400_000)
 }
 
+/** All period START dates (a flow day whose previous day had none), ascending. */
+export function detectPeriodStarts(entries: TrackEntry[]): string[] {
+  const flowDays = new Set(entries.filter((e) => e.flow && e.flow !== "none").map((e) => e.date))
+  const starts: string[] = []
+  for (const d of flowDays) {
+    if (!flowDays.has(addDays(d, -1))) starts.push(d)
+  }
+  return starts.sort()
+}
+
 /**
- * Find the most recent period START from logged entries: a day with real flow
- * whose previous day had none. Lets predictions track reality, not the form.
+ * Find the most recent period START from logged entries. Lets predictions track
+ * reality, not the onboarding form.
  */
 export function deriveLastPeriodStart(entries: TrackEntry[]): string | null {
-  const flowDays = new Set(
-    entries.filter((e) => e.flow && e.flow !== "none").map((e) => e.date)
-  )
-  if (flowDays.size === 0) return null
-  const sorted = [...flowDays].sort((a, b) => (a < b ? 1 : -1)) // newest first
-  for (const day of sorted) {
-    const prev = addDays(day, -1)
-    if (!flowDays.has(prev)) return day // start of the most recent period run
-  }
-  return sorted[sorted.length - 1] ?? null
+  const starts = detectPeriodStarts(entries)
+  return starts.length ? starts[starts.length - 1] : null
+}
+
+export interface CycleHistory {
+  starts: string[]
+  lengths: number[] // actual cycle lengths between consecutive starts
+  average: number | null
+  shortest: number | null
+  longest: number | null
+  regularity: "regular" | "irregular" | "unknown"
+  count: number
+}
+
+/** Cycle lengths + regularity learned from the user's own logged periods. */
+export function cycleHistory(entries: TrackEntry[]): CycleHistory {
+  const starts = detectPeriodStarts(entries)
+  const lengths: number[] = []
+  for (let i = 1; i < starts.length; i++) lengths.push(diffDays(starts[i], starts[i - 1]))
+  const valid = lengths.filter((l) => l >= 15 && l <= 90) // ignore noise
+  const average = valid.length ? Math.round(valid.reduce((a, b) => a + b, 0) / valid.length) : null
+  const shortest = valid.length ? Math.min(...valid) : null
+  const longest = valid.length ? Math.max(...valid) : null
+  let regularity: CycleHistory["regularity"] = "unknown"
+  if (valid.length >= 2) regularity = longest! - shortest! > 9 ? "irregular" : "regular"
+  return { starts, lengths: valid, average, shortest, longest, regularity, count: starts.length }
+}
+
+/** Is the user on their period today (logged flow on this date)? */
+export function isOnPeriod(entries: TrackEntry[], todayKey: string): boolean {
+  const e = entries.find((x) => x.date === todayKey)
+  return Boolean(e?.flow && e.flow !== "none")
 }
 
 export function computeCycle(
   profile: CycleProfile,
   loggedLastPeriod: string | null = null,
-  today: string = toDateKey(new Date())
+  today: string = toDateKey(new Date()),
+  avgOverride: number | null = null
 ): CycleStatus {
-  const cycleLength = profile.cycleLength && profile.cycleLength > 0 ? profile.cycleLength : 28
+  // Prefer the cycle length learned from real logged periods, else onboarding.
+  const cycleLength =
+    avgOverride && avgOverride > 0
+      ? avgOverride
+      : profile.cycleLength && profile.cycleLength > 0
+        ? profile.cycleLength
+        : 28
   const periodLength = profile.periodLength && profile.periodLength > 0 ? profile.periodLength : 5
   const irregular = Boolean(profile.cycleIrregular)
 

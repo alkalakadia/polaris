@@ -5,13 +5,14 @@ import { useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { CycleCalendar } from "@/components/cycle-calendar"
 import { SupportResource } from "@/components/support-resource"
+import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
 import { buildCyclePatterns, buildInsights, type CyclePattern, type InsightSummary } from "@/lib/insights"
 import { buildScreening, type ScreeningPrompt } from "@/lib/clinical"
-import { getAllEntriesAsync } from "@/lib/tracker-store"
-import { deriveLastPeriodStart } from "@/lib/cycle"
+import { getAllEntriesAsync, saveEntryAsync } from "@/lib/tracker-store"
+import { cycleHistory, deriveLastPeriodStart, type CycleHistory } from "@/lib/cycle"
 import { getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
-import type { TrackEntry } from "@/lib/tracker"
+import { toDateKey, type TrackEntry } from "@/lib/tracker"
 
 export default function InsightsPage() {
   const { user } = useAuth()
@@ -21,25 +22,33 @@ export default function InsightsPage() {
   const [patterns, setPatterns] = useState<CyclePattern[]>([])
   const [screening, setScreening] = useState<ScreeningPrompt[]>([])
   const [sensitive, setSensitive] = useState(false)
+  const [history, setHistory] = useState<CycleHistory | null>(null)
+
+  async function reload(prof: CycleProfile) {
+    const all = await getAllEntriesAsync()
+    setEntries(all)
+    setSummary(buildInsights(all))
+    setPatterns(buildCyclePatterns(all, prof))
+    const sc = buildScreening(prof, all)
+    setScreening(sc.prompts)
+    setSensitive(sc.sensitive)
+    setHistory(cycleHistory(all))
+  }
 
   useEffect(() => {
-    let active = true
     if (user?.user_metadata?.cycle) hydrateProfileFromMetadata(user.user_metadata.cycle)
     const prof = getProfile()
-    if (active) setProfile(prof)
-    getAllEntriesAsync().then((all) => {
-      if (!active) return
-      setEntries(all)
-      setSummary(buildInsights(all))
-      setPatterns(buildCyclePatterns(all, prof))
-      const sc = buildScreening(prof, all)
-      setScreening(sc.prompts)
-      setSensitive(sc.sensitive)
-    })
-    return () => {
-      active = false
-    }
+    setProfile(prof)
+    reload(prof)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  // Tap a day on the calendar to add/remove a past (or today's) period day.
+  async function togglePeriod(date: string, makePeriod: boolean) {
+    const existing = entries.find((e) => e.date === date) ?? { date }
+    await saveEntryAsync({ ...existing, date, flow: makePeriod ? "medium" : "none" })
+    await reload(profile)
+  }
 
   const anchor = deriveLastPeriodStart(entries) ?? profile.lastPeriodStart ?? null
 
@@ -61,10 +70,52 @@ export default function InsightsPage() {
         </p>
       </div>
 
-      {/* History calendar — always available */}
+      {/* History calendar — tap a day to backfill past periods */}
       <div className="mt-4">
-        <CycleCalendar entries={entries} profile={profile} anchor={anchor} />
+        <p className="mb-2 px-1 text-xs font-semibold text-g-ink-3">
+          Tap any day to add or remove a period — backfill past months to sharpen your predictions.
+        </p>
+        <CycleCalendar entries={entries} profile={profile} anchor={anchor} onTogglePeriod={togglePeriod} />
       </div>
+
+      {/* Cycle history — your real cycle lengths + how regular */}
+      {history && history.count >= 1 && (
+        <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
+          <h2 className="mb-2 font-cute text-base font-bold text-g-ink">🩷 Your cycle history</h2>
+          {history.average ? (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-candy-soft px-3 py-1.5 text-sm font-bold text-g-ink">
+                  Avg cycle {history.average} days
+                </span>
+                <span className="rounded-full bg-candy-soft px-3 py-1.5 text-sm font-bold text-g-ink">
+                  {history.shortest}–{history.longest} day range
+                </span>
+                <span
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-sm font-bold",
+                    history.regularity === "irregular" ? "bg-g-butter-soft text-g-ink" : "bg-g-mint-soft text-g-ink"
+                  )}
+                >
+                  {history.regularity === "irregular" ? "Cycles vary a lot" : "Fairly regular"}
+                </span>
+              </div>
+              {history.lengths.length > 0 && (
+                <p className="mt-2 text-sm font-semibold text-g-ink-3">
+                  Recent cycles: {history.lengths.slice(-6).join(", ")} days
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm font-semibold text-g-ink-3">
+              Log a couple of periods (and backfill past ones on the calendar) and Polaris will learn your cycle length and how regular it is.
+            </p>
+          )}
+          <p className="mt-2 text-[0.7rem] font-semibold text-g-ink-3">
+            Learned from your own logged periods. PCOS cycles can be irregular — not a diagnosis. 💗
+          </p>
+        </section>
+      )}
 
       {/* Cycle-relative patterns */}
       {patterns.length > 0 && (

@@ -23,6 +23,7 @@ import {
 import {
   PHASE_META,
   computeCycle,
+  cycleHistory,
   deriveLastPeriodStart,
   phaseTip,
   type CycleStatus,
@@ -55,9 +56,11 @@ export default function TodayPage() {
       const tk = toDateKey(new Date())
       setEntry(all.find((e) => e.date === tk) ?? { date: tk })
       setStreak(getStreak(all))
-      // Anchor predictions to the most recent real logged period when available.
+      // Anchor predictions to the most recent real logged period, and use the
+      // cycle length learned from the user's own history when we have it.
       const loggedStart = deriveLastPeriodStart(all)
-      setCycle(computeCycle(prof, loggedStart, tk))
+      const avg = cycleHistory(all).average
+      setCycle(computeCycle(prof, loggedStart, tk, avg))
     })
     return () => {
       active = false

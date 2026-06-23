@@ -148,15 +148,8 @@ export default function TrackPage() {
         )}
       </div>
 
-      {/* Period flow */}
-      <SingleSelectCard
-        title="Period flow"
-        emoji="🌷"
-        accent="pink"
-        options={FLOW_OPTIONS}
-        value={entry.flow}
-        onPick={(id) => toggleSingle("flow", id)}
-      />
+      {/* Period — only prompts flow when you're actually on your period */}
+      <PeriodCard entry={entry} onSetFlow={(id) => update({ flow: id as TrackEntry["flow"] })} />
 
       {/* Energy */}
       <SingleSelectCard
@@ -335,6 +328,40 @@ export default function TrackPage() {
 }
 
 // --- cute building blocks ----------------------------------------------------
+
+function PeriodCard({ entry, onSetFlow }: { entry: TrackEntry; onSetFlow: (id: string) => void }) {
+  const on = !!entry.flow && entry.flow !== "none"
+  return (
+    <Card title="Period" emoji="🌹" accent="pink">
+      {on ? (
+        <>
+          <p className="mb-2.5 text-sm font-bold text-g-ink">You're on your period today 🩷 How's the flow?</p>
+          <div className="flex flex-wrap gap-2">
+            {FLOW_OPTIONS.filter((o) => o.id !== "none").map((o) => (
+              <Chip key={o.id} option={o} accent="pink" selected={entry.flow === o.id} onClick={() => onSetFlow(o.id)} />
+            ))}
+            <Chip
+              option={{ id: "none", label: "Ended", emoji: "✅" }}
+              accent="pink"
+              selected={false}
+              onClick={() => onSetFlow("none")}
+            />
+          </div>
+        </>
+      ) : (
+        <div>
+          <p className="mb-3 text-sm font-semibold text-g-ink-3">Not on your period today 🌷</p>
+          <button
+            onClick={() => onSetFlow("medium")}
+            className="rounded-full bg-candy px-5 py-3 font-cute text-base font-bold text-white shadow-girly-pop active:scale-95"
+          >
+            🩸 Start my period
+          </button>
+        </div>
+      )}
+    </Card>
+  )
+}
 
 function NumField({
   label,

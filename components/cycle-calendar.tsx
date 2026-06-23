@@ -23,10 +23,12 @@ export function CycleCalendar({
   entries,
   profile,
   anchor,
+  onTogglePeriod,
 }: {
   entries: TrackEntry[]
   profile: CycleProfile
   anchor: string | null
+  onTogglePeriod?: (date: string, makePeriod: boolean) => void
 }) {
   const [offset, setOffset] = useState(0) // months from current
   const [selected, setSelected] = useState<string | null>(null)
@@ -154,6 +156,19 @@ export function CycleCalendar({
             </div>
           ) : (
             <p className="mt-1 text-sm font-semibold text-g-ink-3">Nothing logged this day.</p>
+          )}
+          {onTogglePeriod && selected <= todayKey && (
+            <button
+              onClick={() => onTogglePeriod(selected, !(selEntry?.flow && selEntry.flow !== "none"))}
+              className={cn(
+                "mt-2.5 w-full rounded-full py-2.5 text-sm font-bold transition active:scale-95",
+                selEntry?.flow && selEntry.flow !== "none"
+                  ? "border border-g-border bg-white text-g-ink-2"
+                  : "bg-g-pink text-white shadow-girly"
+              )}
+            >
+              {selEntry?.flow && selEntry.flow !== "none" ? "Remove period day" : "🩸 Mark as period day"}
+            </button>
           )}
         </div>
       )}
