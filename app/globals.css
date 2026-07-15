@@ -35,6 +35,39 @@
   --shadow-soft: 0 1px 2px rgba(45, 36, 36, 0.04), 0 4px 16px rgba(45, 36, 36, 0.04);
   --shadow-card: 0 1px 2px rgba(45, 36, 36, 0.06), 0 8px 24px rgba(45, 36, 36, 0.06);
   --shadow-pop: 0 2px 8px rgba(225, 90, 120, 0.10), 0 16px 40px rgba(91, 58, 82, 0.10);
+
+  /* -------------------------------------------------------------------------
+   * Polaris GIRLY theme — the patient app. Soft, cute, fun, pastel.
+   * Bubblegum + lavender + peach + mint + butter on a pink-cream canvas.
+   * ----------------------------------------------------------------------- */
+  --g-canvas: #FFF5F9;       /* pink-cream */
+  /* --- Re-themed to the MyPMOS design system (rose/mauve + purple accent).
+   * Names kept so every existing utility class picks up the new look. --- */
+  --g-canvas-2: #F9EDF2;     /* soft rose-cream (input bg) */
+  --g-card: #FFFFFF;
+  --g-border: rgba(185, 110, 140, 0.16);
+  --g-border-2: rgba(123, 104, 200, 0.16);
+
+  --g-ink: #1E1116;          /* deep plum-ink */
+  --g-ink-2: #7A5568;        /* readable muted */
+  --g-ink-3: #9A7285;        /* muted-foreground */
+
+  --g-pink: #B85876;         /* primary rose/mauve */
+  --g-pink-soft: #F6ECF0;    /* secondary soft rose */
+  --g-pink-deep: #9F4763;    /* deeper primary for text/hover */
+  --g-lavender: #7B68C8;     /* accent purple */
+  --g-lavender-soft: #ECE7F8;
+  --g-peach: #DFA088;        /* warm accent, toned to palette */
+  --g-peach-soft: #F7E6DC;
+  --g-mint: #7FB2A0;         /* muted sage */
+  --g-mint-soft: #DEEEE8;
+  --g-butter: #D9B45C;       /* soft gold */
+  --g-butter-soft: #F5ECCE;
+  --g-sky: #8AA6DC;          /* soft periwinkle */
+  --g-sky-soft: #E4E9F7;
+
+  --g-shadow: 0 1px 2px rgba(30, 17, 22, 0.04), 0 8px 24px rgba(184, 88, 118, 0.07);
+  --g-shadow-pop: 0 2px 8px rgba(184, 88, 118, 0.14), 0 16px 40px rgba(123, 104, 200, 0.12);
 }
 
 @theme inline {
@@ -59,12 +92,37 @@
   --font-display: var(--font-fraunces);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-round: var(--font-quicksand);
+  --font-cute: var(--font-baloo);
+
+  /* Girly theme colors, exposed as Tailwind utilities (bg-g-pink, text-g-ink, …) */
+  --color-g-canvas: var(--g-canvas);
+  --color-g-canvas-2: var(--g-canvas-2);
+  --color-g-card: var(--g-card);
+  --color-g-border: var(--g-border);
+  --color-g-border-2: var(--g-border-2);
+  --color-g-ink: var(--g-ink);
+  --color-g-ink-2: var(--g-ink-2);
+  --color-g-ink-3: var(--g-ink-3);
+  --color-g-pink: var(--g-pink);
+  --color-g-pink-soft: var(--g-pink-soft);
+  --color-g-pink-deep: var(--g-pink-deep);
+  --color-g-lavender: var(--g-lavender);
+  --color-g-lavender-soft: var(--g-lavender-soft);
+  --color-g-peach: var(--g-peach);
+  --color-g-peach-soft: var(--g-peach-soft);
+  --color-g-mint: var(--g-mint);
+  --color-g-mint-soft: var(--g-mint-soft);
+  --color-g-butter: var(--g-butter);
+  --color-g-butter-soft: var(--g-butter-soft);
+  --color-g-sky: var(--g-sky);
+  --color-g-sky-soft: var(--g-sky-soft);
 }
 
 body {
-  background: var(--canvas);
-  color: var(--ink-primary);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--g-canvas);
+  color: var(--g-ink);
+  font-family: var(--font-dm-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -96,9 +154,63 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+/* ---------------------------------------------------------------------------
+ * GIRLY app helpers — used by the patient experience (Today / Track / etc.)
+ * ------------------------------------------------------------------------- */
+
+/* MyPMOS type system: DM Serif Display for headlines, DM Sans for everything else. */
+.font-round { font-family: var(--font-dm-sans), ui-sans-serif, "Segoe UI", sans-serif; }
+.font-cute  { font-family: var(--font-dm-serif), Georgia, serif; letter-spacing: -0.01em; }
+
+/* The patient app's soft canvas — gentle rose + purple glow on warm white. */
+.bg-girly {
+  background:
+    radial-gradient(ellipse 70% 40% at 0% 0%, rgba(184, 88, 118, 0.06), transparent 60%),
+    radial-gradient(ellipse 70% 40% at 100% 3%, rgba(123, 104, 200, 0.07), transparent 60%),
+    var(--g-canvas);
+}
+
+/* Brand gradient (matches the logo mark): rose → mauve → purple. */
+.bg-candy        { background: linear-gradient(135deg, #D4789A 0%, #B85876 55%, #8B72C8 100%); }
+.bg-candy-soft   { background: linear-gradient(135deg, var(--g-pink-soft) 0%, var(--g-lavender-soft) 100%); }
+.text-candy {
+  background: linear-gradient(135deg, #B85876 0%, #8B72C8 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+
+.shadow-girly     { box-shadow: var(--g-shadow); }
+.shadow-girly-pop { box-shadow: var(--g-shadow-pop); }
+
+/* A gentle float for sparkles / cute graphics. */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-6px) rotate(6deg); }
+}
+.animate-float { animation: float-soft 4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-float { animation: none; }
+}
+
+/* A soft pop when something gets selected/saved. */
+@keyframes pop-in {
+  0%   { transform: scale(0.9); opacity: 0; }
+  60%  { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop { animation: pop-in 0.25s ease-out; }
+
+/* Hide scrollbars on horizontal chip rows while keeping them scrollable. */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Print styles for the patient handout */
 @media print {
   body {
     background: white;
   }
+  /* Scoped print hiding so the girly app chrome + controls drop out of the PDF,
+   * without touching the provider handout's own print layout. */
+  .print-hide { display: none !important; }
+  .print-area { box-shadow: none !important; }
+  .bg-girly { background: white !important; }
 }

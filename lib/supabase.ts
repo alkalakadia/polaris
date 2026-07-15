@@ -1,5 +1,5 @@
 /**
- * Supabase client for Polaris.
+ * Supabase client for MyPMOS.
  *
  * Two clients:
  *
@@ -29,31 +29,44 @@ export interface IntakeRow {
   intake_data: Record<string, string | string[]>
 }
 
-export function isSupabaseConfigured(): boolean {
-  return Boolean(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      (process.env.SUPABASE_SERVICE_ROLE_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+// Prefer the modern, independently-rotatable API keys (sb_publishable_… /
+// sb_secret_…) and fall back to the legacy JWT keys (anon / service_role) so
+// rotation is a pure env change. The publishable key behaves like anon (RLS
+// applies); the secret key behaves like service_role (RLS bypassed, server only).
+function publishableKey() {
+  return (
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   )
+}
+function secretKey() {
+  return process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+}
+
+export function isSupabaseConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && (secretKey() || publishableKey()))
 }
 
 export function serverClient() {
-  if (!isSupabaseConfigured()) return null
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: { persistSession: false },
-    }
-  )
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !secretKey()) return null
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, secretKey()!, {
+    auth: { persistSession: false },
+  })
 }
+
+// Single shared browser client. Creating a new client per call gives each
+// instance its own session-load lifecycle, so a query issued on a fresh
+// instance can run before its auth token is attached (RLS then returns zero
+// rows). Memoizing one instance keeps auth + data on the same client.
+function makeBrowserClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, publishableKey()!)
+}
+let browserSingleton: ReturnType<typeof makeBrowserClient> | null = null
 
 export function browserClient() {
   if (!isSupabaseConfigured()) return null
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  browserSingleton ??= makeBrowserClient()
+  return browserSingleton
 }
 
 /**

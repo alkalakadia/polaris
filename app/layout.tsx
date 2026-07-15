@@ -1,5 +1,7 @@
-import type { Metadata } from "next"
-import { Geist, Geist_Mono, Fraunces } from "next/font/google"
+import type { Metadata, Viewport } from "next"
+import { Geist, Geist_Mono, Fraunces, Quicksand, Baloo_2, DM_Serif_Display, DM_Sans } from "next/font/google"
+import { AuthProvider } from "@/lib/auth"
+import { PwaRegister } from "@/components/pwa-register"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -18,10 +20,47 @@ const fraunces = Fraunces({
   axes: ["SOFT", "WONK", "opsz"],
 })
 
+// Quicksand — soft, rounded, friendly UI font for the patient app.
+const quicksand = Quicksand({
+  variable: "--font-quicksand",
+  subsets: ["latin"],
+})
+
+// Baloo 2 — playful rounded display font for cute headings.
+const baloo = Baloo_2({
+  variable: "--font-baloo",
+  subsets: ["latin"],
+})
+
+// MyPMOS design system (from the Figma): DM Serif Display for headlines,
+// DM Sans for body/UI.
+const dmSerif = DM_Serif_Display({
+  variable: "--font-dm-serif",
+  subsets: ["latin"],
+  weight: "400",
+})
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
+  subsets: ["latin"],
+})
+
 export const metadata: Metadata = {
-  title: "Polaris — PCOS clinical decision support",
+  title: "MyPMOS — your cute PMOS bestie 🌸",
   description:
-    "The PCOS workflow tool every OB/GYN should already have. Phenotype classification, recommended workup, and personalized patient handouts in one screen.",
+    "Track everything, spot your patterns, ask the girls, and walk into your gyno visit ready. MyPMOS is your soft, smart companion for PMOS (formerly PCOS) and your cycle.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "MyPMOS" },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/apple-touch-icon.png",
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: "#FF6FA5",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 }
 
 export default function RootLayout({
@@ -32,9 +71,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} ${quicksand.variable} ${baloo.variable} ${dmSerif.variable} ${dmSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <PwaRegister />
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   )
 }

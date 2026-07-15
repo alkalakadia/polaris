@@ -1,8 +1,8 @@
 /**
- * Polaris logo.
+ * MyPMOS logo.
  *
  * Design rationale:
- *  - Polaris = the North Star. The mark is a four-point star with an
+ *  - MyPMOS = the North Star. The mark is a four-point star with an
  *    elongated north arm to read as "guiding star" at a glance.
  *  - The surrounding ring is the menstrual cycle / orbital arc — a
  *    quiet nod to the condition area without being literal.
@@ -26,7 +26,7 @@ interface LogoProps {
   wordmarkClassName?: string
 }
 
-export function PolarisLogo({
+export function MyPMOSLogo({
   size = 40,
   withWordmark = false,
   className,
@@ -40,7 +40,7 @@ export function PolarisLogo({
         viewBox="0 0 48 48"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        aria-label="Polaris"
+        aria-label="MyPMOS"
       >
         <defs>
           <linearGradient id="polaris-gradient" x1="0" y1="0" x2="48" y2="48">
