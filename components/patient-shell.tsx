@@ -7,22 +7,35 @@ import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
 
 /** MyPMOS orbit-star mark: a soft 4-point star inside a dashed orbit ring. */
-export function GirlyLogo({ size = 30, withWordmark = true }: { size?: number; withWordmark?: boolean }) {
+export function GirlyLogo({
+  size = 30,
+  withWordmark = true,
+  tone = "gradient",
+}: {
+  size?: number
+  withWordmark?: boolean
+  /** "white" for use on colored/gradient backgrounds where the default gradient would blend in. */
+  tone?: "gradient" | "white"
+}) {
+  const star = tone === "white" ? "white" : "url(#mpg-hdr)"
+  const ring = tone === "white" ? "rgba(255,255,255,0.55)" : "url(#mpog-hdr)"
   return (
     <span className="inline-flex items-center gap-2">
       <svg width={size} height={size} viewBox="0 0 100 100" fill="none" aria-label="MyPMOS">
-        <defs>
-          <linearGradient id="mpg-hdr" x1="30%" y1="0%" x2="70%" y2="100%">
-            <stop offset="0%" stopColor="#D4789A" />
-            <stop offset="55%" stopColor="#B85876" />
-            <stop offset="100%" stopColor="#8B72C8" />
-          </linearGradient>
-          <linearGradient id="mpog-hdr" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#D4789A" stopOpacity="0.5" />
-            <stop offset="100%" stopColor="#8B72C8" stopOpacity="0.5" />
-          </linearGradient>
-        </defs>
-        <circle cx="50" cy="50" r="43" stroke="url(#mpog-hdr)" strokeWidth="1.8" strokeDasharray="5 3.5" fill="none" />
+        {tone === "gradient" && (
+          <defs>
+            <linearGradient id="mpg-hdr" x1="30%" y1="0%" x2="70%" y2="100%">
+              <stop offset="0%" stopColor="#D4789A" />
+              <stop offset="55%" stopColor="#B85876" />
+              <stop offset="100%" stopColor="#8B72C8" />
+            </linearGradient>
+            <linearGradient id="mpog-hdr" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#D4789A" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#8B72C8" stopOpacity="0.5" />
+            </linearGradient>
+          </defs>
+        )}
+        <circle cx="50" cy="50" r="43" stroke={ring} strokeWidth="1.8" strokeDasharray="5 3.5" fill="none" />
         <path
           d={[
             "M50,50 C57,27 63,11 50,4 C37,11 43,27 50,50",
@@ -30,9 +43,9 @@ export function GirlyLogo({ size = 30, withWordmark = true }: { size?: number; w
             "M50,50 C57,73 63,82 50,90 C37,82 43,73 50,50",
             "M50,50 C27,57 10,62 6,50 C10,38 27,43 50,50",
           ].join(" ")}
-          fill="url(#mpg-hdr)"
+          fill={star}
         />
-        <circle cx="50" cy="50" r="4.5" fill="url(#mpg-hdr)" opacity="0.85" />
+        <circle cx="50" cy="50" r="4.5" fill={star} opacity="0.85" />
       </svg>
       {withWordmark && (
         <span className="font-cute text-[1.15rem] font-normal leading-none text-g-ink">MyPMOS</span>

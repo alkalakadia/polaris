@@ -86,7 +86,7 @@ export default function ArticlePage() {
             {[2, 3, 3, 2].map((w, i) => (
               <div key={i} className={cn("h-3 animate-pulse rounded-full bg-g-canvas-2", w === 2 ? "w-2/3" : "w-full")} />
             ))}
-            <p className="pt-1 text-xs font-bold text-g-ink-3">MyPMOS is writing this for you… ✍️🌸</p>
+            <p className="pt-1 text-xs font-bold text-g-ink-3">MyPMOS is writing this for you…</p>
           </div>
         ) : error ? (
           <div className="text-center">

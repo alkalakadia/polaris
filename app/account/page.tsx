@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import type { User } from "@supabase/supabase-js"
+import { Eye, EyeOff } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { useAuth } from "@/lib/auth"
@@ -22,7 +23,7 @@ import { ReminderToggle } from "@/components/reminder-toggle"
 import { browserClient } from "@/lib/supabase"
 
 export default function AccountPage() {
-  const { user, configured, loading, signIn, signUp, signOut } = useAuth()
+  const { user, configured, loading, signIn, signUp, signOut, sendPasswordReset } = useAuth()
   const [mode, setMode] = useState<"in" | "up">("up")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -32,6 +33,8 @@ export default function AccountPage() {
   const [confirmSent, setConfirmSent] = useState(false)
   const [ageOk, setAgeOk] = useState(false)
   const [agreed, setAgreed] = useState(false)
+  const [forgotMode, setForgotMode] = useState(false)
+  const [resetSent, setResetSent] = useState(false)
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
@@ -50,6 +53,16 @@ export default function AccountPage() {
     else if ("needsConfirm" in res && res.needsConfirm) setConfirmSent(true)
   }
 
+  async function submitForgot(e: React.FormEvent) {
+    e.preventDefault()
+    setBusy(true)
+    setError(null)
+    const res = await sendPasswordReset(email)
+    setBusy(false)
+    if (res.error) setError(res.error)
+    else setResetSent(true)
+  }
+
   // --- signed in: the "Me" hub -------------------------------------------
   if (configured && user) {
     return (
@@ -63,7 +76,7 @@ export default function AccountPage() {
   if (!configured) {
     return (
       <PatientShell>
-        <Hero emoji="☁︎" title="Cloud sync" sub="Coming online soon 💕" />
+        <Hero emoji="☁︎" title="Cloud sync" sub="Coming online soon" />
         <div className="mt-5 rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
           <span className="text-4xl">📱</span>
           <p className="mt-3 font-cute text-lg font-bold text-g-ink">You're all set on this device</p>
@@ -72,6 +85,69 @@ export default function AccountPage() {
             (to sync across devices) turn on as soon as we connect the database.
           </p>
         </div>
+      </PatientShell>
+    )
+  }
+
+  // --- password reset email sent ------------------------------------------
+  if (resetSent) {
+    return (
+      <PatientShell>
+        <Hero emoji="🔑" title="Check your email" sub="Password reset on the way" />
+        <div className="mt-5 rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
+          <span className="text-4xl">📬</span>
+          <p className="mt-3 font-cute text-lg font-bold text-g-ink">Reset link sent</p>
+          <p className="mt-1 text-sm font-semibold text-g-ink-2">
+            We sent a link to <span className="font-bold text-g-ink">{email}</span>. Tap it to
+            choose a new password, then come back and sign in.
+          </p>
+          <button
+            onClick={() => {
+              setResetSent(false)
+              setForgotMode(false)
+              setMode("in")
+            }}
+            className="mt-4 rounded-full bg-candy px-5 py-2.5 text-sm font-bold text-white active:scale-95"
+          >
+            Back to sign in
+          </button>
+        </div>
+      </PatientShell>
+    )
+  }
+
+  // --- forgot password form ------------------------------------------------
+  if (forgotMode) {
+    return (
+      <PatientShell>
+        <Hero emoji="🔑" title="Forgot password?" sub="We'll email you a reset link" />
+        <form onSubmit={submitForgot} className="mt-4 space-y-3">
+          <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@email.com" required />
+
+          {error && (
+            <p className="rounded-2xl bg-g-pink-soft px-4 py-3 text-sm font-bold text-g-pink-deep">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={busy || loading}
+            className="w-full rounded-full bg-candy py-4 font-cute text-lg font-bold text-white shadow-girly-pop transition active:scale-[0.98] disabled:opacity-60"
+          >
+            {busy ? "One sec…" : "Send reset link"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setForgotMode(false)
+              setError(null)
+            }}
+            className="w-full text-center text-sm font-bold text-g-ink-3"
+          >
+            Back to sign in
+          </button>
+        </form>
       </PatientShell>
     )
   }
@@ -105,7 +181,7 @@ export default function AccountPage() {
   // --- signed out: sign in / sign up form ---------------------------------
   return (
     <PatientShell>
-      <Hero emoji="🌸" title={mode === "up" ? "Create your account" : "Welcome back"} sub="Sync your tracker everywhere 💗" />
+      <Hero emoji="🌸" title={mode === "up" ? "Create your account" : "Welcome back"} sub="Sync your tracker everywhere" />
 
       {/* mode toggle */}
       <div className="mt-5 flex rounded-full bg-white p-1 shadow-girly">
@@ -132,6 +208,19 @@ export default function AccountPage() {
         )}
         <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="you@email.com" required />
         <Field label="Password" type="password" value={password} onChange={setPassword} placeholder="••••••••" required />
+
+        {mode === "in" && (
+          <button
+            type="button"
+            onClick={() => {
+              setForgotMode(true)
+              setError(null)
+            }}
+            className="-mt-1 block px-1 text-xs font-bold text-g-pink-deep"
+          >
+            Forgot password?
+          </button>
+        )}
 
         {mode === "up" && (
           <div className="space-y-2 rounded-2xl bg-g-canvas px-4 py-3">
@@ -162,13 +251,13 @@ export default function AccountPage() {
           disabled={busy || loading}
           className="w-full rounded-full bg-candy py-4 font-cute text-lg font-bold text-white shadow-girly-pop transition active:scale-[0.98] disabled:opacity-60"
         >
-          {busy ? "One sec…" : mode === "up" ? "Create account 💕" : "Sign in 🌷"}
+          {busy ? "One sec…" : mode === "up" ? "Create account" : "Sign in"}
         </button>
       </form>
 
       <p className="mt-4 px-2 text-center text-xs font-semibold text-g-ink-3">
         Your tracked data is private to you. We never share it. MyPMOS is a
-        companion, not a doctor, and never diagnoses. 💗
+        companion, not a doctor, and never diagnoses.
       </p>
     </PatientShell>
   )
@@ -253,7 +342,7 @@ function AccountHub({ user }: { user: User }) {
     setEditing(false)
   }
 
-  const displayName = (user.user_metadata?.display_name as string) || "Hi bestie!"
+  const displayName = (user.user_metadata?.display_name as string) || "Welcome back"
 
   return (
     <>
@@ -344,10 +433,10 @@ function AccountHub({ user }: { user: User }) {
         ) : list.length === 0 ? (
           <p className="rounded-2xl bg-candy-soft px-4 py-4 text-center text-sm font-bold text-g-ink">
             {tab === "posts"
-              ? "You haven't posted yet — share something with the girls 💕"
+              ? "You haven't posted yet — share something with the community"
               : tab === "liked"
-                ? "No liked posts yet 💗"
-                : "You haven't commented yet 💬"}
+                ? "No liked posts yet"
+                : "You haven't commented yet"}
           </p>
         ) : (
           list.map((p) => <PostRow key={p.id} post={p} />)
@@ -406,7 +495,7 @@ function AccountHub({ user }: { user: User }) {
 
       <p className="mt-4 px-2 text-center text-xs font-semibold text-g-ink-3">
         Your data is private to you and never shared. MyPMOS is a companion, not a
-        doctor, and never diagnoses. For medical concerns, please see a provider. 💗
+        doctor, and never diagnoses. For medical concerns, please see a provider.
       </p>
     </>
   )
@@ -505,17 +594,34 @@ function Field({
   type?: string
   required?: boolean
 }) {
+  const [reveal, setReveal] = useState(false)
+  const isPassword = type === "password"
   return (
     <label className="block">
       <span className="mb-1.5 block px-1 font-cute text-sm font-bold text-g-ink">{label}</span>
-      <input
-        type={type}
-        value={value}
-        required={required}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
-      />
+      <div className="relative">
+        <input
+          type={isPassword && reveal ? "text" : type}
+          value={value}
+          required={required}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className={cn(
+            "w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink",
+            isPassword && "pr-11"
+          )}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setReveal((r) => !r)}
+            aria-label={reveal ? "Hide password" : "Show password"}
+            className="absolute inset-y-0 right-0 grid w-11 place-items-center text-g-ink-3 active:scale-90"
+          >
+            {reveal ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        )}
+      </div>
     </label>
   )
 }

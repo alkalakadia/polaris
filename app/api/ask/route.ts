@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
   if (mode === "qa") {
     const question = (payload.question || "").trim()
-    if (!question) return NextResponse.json({ error: "Ask a question first 💕" }, { status: 400 })
+    if (!question) return NextResponse.json({ error: "Ask a question first" }, { status: 400 })
     if (question.length > 1000) return NextResponse.json({ error: "That's a bit long — try a shorter question." }, { status: 400 })
 
     // Optional, non-identifying health context to personalize the answer.

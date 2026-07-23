@@ -47,8 +47,8 @@ export async function POST(req: Request) {
 
   const payload = JSON.stringify(
     type === "like"
-      ? { title: "New love on your post 💗", body: `@${handle} liked "${short}"`, url: `/community/${postId}` }
-      : { title: "New reply 💬", body: `@${handle} replied to "${short}"`, url: `/community/${postId}` }
+      ? { title: "New like on your post", body: `@${handle} liked "${short}"`, url: `/community/${postId}` }
+      : { title: "New reply", body: `@${handle} replied to "${short}"`, url: `/community/${postId}` }
   )
 
   const { data: subs } = await c

@@ -28,7 +28,7 @@ export function ReminderToggle() {
       const r = await enableReminders({ hour: 19, userId: user?.id })
       if (r.ok) {
         setOn(true)
-        setMsg("You're set! We'll send a gentle nudge each evening 💕")
+        setMsg("You're set! We'll send a gentle nudge each evening.")
       } else {
         setMsg(r.error ?? "Couldn't turn that on.")
       }
@@ -62,7 +62,7 @@ export function ReminderToggle() {
       </div>
       {!supported && (
         <p className="mt-2 rounded-2xl bg-g-lavender-soft px-3 py-2 text-xs font-bold text-g-ink">
-          Add MyPMOS to your home screen first, then reminders can turn on 💗
+          Add MyPMOS to your home screen first, then reminders can turn on.
         </p>
       )}
       {msg && <p className="mt-2 text-xs font-semibold text-g-ink-2">{msg}</p>}

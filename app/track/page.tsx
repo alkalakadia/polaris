@@ -170,8 +170,13 @@ export default function TrackPage() {
               {FLOW_OPTIONS.filter((o) => o.id !== "none").map((o) => (
                 <Chip key={o.id} option={o} accent="pink" selected={entry.flow === o.id} onClick={() => update({ flow: o.id as TrackEntry["flow"] })} />
               ))}
-              <Chip option={{ id: "none", label: "Ended", emoji: "✅" }} accent="pink" selected={false} onClick={() => update({ flow: "none" })} />
             </div>
+            <button
+              onClick={() => update({ flow: "none" })}
+              className="mt-3 w-full rounded-full border border-g-border bg-white py-3 text-sm font-bold text-g-ink-2 active:scale-[0.98]"
+            >
+              End period
+            </button>
           </>
         ) : (
           <div>
@@ -357,7 +362,7 @@ export default function TrackPage() {
           <textarea
             value={entry.notes ?? ""}
             onChange={(e) => update({ notes: e.target.value })}
-            placeholder="Anything else on your mind today, bestie? 💭"
+            placeholder="Anything else on your mind today?"
             rows={3}
             className="w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
@@ -412,10 +417,10 @@ export default function TrackPage() {
       {/* Completeness + saved pill */}
       <div className="mt-4 flex items-center justify-between rounded-3xl bg-candy-soft px-4 py-3">
         <span className="text-sm font-bold text-g-ink">
-          {filled === 0 ? "Tap to log how you feel 💕" : `${filled} of ${TRACKABLE_CATEGORIES} things logged ✨`}
+          {filled === 0 ? "Tap to log how you feel" : `${filled} of ${TRACKABLE_CATEGORIES} things logged`}
         </span>
         {ready && savedAt && (
-          <span className="animate-pop rounded-full bg-white px-3 py-1 text-xs font-bold text-g-pink-deep">Saved 🩷</span>
+          <span className="animate-pop rounded-full bg-white px-3 py-1 text-xs font-bold text-g-pink-deep">Saved</span>
         )}
       </div>
 

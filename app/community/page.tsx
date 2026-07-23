@@ -56,7 +56,7 @@ export default function CommunityPage() {
           <span className="animate-float text-3xl">💬</span>
           <div>
             <h1 className="font-cute text-3xl font-bold text-g-ink">Community</h1>
-            <p className="text-sm font-semibold text-g-ink-3">Ask the girls, share your wins 💕</p>
+            <p className="text-sm font-semibold text-g-ink-3">Ask questions, share your wins</p>
           </div>
         </div>
         <button
@@ -250,7 +250,7 @@ function Composer({ defaultSub, onPosted }: { defaultSub: string; onPosted: () =
         disabled={busy || !title.trim()}
         className="mt-3 w-full rounded-full bg-candy py-3 font-cute text-base font-bold text-white shadow-girly-pop active:scale-[0.98] disabled:opacity-50"
       >
-        {busy ? (files.length ? "Uploading…" : "Posting…") : "Share with the girls 💕"}
+        {busy ? (files.length ? "Uploading…" : "Posting…") : "Share with the community"}
       </button>
     </div>
   )
@@ -272,13 +272,13 @@ function Empty({ signedIn, onCompose }: { signedIn: boolean; onCompose: () => vo
       <span className="text-4xl">🌸</span>
       <p className="mt-3 font-cute text-lg font-bold text-g-ink">No posts here yet</p>
       <p className="mt-1 text-sm font-semibold text-g-ink-3">
-        {signedIn ? "Be the first to start the conversation 💕" : "Sign in to start the conversation 💕"}
+        {signedIn ? "Be the first to start the conversation" : "Sign in to start the conversation"}
       </p>
       <button
         onClick={onCompose}
         className="mt-4 rounded-full bg-candy px-5 py-2.5 text-sm font-bold text-white active:scale-95"
       >
-        {signedIn ? "Write a post ✍️" : "Sign in"}
+        {signedIn ? "Write a post" : "Sign in"}
       </button>
     </div>
   )

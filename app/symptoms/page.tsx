@@ -98,7 +98,7 @@ export default function SymptomsPage() {
         onClick={save}
         className="mt-3 w-full rounded-full bg-candy py-4 font-cute text-lg font-bold text-white shadow-girly-pop active:scale-[0.98]"
       >
-        {saved ? "Saved 💖" : "Save my symptom profile"}
+        {saved ? "Saved" : "Save my symptom profile"}
       </button>
       <div className="h-2" />
     </PatientShell>

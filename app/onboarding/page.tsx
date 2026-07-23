@@ -116,7 +116,7 @@ export default function OnboardingPage() {
                 )
               })}
               <Chip selected={p.lastPeriodStart === undefined} onClick={() => set({ lastPeriodStart: undefined })}>
-                🤷‍♀️ Not sure
+                🤷 Not sure
               </Chip>
             </div>
             <p className="mt-3 text-xs font-semibold text-g-ink-3">
@@ -188,7 +188,7 @@ export default function OnboardingPage() {
               })}
             </div>
             <p className="mt-3 text-xs font-semibold text-g-ink-3">
-              {(p.goals?.length ?? 0) >= 3 ? "That's 3 — your focus is set. 💕" : "Choose the ones that matter most to you."}
+              {(p.goals?.length ?? 0) >= 3 ? "That's 3 — your focus is set." : "Choose the ones that matter most to you."}
             </p>
           </Step>
         )}
@@ -233,7 +233,7 @@ export default function OnboardingPage() {
             disabled={!canContinue}
             className="rounded-full bg-candy px-7 py-3 font-cute text-base font-bold text-white shadow-girly-pop transition active:scale-95 disabled:opacity-50"
           >
-            {step === STEPS - 1 ? "All done 💕" : "Continue"}
+            {step === STEPS - 1 ? "All done" : "Continue"}
           </button>
         </div>
       </footer>

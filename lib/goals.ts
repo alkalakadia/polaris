@@ -40,7 +40,7 @@ export const GOAL_CATEGORIES: GoalMeta[] = [
   {
     id: "exercise",
     label: "Movement",
-    emoji: "🏃‍♀️",
+    emoji: "🏃",
     hint: "Guidelines suggest 150-300 min of moderate activity per week.",
     suggestion: "Move 30 min, 5 days a week",
   },

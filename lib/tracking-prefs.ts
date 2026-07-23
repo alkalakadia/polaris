@@ -59,7 +59,7 @@ export const LOG_SECTIONS: SectionMeta[] = [
   { id: "discharge", title: "Discharge", emoji: "💧", accent: "sky", goals: ["ttc", "regulate"], desc: "Cervical fluid" },
   { id: "cravings", title: "Cravings", emoji: "🍫", accent: "butter", goals: ["weight"], desc: "What you're craving" },
   { id: "digestion", title: "Digestion", emoji: "🌿", accent: "mint", goals: ["symptoms", "weight"], desc: "Bloating, gut feel" },
-  { id: "movement", title: "Movement", emoji: "🤸‍♀️", accent: "sky", goals: ["weight"], desc: "Activity you did" },
+  { id: "movement", title: "Movement", emoji: "🤸", accent: "sky", goals: ["weight"], desc: "Activity you did" },
   { id: "water", title: "Water", emoji: "💦", accent: "sky", goals: ["weight"], desc: "Glasses today" },
   { id: "meds", title: "Meds & supplements", emoji: "💊", accent: "lavender", goals: ["symptoms", "regulate"], desc: "What you took" },
   { id: "measurements", title: "Measurements", emoji: "📏", accent: "sky", goals: ["ttc", "weight"], desc: "Weight, temp, BP, ov test" },

@@ -125,7 +125,7 @@ function GoalCard({ goal, onCheck, onRemove }: { goal: Goal; onCheck: () => void
           done ? "bg-candy-soft text-g-pink-deep" : "bg-candy text-white shadow-girly-pop"
         )}
       >
-        {done ? "✓ Done today 💗" : "Mark done today"}
+        {done ? "✓ Done today" : "Mark done today"}
       </button>
     </div>
   )

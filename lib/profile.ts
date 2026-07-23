@@ -102,7 +102,7 @@ export const GOALS: { id: Goal; label: string; emoji: string; blurb: string }[] 
 export const CONCERNS: { id: string; label: string; emoji: string }[] = [
   { id: "irregular", label: "Irregular periods", emoji: "🌀" },
   { id: "acne", label: "Acne", emoji: "🔴" },
-  { id: "hair", label: "Hair changes", emoji: "💇‍♀️" },
+  { id: "hair", label: "Hair changes", emoji: "💇" },
   { id: "weight", label: "Weight", emoji: "⚖️" },
   { id: "mood", label: "Mood", emoji: "💭" },
   { id: "fatigue", label: "Fatigue", emoji: "🪫" },

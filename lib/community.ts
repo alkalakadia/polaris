@@ -70,10 +70,10 @@ export function isEditable(createdAt: string): boolean {
 
 /** A friendly handle for the signed-in user. */
 export function handleFor(user: User | null): string {
-  if (!user) return "bestie"
+  if (!user) return "friend"
   const dn = (user.user_metadata?.display_name as string) || ""
   if (dn.trim()) return dn.trim()
-  const local = user.email?.split("@")[0] ?? "bestie"
+  const local = user.email?.split("@")[0] ?? "friend"
   return local
 }
 
