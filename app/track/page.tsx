@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ClipboardList, CalendarDays, Camera, SlidersHorizontal, ChevronDown } from "lucide-react"
+import { CalendarDays, Camera, SlidersHorizontal, ChevronDown, ChevronRight } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { cn } from "@/lib/cn"
@@ -43,7 +43,7 @@ function sectionFilled(id: SectionId, e: TrackEntry): boolean {
     case "energy":
       return !!e.energy
     case "sleep":
-      return !!e.sleepQuality || !!e.sleepHours
+      return !!e.sleepQuality || e.sleepHours != null
     case "pain":
       return typeof e.pain === "number" && e.pain > 0
     case "water":
@@ -205,13 +205,15 @@ export default function TrackPage() {
               <Chip key={o.id} option={o} accent="lavender" selected={entry.sleepQuality === o.id} onClick={() => toggleSingle("sleepQuality", o.id)} />
             ))}
             <div className="ml-auto flex items-center gap-2 rounded-full bg-g-lavender-soft px-3 py-1.5">
-              <span className="text-sm font-bold text-g-ink">{entry.sleepHours ?? 0}h</span>
+              <span className="text-sm font-bold text-g-ink">
+                {entry.sleepHours != null ? `${entry.sleepHours} hrs` : "Not set"}
+              </span>
               <input
                 type="range"
                 min={0}
                 max={12}
                 step={0.5}
-                value={entry.sleepHours ?? 0}
+                value={entry.sleepHours ?? 7}
                 onChange={(e) => update({ sleepHours: Number(e.target.value) })}
                 className="w-24 accent-[var(--g-lavender)]"
                 aria-label="Hours of sleep"
@@ -374,20 +376,23 @@ export default function TrackPage() {
 
   return (
     <PatientShell>
-      {/* Heading + sub-nav (Log · Period · Photos) */}
+      {/* Heading */}
       <div>
         <h1 className="font-cute text-2xl text-g-ink">Track</h1>
         <p className="mt-0.5 text-sm font-medium text-g-ink-3">Log how you feel — it all flows into your Insights.</p>
       </div>
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        <span className="flex items-center justify-center gap-1.5 rounded-xl border border-transparent bg-g-pink py-2.5 text-xs font-semibold text-white">
-          <ClipboardList size={13} /> Log
-        </span>
-        <Link href="/period" className="flex items-center justify-center gap-1.5 rounded-xl border border-g-border bg-white py-2.5 text-xs font-semibold text-g-ink-2 active:scale-95">
-          <CalendarDays size={13} /> Period
+
+      {/* These open separate pages, not tabs of this one — styled as a distinct "jump to" row (not a segmented control) so that's clear. */}
+      <div className="mt-3 flex gap-2">
+        <Link href="/period" className="flex flex-1 items-center gap-1.5 rounded-xl border border-g-border bg-white py-2.5 pl-3 pr-2 text-xs font-semibold text-g-ink-2 active:scale-95">
+          <CalendarDays size={13} />
+          <span className="flex-1">Period tracker</span>
+          <ChevronRight size={14} className="text-g-ink-3" />
         </Link>
-        <Link href="/hirsutism" className="flex items-center justify-center gap-1.5 rounded-xl border border-g-border bg-white py-2.5 text-xs font-semibold text-g-ink-2 active:scale-95">
-          <Camera size={13} /> Photos
+        <Link href="/hirsutism" className="flex flex-1 items-center gap-1.5 rounded-xl border border-g-border bg-white py-2.5 pl-3 pr-2 text-xs font-semibold text-g-ink-2 active:scale-95">
+          <Camera size={13} />
+          <span className="flex-1">Photos</span>
+          <ChevronRight size={14} className="text-g-ink-3" />
         </Link>
       </div>
 

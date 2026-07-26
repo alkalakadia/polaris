@@ -9,7 +9,7 @@ import { getResult } from "@/lib/assessments"
 import { getLabs } from "@/lib/labs"
 import { getGoals } from "@/lib/goals"
 import { getHistory } from "@/lib/history"
-import { Flame } from "lucide-react"
+import { ChevronRight, Flame } from "lucide-react"
 import {
   CHIP_GROUPS,
   FLOW_OPTIONS,
@@ -197,7 +197,10 @@ export default function TodayPage() {
         />
       )}
 
-      <SmartPrompts filledToday={filled} onPeriod={!!(entry?.flow && entry.flow !== "none")} />
+      {/* Pre-onboarding, several of these prompts (main concern, goals) just duplicate the Personalize card above. */}
+      {onboarded && (
+        <SmartPrompts filledToday={filled} onPeriod={!!(entry?.flow && entry.flow !== "none")} />
+      )}
 
       {/* Big log CTA */}
       <Link
@@ -233,12 +236,24 @@ export default function TodayPage() {
         </section>
       )}
 
+      {/* Featured: the flagship visit-prep feature gets its own banner, not just a grid tile. */}
+      <Link
+        href="/export"
+        className="mt-5 flex items-center gap-3 rounded-3xl border-2 border-g-peach bg-white p-4 shadow-girly-pop transition active:scale-[0.98]"
+      >
+        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-g-peach-soft text-2xl">📄</span>
+        <div className="min-w-0 flex-1">
+          <p className="font-cute text-lg font-bold text-g-ink">Gyno visit PDF</p>
+          <p className="text-sm font-semibold text-g-ink-3">Turn what you&apos;ve tracked into a doctor-ready summary</p>
+        </div>
+        <ChevronRight size={18} className="shrink-0 text-g-ink-3" />
+      </Link>
+
       {/* Quick links to the rest of the app */}
-      <div className="mt-5 grid grid-cols-2 gap-3">
+      <div className="mt-3 grid grid-cols-3 gap-3">
         <FeatureCard href="/insights" emoji="✨" title="Insights" sub="Your patterns" tint="bg-g-lavender-soft" />
         <FeatureCard href="/community" emoji="💬" title="Community" sub="Connect & ask" tint="bg-g-pink-soft" />
         <FeatureCard href="/learn" emoji="📚" title="Learn" sub="Real research" tint="bg-g-mint-soft" />
-        <FeatureCard href="/export" emoji="📄" title="Gyno PDF" sub="Visit-ready" tint="bg-g-peach-soft" />
       </div>
 
       <p className="mt-6 px-2 text-center text-xs font-semibold text-g-ink-3">

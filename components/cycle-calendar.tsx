@@ -183,9 +183,9 @@ export function CycleCalendar({
                 setRangeStart(null)
                 setSelected(null)
               }}
-              className="w-full rounded-full border border-g-pink/40 bg-g-pink-soft/50 py-2 text-sm font-bold text-g-pink-deep active:scale-95"
+              className="w-full rounded-full bg-g-pink py-3 text-sm font-bold text-white shadow-girly-pop active:scale-95"
             >
-              🩸 Log a period (pick start + end)
+              🩸 Log a whole period (pick start + end)
             </button>
           ) : (
             <div className="rounded-2xl bg-g-pink-soft/60 px-3 py-2.5">

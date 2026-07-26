@@ -1,6 +1,7 @@
 "use client"
 
-import { Shield, Heart, AlertCircle, Lock } from "lucide-react"
+import Link from "next/link"
+import { ArrowLeft, Shield, Heart, AlertCircle, Lock } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
 import { GirlyLogo } from "@/components/patient-shell"
 
@@ -14,8 +15,12 @@ const PROMISES = [
 export default function AboutPage() {
   return (
     <PatientShell>
+      <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+        <ArrowLeft size={17} />
+      </Link>
+
       {/* Hero */}
-      <div className="flex flex-col items-center rounded-3xl border border-g-border bg-candy-soft px-6 py-8 text-center">
+      <div className="mt-3 flex flex-col items-center rounded-3xl border border-g-border bg-candy-soft px-6 py-8 text-center">
         <GirlyLogo size={64} withWordmark={false} />
         <h1 className="mt-3 font-cute text-3xl text-g-ink">MyPMOS</h1>
         <p className="mt-1 max-w-xs text-sm font-medium leading-relaxed text-g-ink-2">

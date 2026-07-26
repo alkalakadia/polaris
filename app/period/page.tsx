@@ -1,7 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
-import { Droplet } from "lucide-react"
+import { ArrowLeft, Droplet } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
 import { CycleCalendar } from "@/components/cycle-calendar"
 import { cn } from "@/lib/cn"
@@ -95,6 +96,9 @@ export default function PeriodPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
+        <Link href="/track" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Track">
+          <ArrowLeft size={17} />
+        </Link>
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-g-pink-soft">
           <Droplet size={18} className="text-g-pink-deep" />
         </span>
@@ -151,12 +155,39 @@ export default function PeriodPage() {
         <p className="mt-0.5 text-xs font-medium text-g-ink-3">
           This is what your predictions are based on — fix it here if it&apos;s wrong.
         </p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {(
+            [
+              ["Today", 0],
+              ["Yesterday", -1],
+              ["~1 week ago", -7],
+              ["~2 weeks ago", -14],
+            ] as [string, number][]
+          ).map(([label, off]) => {
+            const d = new Date()
+            d.setDate(d.getDate() + off)
+            const key = toDateKey(d)
+            return (
+              <button
+                key={label}
+                onClick={() => setLastPeriodStart(key)}
+                className={cn(
+                  "rounded-full border px-3.5 py-2 text-sm font-semibold transition active:scale-95",
+                  profile.lastPeriodStart === key ? "border-transparent bg-g-pink text-white" : "border-g-border bg-white text-g-ink-2"
+                )}
+              >
+                {label}
+              </button>
+            )
+          })}
+        </div>
+        <p className="mt-2.5 text-xs font-semibold text-g-ink-3">Or pick an exact date:</p>
         <input
           type="date"
           value={profile.lastPeriodStart ?? ""}
           max={today}
           onChange={(e) => setLastPeriodStart(e.target.value)}
-          className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none focus:border-g-pink"
+          className="mt-1.5 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none focus:border-g-pink"
         />
         {profile.lastPeriodStart && (
           <button

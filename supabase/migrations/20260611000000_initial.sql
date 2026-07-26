@@ -11,16 +11,16 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Raw intake submissions. One row per completed pre-visit questionnaire.
-CREATE TABLE intakes (
+CREATE TABLE IF NOT EXISTS intakes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   intake_data JSONB NOT NULL
 );
-CREATE INDEX idx_intakes_created_at ON intakes(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_intakes_created_at ON intakes(created_at DESC);
 
 -- Phenotype classification results. One row per AI run; we may classify
 -- the same intake multiple times if the prompt or model changes.
-CREATE TABLE classifications (
+CREATE TABLE IF NOT EXISTS classifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   intake_id UUID NOT NULL REFERENCES intakes(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -31,10 +31,10 @@ CREATE TABLE classifications (
   model TEXT,
   ai_powered BOOLEAN NOT NULL DEFAULT FALSE
 );
-CREATE INDEX idx_classifications_intake_id ON classifications(intake_id);
+CREATE INDEX IF NOT EXISTS idx_classifications_intake_id ON classifications(intake_id);
 
 -- Generated patient handouts, cached by classification.
-CREATE TABLE handouts (
+CREATE TABLE IF NOT EXISTS handouts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   classification_id UUID NOT NULL REFERENCES classifications(id) ON DELETE CASCADE,
   generated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -42,7 +42,7 @@ CREATE TABLE handouts (
   ai_powered BOOLEAN NOT NULL DEFAULT FALSE,
   generation_ms INTEGER
 );
-CREATE INDEX idx_handouts_classification_id ON handouts(classification_id);
+CREATE INDEX IF NOT EXISTS idx_handouts_classification_id ON handouts(classification_id);
 
 -- RLS posture: V1 keeps the schema permissive while we iterate. Production
 -- will restrict by provider_id once auth lands. For pilot data integrity

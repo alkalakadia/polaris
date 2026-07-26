@@ -21,6 +21,7 @@ const TODAY = toDateKey(new Date())
 export default function OnboardingPage() {
   const router = useRouter()
   const existing = useMemo(() => getProfile(), [])
+  const isEditing = Boolean(existing.completedAt)
   const [step, setStep] = useState(0)
   const [p, setP] = useState<CycleProfile>({
     periodLength: 5,
@@ -75,6 +76,23 @@ export default function OnboardingPage() {
             style={{ width: `${((step + 1) / STEPS) * 100}%` }}
           />
         </div>
+        {isEditing && (
+          <div className="mt-2.5 flex justify-center gap-2">
+            {Array.from({ length: STEPS }, (_, i) => (
+              <button
+                key={i}
+                onClick={() => setStep(i)}
+                aria-label={`Jump to step ${i + 1}`}
+                className={cn(
+                  "h-6 w-6 rounded-full text-xs font-bold transition active:scale-90",
+                  i === step ? "bg-candy text-white" : "bg-white text-g-ink-3 shadow-girly"
+                )}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col px-5 pt-6">

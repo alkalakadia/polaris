@@ -1,6 +1,8 @@
 "use client"
 
+import Link from "next/link"
 import { useEffect, useState } from "react"
+import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
 import { cn } from "@/lib/cn"
 import {
@@ -29,6 +31,9 @@ export default function GoalsPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
+        <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+          <ArrowLeft size={17} />
+        </Link>
         <span className="animate-float text-3xl">🎯</span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">My goals</h1>

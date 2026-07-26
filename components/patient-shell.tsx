@@ -130,7 +130,7 @@ export function PatientShell({ children, title }: { children: React.ReactNode; t
       <main className="mx-auto max-w-2xl px-5 pb-28 pt-5">{children}</main>
 
       {/* Bottom tab bar */}
-      <nav className="print-hide fixed inset-x-0 bottom-0 z-30 border-t border-g-border bg-white/95 backdrop-blur-md">
+      <nav className="print-hide fixed inset-x-0 bottom-0 z-30 border-t border-g-border bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md">
         <div className="mx-auto flex h-[62px] max-w-md items-center justify-around px-1">
           {NAV.map(({ href, label, Icon }) => {
             const active = isActive(pathname, href)
