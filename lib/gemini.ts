@@ -27,9 +27,11 @@ export async function askGemini(opts: {
     ...(opts.system ? { systemInstruction: { parts: [{ text: opts.system }] } } : {}),
     generationConfig: {
       temperature: opts.temperature ?? 0.5,
-      maxOutputTokens: opts.maxTokens ?? 900,
-      // Disable "thinking" so tokens go to the answer, not hidden reasoning.
-      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: opts.maxTokens ?? 1200,
+      // Keep a SMALL thinking budget. gemini-flash-latest rejects a 0 budget
+      // (empty output / INVALID_ARGUMENT), but a large/dynamic budget eats the
+      // output tokens and truncates the answer. 128 stays fast and complete.
+      thinkingConfig: { thinkingBudget: 128 },
       ...(opts.json ? { responseMimeType: "application/json" } : {}),
     },
   }
@@ -70,8 +72,10 @@ export async function askGeminiGrounded(opts: {
     tools: [{ google_search: {} }],
     generationConfig: {
       temperature: opts.temperature ?? 0.4,
-      maxOutputTokens: opts.maxTokens ?? 1200,
-      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: opts.maxTokens ?? 1500,
+      // Small budget (see note above): non-zero so the model accepts it, small
+      // so grounded answers don't get truncated by hidden reasoning.
+      thinkingConfig: { thinkingBudget: 128 },
     },
   }
   try {
