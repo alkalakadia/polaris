@@ -27,9 +27,10 @@ export async function askGemini(opts: {
     ...(opts.system ? { systemInstruction: { parts: [{ text: opts.system }] } } : {}),
     generationConfig: {
       temperature: opts.temperature ?? 0.5,
-      maxOutputTokens: opts.maxTokens ?? 900,
-      // Disable "thinking" so tokens go to the answer, not hidden reasoning.
-      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: opts.maxTokens ?? 1200,
+      // NOTE: do NOT set thinkingBudget: 0. The current gemini-flash-latest
+      // model rejects a zero budget (empty output / INVALID_ARGUMENT), which
+      // took the whole assistant down. Let the model manage thinking itself.
       ...(opts.json ? { responseMimeType: "application/json" } : {}),
     },
   }
@@ -70,8 +71,8 @@ export async function askGeminiGrounded(opts: {
     tools: [{ google_search: {} }],
     generationConfig: {
       temperature: opts.temperature ?? 0.4,
-      maxOutputTokens: opts.maxTokens ?? 1200,
-      thinkingConfig: { thinkingBudget: 0 },
+      maxOutputTokens: opts.maxTokens ?? 1500,
+      // See note above: a zero thinkingBudget breaks gemini-flash-latest.
     },
   }
   try {
