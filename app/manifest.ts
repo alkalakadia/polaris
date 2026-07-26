@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "MyPMOS — your PMOS bestie",
+    name: "MyPMOS — your PMOS companion",
     short_name: "MyPMOS",
     description:
-      "Track everything, spot your patterns, ask the girls, and walk into your gyno visit ready. Your soft, smart companion for PMOS (formerly PCOS) and your cycle.",
+      "Track everything, spot your patterns, and walk into your doctor's visit ready. A smart companion for PMOS (formerly PCOS) and your cycle.",
     start_url: "/",
     display: "standalone",
     orientation: "portrait",

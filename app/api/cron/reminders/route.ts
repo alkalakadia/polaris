@@ -6,10 +6,10 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 const MESSAGES = [
-  { title: "MyPMOS 🌸", body: "How are you feeling today? A quick log keeps your patterns sharp 💕" },
-  { title: "Hey bestie 💗", body: "30 seconds to check in with yourself. Your future self (and your gyno) will thank you ✨" },
-  { title: "Daily check-in 🌷", body: "Mood, symptoms, energy — log what you've got today 🩷" },
-  { title: "MyPMOS ✨", body: "Your cycle is always changing. Capture today so nothing gets lost 🌙" },
+  { title: "MyPMOS", body: "How are you feeling today? A quick log keeps your patterns sharp." },
+  { title: "Daily check-in", body: "30 seconds to check in. Your future self (and your doctor) will thank you." },
+  { title: "Daily check-in", body: "Mood, symptoms, energy — log what you've got today." },
+  { title: "MyPMOS", body: "Your cycle is always changing. Capture today so nothing gets lost." },
 ]
 
 export async function GET(req: Request) {

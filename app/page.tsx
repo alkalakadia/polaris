@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { PatientShell } from "@/components/patient-shell"
+import { GirlyLogo, PatientShell } from "@/components/patient-shell"
 import { useAuth } from "@/lib/auth"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
 import { getResult } from "@/lib/assessments"
@@ -173,17 +173,18 @@ export default function TodayPage() {
       ) : (
         <Link
           href="/onboarding"
-          className="mt-5 block overflow-hidden rounded-[2rem] bg-candy p-5 shadow-girly-pop transition active:scale-[0.98]"
+          className="mt-6 block overflow-hidden rounded-[2.5rem] bg-candy p-8 text-center shadow-girly-pop ring-4 ring-white/40 transition active:scale-[0.98]"
         >
-          <div className="flex items-center justify-between">
-            <div className="pr-3">
-              <p className="font-cute text-xl font-bold text-white">Personalize MyPMOS ✨</p>
-              <p className="text-sm font-semibold text-white/90">
-                Tell us about your cycle to unlock daily, tailored guidance.
-              </p>
-            </div>
-            <span className="animate-float text-4xl">🌸</span>
-          </div>
+          <span className="mx-auto grid h-24 w-24 place-items-center rounded-full bg-white/15">
+            <GirlyLogo size={64} withWordmark={false} tone="white" />
+          </span>
+          <p className="mt-4 font-cute text-4xl font-bold leading-tight text-white">Personalize MyPMOS</p>
+          <p className="mx-auto mt-2.5 max-w-xs text-base font-semibold text-white/90">
+            Tell us about your cycle to unlock daily, tailored guidance.
+          </p>
+          <span className="mt-5 inline-flex items-center gap-1.5 rounded-full bg-white px-6 py-3 text-base font-bold text-g-pink-deep">
+            Get started →
+          </span>
         </Link>
       )}
 
@@ -206,7 +207,7 @@ export default function TodayPage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="font-cute text-xl font-bold text-white">
-              {filled === 0 ? "Log today 💕" : "Add to today ✨"}
+              {filled === 0 ? "Log today" : "Add to today"}
             </p>
             <p className="text-sm font-semibold text-white/90">
               {filled === 0
@@ -235,7 +236,7 @@ export default function TodayPage() {
       {/* Quick links to the rest of the app */}
       <div className="mt-5 grid grid-cols-2 gap-3">
         <FeatureCard href="/insights" emoji="✨" title="Insights" sub="Your patterns" tint="bg-g-lavender-soft" />
-        <FeatureCard href="/community" emoji="💬" title="Community" sub="Ask the girls" tint="bg-g-pink-soft" />
+        <FeatureCard href="/community" emoji="💬" title="Community" sub="Connect & ask" tint="bg-g-pink-soft" />
         <FeatureCard href="/learn" emoji="📚" title="Learn" sub="Real research" tint="bg-g-mint-soft" />
         <FeatureCard href="/export" emoji="📄" title="Gyno PDF" sub="Visit-ready" tint="bg-g-peach-soft" />
       </div>
@@ -293,7 +294,7 @@ function FocusSection({
         }
       case "symptoms":
         return {
-          sub: filled > 0 ? "Symptoms logged today — nice work. 💗" : "Log today's symptoms to catch what sets them off.",
+          sub: filled > 0 ? "Symptoms logged today — nice work." : "Log today's symptoms to catch what sets them off.",
           href: "/track",
           cta: "Log symptoms",
         }
@@ -301,7 +302,7 @@ function FocusSection({
         return {
           sub:
             cycle && cycle.fertileWindow && !cycle.isLate
-              ? "✨ You may be in your fertile window right now."
+              ? "You may be in your fertile window right now."
               : "Track discharge and basal temp to spot ovulation.",
           href: "/track",
           cta: "Log fertility signs",

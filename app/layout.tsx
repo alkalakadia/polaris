@@ -45,9 +45,9 @@ const dmSans = DM_Sans({
 })
 
 export const metadata: Metadata = {
-  title: "MyPMOS — your cute PMOS bestie 🌸",
+  title: "MyPMOS — your PMOS companion",
   description:
-    "Track everything, spot your patterns, ask the girls, and walk into your gyno visit ready. MyPMOS is your soft, smart companion for PMOS (formerly PCOS) and your cycle.",
+    "Track everything, spot your patterns, and walk into your doctor's visit ready. MyPMOS is a smart companion for PMOS (formerly PCOS) and your cycle.",
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "default", title: "MyPMOS" },
   icons: {

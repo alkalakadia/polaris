@@ -96,7 +96,7 @@ export default function ImportPage() {
           onClick={saveToday}
           className="mt-3 w-full rounded-full bg-candy py-3 font-cute text-base font-bold text-white shadow-girly-pop active:scale-[0.98]"
         >
-          {savedToday ? "Saved 💗" : "Save today"}
+          {savedToday ? "Saved" : "Save today"}
         </button>
       </section>
 

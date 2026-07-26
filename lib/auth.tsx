@@ -32,6 +32,8 @@ interface AuthState {
   ) => Promise<{ error?: string; needsConfirm?: boolean }>
   signOut: () => Promise<void>
   updateName: (displayName: string) => Promise<{ error?: string }>
+  sendPasswordReset: (email: string) => Promise<{ error?: string }>
+  updatePassword: (password: string) => Promise<{ error?: string }>
 }
 
 const AuthContext = createContext<AuthState | null>(null)
@@ -96,6 +98,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }, [])
 
+  const sendPasswordReset = useCallback(async (email: string) => {
+    const c = browserClient()
+    if (!c) return { error: "Cloud sync isn't set up yet." }
+    const { error } = await c.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/account/reset`,
+    })
+    return error ? { error: error.message } : {}
+  }, [])
+
+  const updatePassword = useCallback(async (password: string) => {
+    const c = browserClient()
+    if (!c) return { error: "Cloud sync isn't set up yet." }
+    const { error } = await c.auth.updateUser({ password })
+    return error ? { error: error.message } : {}
+  }, [])
+
   const updateName = useCallback(async (displayName: string) => {
     const c = browserClient()
     if (!c) return { error: "Not connected." }
@@ -109,7 +127,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, configured, signIn, signUp, signOut, updateName }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        configured,
+        signIn,
+        signUp,
+        signOut,
+        updateName,
+        sendPasswordReset,
+        updatePassword,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

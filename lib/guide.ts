@@ -21,7 +21,7 @@ export const MYTHS: MythFact[] = [
   },
   {
     myth: "If I just lose weight, my PMOS will go away.",
-    fact: "PMOS isn't caused by weight (lean women have it too), and there's no cure, only management. For those carrying extra weight, a modest 5-10% loss can ease symptoms, but healthy lifestyle helps everyone regardless of size.",
+    fact: "PMOS isn't caused by weight (lean people have it too), and there's no cure, only management. For those carrying extra weight, a modest 5-10% loss can ease symptoms, but healthy lifestyle helps everyone regardless of size.",
   },
   {
     myth: "Exercise only counts if it's intense.",
@@ -41,7 +41,7 @@ export const MYTHS: MythFact[] = [
   },
   {
     myth: "PMOS means I can't get pregnant.",
-    fact: "Many women with PMOS conceive, with or without help. It's a common and often treatable cause of fertility challenges, not a closed door.",
+    fact: "Many people with PMOS conceive, with or without help. It's a common and often treatable cause of fertility challenges, not a closed door.",
   },
 ]
 
@@ -56,10 +56,10 @@ export const GUIDELINE_FACTS: GuideFact[] = [
   {
     emoji: "🌱",
     title: "Lifestyle comes first, for everyone",
-    body: "Healthy eating, movement, and sleep are recommended first-line for all women with PMOS, for overall health and how you feel, not just for weight, and whether you're lean or not.",
+    body: "Healthy eating, movement, and sleep are recommended first-line for everyone with PMOS, for overall health and how you feel, not just for weight, and whether you're lean or not.",
   },
   {
-    emoji: "🏃‍♀️",
+    emoji: "🏃",
     title: "Movement: aim for 150-300 min a week",
     body: "At least 150-300 minutes of moderate activity weekly (or 75-150 of vigorous), plus muscle-strengthening on 2 days. More (around 250+ min) supports weight goals. Reducing long sitting helps too.",
   },
@@ -71,7 +71,7 @@ export const GUIDELINE_FACTS: GuideFact[] = [
   {
     emoji: "⚖️",
     title: "Weight isn't the whole story",
-    body: "For those with extra weight, a 5-10% loss can improve cycles, skin, and metabolism. But PMOS affects normal-weight women too, and it's never only about a number on the scale.",
+    body: "For those with extra weight, a 5-10% loss can improve cycles, skin, and metabolism. But PMOS affects normal-weight people too, and it's never only about a number on the scale.",
   },
   {
     emoji: "💗",

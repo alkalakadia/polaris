@@ -20,7 +20,7 @@ import {
 } from "@/lib/wellness"
 
 const HEADING: Record<Category, string> = {
-  calm: "Calm picks 🧘‍♀️",
+  calm: "Calm picks 🧘",
   listen: "Shows we love 🎧",
   move: "Workouts to try 💪",
   eat: "Recipes to try 🍓",

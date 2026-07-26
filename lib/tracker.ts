@@ -126,7 +126,7 @@ export const CHIP_GROUPS: ChipGroup[] = [
     key: "moods", title: "Mood", emoji: "💭", accent: "lavender", multi: true,
     options: [
       { id: "happy", label: "Happy", emoji: "😊" },
-      { id: "calm", label: "Calm", emoji: "🧘‍♀️" },
+      { id: "calm", label: "Calm", emoji: "🧘" },
       { id: "confident", label: "Confident", emoji: "💅" },
       { id: "sensitive", label: "Sensitive", emoji: "🥹" },
       { id: "anxious", label: "Anxious", emoji: "😰" },
@@ -200,12 +200,12 @@ export const CHIP_GROUPS: ChipGroup[] = [
     ],
   },
   {
-    key: "movement", title: "Movement", emoji: "🤸‍♀️", accent: "sky", multi: true,
+    key: "movement", title: "Movement", emoji: "🤸", accent: "sky", multi: true,
     options: [
-      { id: "walk", label: "Walk", emoji: "🚶‍♀️" },
-      { id: "strength", label: "Strength", emoji: "🏋️‍♀️" },
-      { id: "yoga", label: "Yoga", emoji: "🧘‍♀️" },
-      { id: "cardio", label: "Cardio", emoji: "🏃‍♀️" },
+      { id: "walk", label: "Walk", emoji: "🚶" },
+      { id: "strength", label: "Strength", emoji: "🏋️" },
+      { id: "yoga", label: "Yoga", emoji: "🧘" },
+      { id: "cardio", label: "Cardio", emoji: "🏃" },
       { id: "dance", label: "Dance", emoji: "💃" },
       { id: "rest", label: "Rest day", emoji: "🛋️" },
     ],

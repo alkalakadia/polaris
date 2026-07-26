@@ -102,7 +102,7 @@ export default function PostDetailPage() {
     const reason = window.prompt("What's wrong with this? (optional) e.g. spam, misinformation, harassment")
     if (reason === null) return
     await reportContent({ ...target, reason: reason || "unspecified" }, user)
-    window.alert("Thanks for flagging this. We'll review it. 💗")
+    window.alert("Thanks for flagging this. We'll review it.")
   }
   function blockAuthor(uid: string) {
     if (!window.confirm("Block this person? You won't see their posts or replies anymore.")) return

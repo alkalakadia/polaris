@@ -38,7 +38,7 @@ export default function AssessmentsPage() {
 
   if (view === "fg") return <FGRunner onDone={refresh} onCancel={() => setView("hub")} />
   if (view === "acne") return <SeverityRunner id="acne" title="Acne severity" emoji="🌸" onDone={refresh} onCancel={() => setView("hub")} />
-  if (view === "hairloss") return <SeverityRunner id="hairloss" title="Scalp hair loss / thinning" emoji="💇‍♀️" onDone={refresh} onCancel={() => setView("hub")} />
+  if (view === "hairloss") return <SeverityRunner id="hairloss" title="Scalp hair loss / thinning" emoji="💇" onDone={refresh} onCancel={() => setView("hub")} />
   const s = screenerById(view as AssessmentId)
   if (s) return <ScreenerRunner screener={s} onDone={refresh} onCancel={() => setView("hub")} />
 
@@ -67,7 +67,7 @@ export default function AssessmentsPage() {
           onOpen={() => setView("fg")}
         />
         <HubCard emoji="🌸" title="Acne severity" sub="None to severe" result={results.acne} onOpen={() => setView("acne")} />
-        <HubCard emoji="💇‍♀️" title="Scalp hair loss" sub="Thinning at the crown / hairline" result={results.hairloss} onOpen={() => setView("hairloss")} />
+        <HubCard emoji="💇" title="Scalp hair loss" sub="Thinning at the crown / hairline" result={results.hairloss} onOpen={() => setView("hairloss")} />
       </div>
 
       <h2 className="mt-6 px-1 font-cute text-base font-bold text-g-ink">Wellbeing & sleep</h2>

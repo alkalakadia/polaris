@@ -50,7 +50,7 @@ export const SYMPTOM_CATEGORIES: SymptomCategory[] = [
   {
     id: "hair",
     title: "Excess hair growth",
-    emoji: "💇‍♀️",
+    emoji: "💇",
     intro: "Where do you notice unwanted or coarser hair?",
     items: [
       { id: "lip", label: "Upper lip" },

@@ -273,7 +273,7 @@ export default function LearnPage() {
             title="Refresh research + articles"
             className="rounded-full bg-candy-soft px-3 py-1.5 text-xs font-bold text-g-pink-deep active:scale-95 disabled:opacity-50"
           >
-            {resLoading ? "…" : "Refresh ✨"}
+            {resLoading ? "…" : "Refresh"}
           </button>
         </div>
         {resLoading ? (
@@ -332,7 +332,7 @@ export default function LearnPage() {
       <div className="mt-4 space-y-3">
         {list.length === 0 ? (
           <p className="rounded-2xl bg-candy-soft px-4 py-4 text-center text-sm font-bold text-g-ink">
-            {topic === "Read" ? "No saved reads yet — tap ✓ on an article to keep it here 💕" : "Nothing here yet."}
+            {topic === "Read" ? "No saved reads yet — tap ✓ on an article to keep it here" : "Nothing here yet."}
           </p>
         ) : (
           list.map((a) => {
