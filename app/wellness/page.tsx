@@ -258,13 +258,13 @@ function AddYourOwn({ category, onAdded }: { category: Category; onAdded: () => 
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         placeholder="https://open.spotify.com/… or https://youtu.be/…"
-        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Give it a name (optional)"
-        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       {url && !valid && (
         <p className="mt-2 text-xs font-bold text-g-pink-deep">

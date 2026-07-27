@@ -229,7 +229,7 @@ export default function ExportPage() {
             value={cfg.name}
             onChange={(e) => update({ name: e.target.value })}
             placeholder="e.g. Sarah"
-            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
         </section>
 
@@ -245,7 +245,7 @@ export default function ExportPage() {
             onChange={(e) => update({ chiefConcern: e.target.value })}
             rows={2}
             placeholder="e.g. irregular periods and new chin hair for ~6 months"
-            className="mt-1.5 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+            className="mt-1.5 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
           <label className="mt-3 block text-sm font-bold text-g-ink">What have you already tried?</label>
           <textarea
@@ -253,7 +253,7 @@ export default function ExportPage() {
             onChange={(e) => update({ tried: e.target.value })}
             rows={2}
             placeholder="e.g. cut back on sugar, started walking, tried inositol"
-            className="mt-1.5 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+            className="mt-1.5 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
           {loggedMeds.length > 0 && (
             <p className="mt-2 text-xs font-semibold text-g-ink-3">
@@ -336,7 +336,7 @@ export default function ExportPage() {
                 onChange={(e) => setNewQ(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addQuestion()}
                 placeholder="Add a question…"
-                className="flex-1 rounded-2xl border border-g-border bg-g-canvas px-4 py-2.5 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+                className="flex-1 rounded-2xl border border-g-border bg-g-canvas px-4 py-2.5 text-base font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
               />
               <button onClick={addQuestion} className="rounded-2xl bg-candy px-4 text-sm font-bold text-white active:scale-95">
                 Add
@@ -354,7 +354,7 @@ export default function ExportPage() {
               onChange={(e) => update({ notes: e.target.value })}
               rows={3}
               placeholder="Extra context for your doctor, how you've been feeling, etc."
-              className="w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+              className="w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
             />
           </section>
         )}

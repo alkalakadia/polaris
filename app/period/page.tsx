@@ -187,7 +187,7 @@ export default function PeriodPage() {
           value={profile.lastPeriodStart ?? ""}
           max={today}
           onChange={(e) => setLastPeriodStart(e.target.value)}
-          className="mt-1.5 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none focus:border-g-pink"
+          className="mt-1.5 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none focus:border-g-pink"
         />
         {profile.lastPeriodStart && (
           <button

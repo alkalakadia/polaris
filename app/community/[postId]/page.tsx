@@ -148,7 +148,7 @@ export default function PostDetailPage() {
                   value={editBody}
                   onChange={(e) => setEditBody(e.target.value)}
                   rows={4}
-                  className="mt-2 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none focus:border-g-pink"
+                  className="mt-2 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none focus:border-g-pink"
                 />
                 <div className="mt-2 flex gap-2">
                   <button onClick={saveEdit} disabled={busy || !editTitle.trim()} className="rounded-full bg-candy px-5 py-2.5 text-sm font-bold text-white active:scale-95 disabled:opacity-50">
@@ -230,7 +230,7 @@ export default function PostDetailPage() {
               rows={2}
               placeholder={user ? "Add a kind reply…" : "Sign in to reply"}
               onFocus={() => !user && router.push("/account")}
-              className="flex-1 resize-none rounded-2xl border border-g-border bg-white px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+              className="flex-1 resize-none rounded-2xl border border-g-border bg-white px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
             />
             <button
               onClick={send}

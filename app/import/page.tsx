@@ -161,7 +161,7 @@ function Field({
         onChange={(e) => onChange(e.target.value)}
         inputMode="decimal"
         placeholder={placeholder}
-        className="mt-0.5 w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-bold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        className="mt-0.5 w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-bold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
     </label>
   )

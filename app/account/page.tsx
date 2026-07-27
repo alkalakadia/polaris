@@ -359,7 +359,7 @@ function AccountHub({ user }: { user: User }) {
                   value={nameDraft}
                   onChange={(e) => setNameDraft(e.target.value)}
                   placeholder="Your name"
-                  className="min-w-0 flex-1 rounded-xl border border-g-border bg-g-canvas px-3 py-2 text-sm font-bold text-g-ink outline-none focus:border-g-pink"
+                  className="min-w-0 flex-1 rounded-xl border border-g-border bg-g-canvas px-3 py-2 text-base font-bold text-g-ink outline-none focus:border-g-pink"
                 />
                 <button
                   onClick={saveName}
@@ -608,7 +608,7 @@ function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className={cn(
-            "w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink",
+            "w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 text-base font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink",
             isPassword && "pr-11"
           )}
         />

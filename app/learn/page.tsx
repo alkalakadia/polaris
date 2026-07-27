@@ -229,7 +229,7 @@ export default function LearnPage() {
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && ask(q)}
             placeholder="e.g. is dairy bad for PMOS?"
-            className="flex-1 bg-transparent px-3 py-1.5 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3"
+            className="flex-1 bg-transparent px-3 py-1.5 text-base font-semibold text-g-ink outline-none placeholder:text-g-ink-3"
           />
           <button onClick={() => ask(q)} disabled={asking || !q.trim()} className="rounded-full bg-candy px-4 py-2 text-sm font-bold text-white active:scale-95 disabled:opacity-60">
             {asking ? "…" : "Ask"}

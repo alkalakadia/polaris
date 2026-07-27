@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
               required
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 pr-11 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+              className="w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 pr-11 text-base font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
             />
             <button
               type="button"
@@ -133,7 +133,7 @@ export default function ResetPasswordPage() {
             required
             onChange={(e) => setConfirm(e.target.value)}
             placeholder="••••••••"
-            className="w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 text-sm font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+            className="w-full rounded-2xl border border-g-border bg-white px-4 py-3.5 text-base font-semibold text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
         </label>
 

@@ -55,7 +55,7 @@ export default function ProvidersPage() {
           onChange={(e) => setWhere(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && search()}
           placeholder="Your city or ZIP"
-          className="min-w-0 flex-1 bg-transparent text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3"
+          className="min-w-0 flex-1 bg-transparent text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3"
         />
         <button onClick={search} className="shrink-0 rounded-full bg-g-pink px-3.5 py-1.5 text-xs font-semibold text-white active:scale-95">
           Search

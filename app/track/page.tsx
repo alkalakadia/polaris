@@ -330,7 +330,7 @@ export default function TrackPage() {
                   placeholder="120"
                   value={entry.bpSys ?? ""}
                   onChange={(e) => update({ bpSys: e.target.value === "" ? undefined : Number(e.target.value) })}
-                  className="w-20 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-bold text-g-ink outline-none focus:border-g-pink"
+                  className="w-20 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-bold text-g-ink outline-none focus:border-g-pink"
                 />
                 <span className="font-bold text-g-ink-3">/</span>
                 <input
@@ -339,7 +339,7 @@ export default function TrackPage() {
                   placeholder="80"
                   value={entry.bpDia ?? ""}
                   onChange={(e) => update({ bpDia: e.target.value === "" ? undefined : Number(e.target.value) })}
-                  className="w-20 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-bold text-g-ink outline-none focus:border-g-pink"
+                  className="w-20 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-bold text-g-ink outline-none focus:border-g-pink"
                 />
               </div>
             </div>
@@ -366,7 +366,7 @@ export default function TrackPage() {
             onChange={(e) => update({ notes: e.target.value })}
             placeholder="Anything else on your mind today?"
             rows={3}
-            className="w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+            className="w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
         )
       default:
@@ -579,7 +579,7 @@ function NumField({
         step={step}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-bold text-g-ink outline-none focus:border-g-pink"
+        className="w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-bold text-g-ink outline-none focus:border-g-pink"
       />
     </label>
   )

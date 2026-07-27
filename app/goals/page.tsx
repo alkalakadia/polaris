@@ -186,7 +186,7 @@ function AddGoal({ onAdded, onCancel }: { onAdded: () => void; onCancel: () => v
         value={target}
         onChange={(e) => setTarget(e.target.value)}
         placeholder="Target (optional), e.g. 150 min / week"
-        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       {error && <p className="mt-2 text-xs font-bold text-g-pink-deep">{error}</p>}
       <div className="mt-3 flex gap-2">

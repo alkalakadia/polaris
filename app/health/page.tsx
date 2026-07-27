@@ -150,13 +150,13 @@ export default function HealthPage() {
                 value={l.name}
                 onChange={(e) => setLab(i, { name: e.target.value })}
                 placeholder="Test"
-                className="flex-1 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-semibold text-g-ink outline-none focus:border-g-pink"
+                className="flex-1 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-semibold text-g-ink outline-none focus:border-g-pink"
               />
               <input
                 value={l.value}
                 onChange={(e) => setLab(i, { value: e.target.value })}
                 placeholder="Value"
-                className="w-24 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-semibold text-g-ink outline-none focus:border-g-pink"
+                className="w-24 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-semibold text-g-ink outline-none focus:border-g-pink"
               />
               <button onClick={() => removeLab(i)} className="text-g-ink-3 active:scale-90" aria-label="Remove">✕</button>
             </div>
@@ -222,7 +222,7 @@ function NumInput({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-transparent text-sm font-bold text-g-ink outline-none"
+        className="w-full bg-transparent text-base font-bold text-g-ink outline-none"
       />
       {suffix && <span className="text-xs font-bold text-g-ink-3">{suffix}</span>}
     </div>

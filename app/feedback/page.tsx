@@ -76,7 +76,7 @@ export default function FeedbackPage() {
         <div key={key} className="flex flex-col gap-2">
           <label className="font-medium text-sm">{label}</label>
           <textarea rows={2}
-            className="border border-gray-200 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-pink-300"
+            className="border border-gray-200 rounded-xl p-3 text-base resize-none focus:outline-none focus:ring-2 focus:ring-pink-300"
             value={(form as any)[key]}
             onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
           />
@@ -100,7 +100,7 @@ export default function FeedbackPage() {
       <div className="flex flex-col gap-2">
         <label className="font-medium text-sm">Anything else you'd like us to know? <span className="text-gray-400">(optional)</span></label>
         <textarea rows={3}
-          className="border border-gray-200 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-pink-300"
+          className="border border-gray-200 rounded-xl p-3 text-base resize-none focus:outline-none focus:ring-2 focus:ring-pink-300"
           value={form.open_feedback}
           onChange={e => setForm(f => ({ ...f, open_feedback: e.target.value }))}
         />

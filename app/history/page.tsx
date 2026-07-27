@@ -74,7 +74,7 @@ export default function HistoryPage() {
             onChange={(e) => setConcernNote(e.target.value)}
             onBlur={saveConcernNote}
             placeholder="Anything to add? (optional)"
-            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
         )}
       </section>
@@ -172,12 +172,12 @@ function AddContra({ onAdded, onCancel }: { onAdded: (h: HistoryData) => void; o
       <div className="mt-2 grid grid-cols-2 gap-2">
         <label className="block">
           <span className="px-1 text-[0.7rem] font-bold text-g-ink-3">Started</span>
-          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-0.5 w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-medium text-g-ink outline-none focus:border-g-pink" />
+          <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="mt-0.5 w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-medium text-g-ink outline-none focus:border-g-pink" />
         </label>
         {!current && (
           <label className="block">
             <span className="px-1 text-[0.7rem] font-bold text-g-ink-3">Stopped</span>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="mt-0.5 w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-sm font-medium text-g-ink outline-none focus:border-g-pink" />
+            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="mt-0.5 w-full rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-medium text-g-ink outline-none focus:border-g-pink" />
           </label>
         )}
       </div>
@@ -186,13 +186,13 @@ function AddContra({ onAdded, onCancel }: { onAdded: (h: HistoryData) => void; o
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         placeholder="Why did you start it? (e.g. acne, cramps, pregnancy prevention)"
-        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       <input
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="How did it affect you? (optional)"
-        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       <div className="mt-3 flex gap-2">
         <button onClick={add} className="rounded-full bg-candy px-5 py-2.5 text-sm font-bold text-white active:scale-95">

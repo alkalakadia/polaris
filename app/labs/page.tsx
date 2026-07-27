@@ -250,20 +250,20 @@ function AddLab({ onAdded, onCancel }: { onAdded: () => void; onCancel: () => vo
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               placeholder="Unit"
-              className="w-24 rounded-2xl border border-g-border bg-g-canvas px-3 py-3 text-sm font-bold text-g-ink-2 outline-none focus:border-g-pink"
+              className="w-24 rounded-2xl border border-g-border bg-g-canvas px-3 py-3 text-base font-bold text-g-ink-2 outline-none focus:border-g-pink"
             />
           </div>
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none focus:border-g-pink"
+            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none focus:border-g-pink"
           />
           <input
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Note (optional)"
-            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+            className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
           />
           {error && <p className="mt-2 text-xs font-bold text-g-pink-deep">{error}</p>}
           <div className="mt-3 flex gap-2">
