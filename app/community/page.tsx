@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
 import {
@@ -53,7 +54,9 @@ export default function CommunityPage() {
     <PatientShell>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="animate-float text-3xl">💬</span>
+          <span className="animate-float grid h-12 w-12 place-items-center rounded-2xl bg-g-canvas text-g-pink-deep">
+            <MedicalIcon name="community" size={24} className="text-g-pink-deep" />
+          </span>
           <div>
             <h1 className="font-cute text-3xl font-bold text-g-ink">Community</h1>
             <p className="text-sm font-semibold text-g-ink-3">Ask questions, share your wins</p>
@@ -90,7 +93,9 @@ export default function CommunityPage() {
                 : cn(s.tint, "border-g-border text-g-ink")
             )}
           >
-            <span>{s.emoji}</span>
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-white text-g-ink">
+              <MedicalIcon name={s.icon} size={12} className="text-current" />
+            </span>
             <span>{s.name}</span>
           </button>
         ))}
@@ -110,7 +115,10 @@ export default function CommunityPage() {
                 <Link href={`/community/${p.id}`} className="block active:scale-[0.99]">
                   <div className="flex items-center gap-2 text-xs font-bold text-g-ink-3">
                     <span className="rounded-full bg-candy-soft px-2.5 py-1 text-g-ink">
-                      {sn.emoji} {sn.name}
+                      <span className="inline-flex items-center gap-1">
+                        <MedicalIcon name={sn.icon} size={12} className="text-current" />
+                        {sn.name}
+                      </span>
                     </span>
                     <span>@{p.author_name}</span>
                     <span>· {ago(p.created_at)}</span>
@@ -121,10 +129,12 @@ export default function CommunityPage() {
                 </Link>
                 <div className="mt-3 flex items-center gap-4 text-sm font-bold text-g-ink-3">
                   <button onClick={() => onLike(p)} className="inline-flex items-center gap-1.5 active:scale-90">
-                    <span className={p.liked_by_me ? "" : "grayscale"}>💗</span> {p.hearts}
+                    <MedicalIcon name="heart" size={14} className={p.liked_by_me ? "text-g-pink-deep" : "text-g-ink-3 grayscale"} />
+                    {p.hearts}
                   </button>
                   <Link href={`/community/${p.id}`} className="inline-flex items-center gap-1.5">
-                    💬 {p.comment_count}
+                    <MedicalIcon name="messageCircle" size={14} className="text-g-ink-3" />
+                    {p.comment_count}
                   </Link>
                 </div>
               </article>
@@ -134,7 +144,7 @@ export default function CommunityPage() {
       </div>
 
       <p className="mt-6 px-2 text-center text-xs font-semibold text-g-ink-3">
-        Be kind 💗 Posts are from members, not medical professionals. Always check
+        Be kind. Posts are from members, not medical professionals. Always check
         with your doctor before changing anything.
       </p>
     </PatientShell>
@@ -188,7 +198,10 @@ function Composer({ defaultSub, onPosted }: { defaultSub: string; onPosted: () =
               sub === s.id ? "border-transparent bg-candy text-white" : "border-g-border bg-g-canvas text-g-ink-2"
             )}
           >
-            {s.emoji} {s.name}
+            <span className="inline-flex items-center gap-1">
+              <MedicalIcon name={s.icon} size={12} className="text-current" />
+              {s.name}
+            </span>
           </button>
         ))}
       </div>
@@ -202,13 +215,13 @@ function Composer({ defaultSub, onPosted }: { defaultSub: string; onPosted: () =
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={3}
-        placeholder="Share a little more (optional) 💭"
-        className="mt-2 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        placeholder="Share a little more (optional)"
+        className="mt-2 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       {/* Photo / video picker */}
       <div className="mt-2 flex flex-wrap items-center gap-2">
         <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-candy-soft px-3.5 py-2 text-sm font-bold text-g-pink-deep active:scale-95">
-          📷 Add photo / video
+          <MedicalIcon name="photos" size={14} className="text-g-pink-deep" /> Add photo / video
           <input
             type="file"
             accept="image/*,video/*"
@@ -227,7 +240,9 @@ function Composer({ defaultSub, onPosted }: { defaultSub: string; onPosted: () =
           {files.map((f, i) => (
             <div key={i} className="relative h-16 w-16 overflow-hidden rounded-xl border border-g-border bg-g-canvas">
               {f.type.startsWith("video") ? (
-                <span className="grid h-full w-full place-items-center text-2xl">🎬</span>
+                <span className="grid h-full w-full place-items-center text-g-ink">
+                  <MedicalIcon name="video" size={28} className="text-current" />
+                </span>
               ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={URL.createObjectURL(f)} alt="" className="h-full w-full object-cover" />
@@ -237,14 +252,14 @@ function Composer({ defaultSub, onPosted }: { defaultSub: string; onPosted: () =
                 className="absolute right-0.5 top-0.5 grid h-5 w-5 place-items-center rounded-full bg-white/90 text-xs font-bold text-g-ink shadow"
                 aria-label="Remove"
               >
-                ✕
+                <MedicalIcon name="x" size={12} className="text-g-ink" />
               </button>
             </div>
           ))}
         </div>
       )}
 
-      {error && <p className="mt-2 text-sm font-bold text-g-pink-deep">💔 {error}</p>}
+      {error && <p className="mt-2 text-sm font-bold text-g-pink-deep">{error}</p>}
       <button
         onClick={post}
         disabled={busy || !title.trim()}
@@ -269,8 +284,7 @@ function Loading() {
 function Empty({ signedIn, onCompose }: { signedIn: boolean; onCompose: () => void }) {
   return (
     <div className="rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
-      <span className="text-4xl">🌸</span>
-      <p className="mt-3 font-cute text-lg font-bold text-g-ink">No posts here yet</p>
+NO_OP      <p className="mt-3 font-cute text-lg font-bold text-g-ink">No posts here yet</p>
       <p className="mt-1 text-sm font-semibold text-g-ink-3">
         {signedIn ? "Be the first to start the conversation" : "Sign in to start the conversation"}
       </p>

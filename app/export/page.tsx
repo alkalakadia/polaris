@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
+import { MedicalIcon } from "@/components/medical-icon"
 import { PatientShell } from "@/components/patient-shell"
 import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
@@ -43,14 +44,14 @@ interface ExportConfig {
 }
 
 const SECTION_DEFS = [
-  { key: "previsit", label: "Pre-visit summary (Rotterdam)", emoji: "🧭" },
-  { key: "clinical", label: "Clinical summary (for your doctor)", emoji: "🩺" },
-  { key: "summary", label: "Tracking summary", emoji: "📅" },
-  { key: "symptoms", label: "Top symptoms & moods", emoji: "🩷" },
-  { key: "cycle", label: "Period & pain", emoji: "🌷" },
-  { key: "watchouts", label: "Things to discuss", emoji: "💛" },
-  { key: "questions", label: "My questions for the doctor", emoji: "❓" },
-  { key: "notes", label: "Personal notes", emoji: "📝" },
+  { key: "previsit", label: "Pre-visit summary (Rotterdam)", icon: "brief" },
+  { key: "clinical", label: "Clinical summary (for your doctor)", icon: "doctor" },
+  { key: "summary", label: "Tracking summary", icon: "calendar" },
+  { key: "symptoms", label: "Top symptoms & moods", icon: "symptoms" },
+  { key: "cycle", label: "Period & pain", icon: "period" },
+  { key: "watchouts", label: "Things to discuss", icon: "doctor" },
+  { key: "questions", label: "My questions for the doctor", icon: "question" },
+  { key: "notes", label: "Personal notes", icon: "notes" },
 ]
 
 const CONFIG_KEY = "polaris.export.v1"
@@ -70,7 +71,6 @@ function loadConfig(): ExportConfig {
     const raw = window.localStorage.getItem(CONFIG_KEY)
     if (!raw) return base
     const parsed = JSON.parse(raw) as Partial<ExportConfig>
-    // Merge sections so any newly-added section (e.g. previsit) defaults on.
     return { ...base, ...parsed, sections: { ...base.sections, ...(parsed.sections ?? {}) } }
   } catch {
     return base
@@ -215,10 +215,12 @@ export default function ExportPage() {
           <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
             <ArrowLeft size={17} />
           </Link>
-          <span className="animate-float text-3xl">📄</span>
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-g-canvas text-g-ink-3">
+            <MedicalIcon name="document" size={24} className="text-g-ink-3" />
+          </span>
           <div>
             <h1 className="font-cute text-3xl font-bold text-g-ink">Gyno visit PDF</h1>
-            <p className="text-sm font-semibold text-g-ink-3">Make it cute, make it yours 💕</p>
+            <p className="text-sm font-semibold text-g-ink-3">Make it professional, make it yours</p>
           </div>
         </div>
 
@@ -235,7 +237,7 @@ export default function ExportPage() {
 
         {/* Pre-visit summary inputs — these land at the TOP of the PDF for your doctor */}
         <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
-          <p className="font-cute text-sm font-bold text-g-ink">For your doctor 🩺</p>
+          <p className="font-cute text-sm font-bold text-g-ink">For your doctor</p>
           <p className="mb-3 text-xs font-semibold text-g-ink-3">
             This goes right at the top so your gyno sees the important stuff first.
           </p>
@@ -264,7 +266,7 @@ export default function ExportPage() {
 
         {/* Theme */}
         <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
-          <p className="mb-3 font-cute text-sm font-bold text-g-ink">Cover color 🎨</p>
+          <p className="mb-3 font-cute text-sm font-bold text-g-ink">Cover color</p>
           <div className="flex gap-3">
             {THEMES.map((t) => (
               <button
@@ -295,8 +297,9 @@ export default function ExportPage() {
                 onClick={() => toggleSection(s.key)}
                 className="flex w-full items-center justify-between rounded-2xl bg-g-canvas px-4 py-3 text-left active:scale-[0.99]"
               >
-                <span className="text-sm font-bold text-g-ink">
-                  {s.emoji} {s.label}
+                <span className="flex items-center gap-2 text-sm font-bold text-g-ink">
+                  <MedicalIcon name={s.icon} size={16} className="text-current" />
+                  {s.label}
                 </span>
                 <span
                   className={cn(
@@ -319,11 +322,10 @@ export default function ExportPage() {
         {/* Custom questions */}
         {cfg.sections.questions && (
           <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
-            <p className="mb-3 font-cute text-sm font-bold text-g-ink">My questions for the doctor ❓</p>
             <div className="space-y-2">
               {cfg.questions.map((q, i) => (
                 <div key={i} className="flex items-center gap-2 rounded-2xl bg-g-canvas px-3 py-2.5">
-                  <span className="flex-1 text-sm font-semibold text-g-ink">💬 {q}</span>
+                  <span className="flex-1 text-sm font-semibold text-g-ink">{q}</span>
                   <button onClick={() => removeQuestion(i)} className="text-g-ink-3 active:scale-90" aria-label="Remove">
                     ✕
                   </button>
@@ -348,7 +350,7 @@ export default function ExportPage() {
         {/* Custom notes */}
         {cfg.sections.notes && (
           <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
-            <p className="mb-2 font-cute text-sm font-bold text-g-ink">Anything else to add 📝</p>
+            <p className="mb-2 font-cute text-sm font-bold text-g-ink">Anything else to add</p>
             <textarea
               value={cfg.notes}
               onChange={(e) => update({ notes: e.target.value })}
@@ -360,14 +362,8 @@ export default function ExportPage() {
         )}
 
         {/* Download */}
-        <button
-          onClick={() => window.print()}
-          className="mt-5 w-full rounded-full bg-candy py-4 font-cute text-lg font-bold text-white shadow-girly-pop active:scale-[0.98]"
-        >
-          Download my PDF 💖
-        </button>
-        <p className="mt-2 text-center text-xs font-semibold text-g-ink-3">
-          Tip: choose “Save as PDF” in the print dialog. Preview below 👇
+NO_OP        <p className="mt-2 text-center text-xs font-semibold text-g-ink-3">
+          Tip: choose “Save as PDF” in the print dialog. Preview below.
         </p>
       </div>
 
@@ -375,11 +371,7 @@ export default function ExportPage() {
       <div className="print-area mt-6 overflow-hidden rounded-3xl border border-g-border bg-white shadow-girly">
         {/* Cover */}
         <div className="p-6 text-white" style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}>
-          <p className="text-sm font-bold opacity-90">🌸 MyPMOS · My health summary</p>
-          <h2 className="font-cute text-3xl font-extrabold leading-tight">
-            {cfg.name ? `${cfg.name}'s` : "My"} gyno visit notes
-          </h2>
-          <p className="mt-1 text-sm font-semibold opacity-90">Tracked {dateRange}</p>
+NO_OP          <p className="mt-1 text-sm font-semibold opacity-90">Tracked {dateRange}</p>
         </div>
 
         <div className="space-y-5 p-6">
@@ -415,7 +407,7 @@ export default function ExportPage() {
               <PreItem label="My questions">
                 <ul className="space-y-0.5">
                   {cfg.questions.map((q, i) => (
-                    <li key={i} className="font-semibold text-g-ink">💬 {q}</li>
+                    <li key={i} className="text-xs font-medium text-g-ink-2">• {q}</li>
                   ))}
                 </ul>
               </PreItem>
@@ -423,7 +415,7 @@ export default function ExportPage() {
           </section>
 
           {cfg.sections.previsit !== false && hasPreVisit && (
-            <AlbumSection title="Pre-visit summary" emoji="🧭" soft={theme.soft}>
+            <AlbumSection title="Pre-visit summary" icon="doctor" soft={theme.soft}>
               {mainConcern && (
                 <div className="mb-2 rounded-xl bg-white/70 p-2.5">
                   <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Main concern</p>
@@ -437,9 +429,7 @@ export default function ExportPage() {
               <div className="space-y-1.5">
                 {preVisit.criteria.map((c) => (
                   <div key={c.key} className="rounded-xl bg-white/70 p-2.5">
-                    <p className="text-sm font-bold text-g-ink">
-                      <span className="mr-1">{c.signal ? "🔶" : "▫️"}</span>
-                      {c.label}
+                    <p className="text-sm font-bold text-g-ink">{c.label}
                       <span className="ml-1 text-[0.7rem] font-bold text-g-ink-3">
                         {c.key === "morphology" ? "· clinician-assessed" : c.signal ? "· signal reported" : "· not reported"}
                       </span>
@@ -522,7 +512,7 @@ export default function ExportPage() {
           )}
 
           {cfg.sections.clinical && hasClinical && (
-            <AlbumSection title="Clinical summary" emoji="🩺" soft={theme.soft}>
+            <AlbumSection title="Clinical summary" icon="doctor" soft={theme.soft}>
               {clinical.menstrual.length > 0 && <ClinList label="Menstrual history" items={clinical.menstrual} />}
               {clinical.body.length > 0 && <ClinList label="Body & vitals" items={clinical.body} />}
               {clinical.history.length > 0 && <ClinList label="Relevant history" items={clinical.history} />}
@@ -574,7 +564,7 @@ export default function ExportPage() {
           )}
 
           {cfg.sections.summary && summary && (
-            <AlbumSection title="Tracking summary" emoji="📅" soft={theme.soft} focus={focusedSections.has("summary")}>
+            <AlbumSection title="Tracking summary" icon="calendar" soft={theme.soft} focus={focusedSections.has("summary")}>
               <div className="grid grid-cols-2 gap-3">
                 <Mini label="Days tracked" value={`${summary.daysTracked}`} />
                 <Mini label="Period days" value={`${summary.flowDays}`} />
@@ -585,7 +575,7 @@ export default function ExportPage() {
           )}
 
           {cfg.sections.symptoms && summary && (summary.topSymptoms.length > 0 || summary.topMoods.length > 0) && (
-            <AlbumSection title="Most common" emoji="🩷" soft={theme.soft} focus={focusedSections.has("symptoms")}>
+            <AlbumSection title="Most common" icon="symptoms" soft={theme.soft} focus={focusedSections.has("symptoms")}>
               <div className="flex flex-wrap gap-2">
                 {[...summary.topSymptoms, ...summary.topMoods].map((s) => (
                   <span key={`${s.group}-${s.option.id}`} className="rounded-full bg-white px-3 py-1.5 text-sm font-bold text-g-ink shadow-sm">
@@ -597,7 +587,7 @@ export default function ExportPage() {
           )}
 
           {cfg.sections.cycle && summary && (
-            <AlbumSection title="Period & pain" emoji="🌷" soft={theme.soft} focus={focusedSections.has("cycle")}>
+            <AlbumSection title="Period & pain" icon="period" soft={theme.soft} focus={focusedSections.has("cycle")}>
               <p className="text-sm font-semibold text-g-ink-2">
                 {summary.flowDays} day{summary.flowDays === 1 ? "" : "s"} of period logged over {summary.daysTracked} tracked
                 day{summary.daysTracked === 1 ? "" : "s"}.
@@ -614,7 +604,7 @@ export default function ExportPage() {
           )}
 
           {cfg.sections.watchouts && summary && summary.watchOuts.length > 0 && (
-            <AlbumSection title="Things I'd like to discuss" emoji="💛" soft={theme.soft} focus={focusedSections.has("watchouts")}>
+            <AlbumSection title="Things I'd like to discuss" icon="doctor" soft={theme.soft} focus={focusedSections.has("watchouts")}>
               <ul className="space-y-2">
                 {summary.watchOuts.map((w, i) => (
                   <li key={i} className="text-sm font-semibold text-g-ink">
@@ -627,7 +617,7 @@ export default function ExportPage() {
           )}
 
           {cfg.sections.notes && (cfg.notes.trim() || notesEntries.length > 0) && (
-            <AlbumSection title="Notes" emoji="📝" soft={theme.soft}>
+            <AlbumSection title="Notes" icon="notes" soft={theme.soft}>
               {cfg.notes.trim() && <p className="text-sm font-medium text-g-ink">{cfg.notes}</p>}
               {notesEntries.map((e) => (
                 <p key={e.date} className="mt-1 text-xs font-medium text-g-ink-2">
@@ -638,7 +628,7 @@ export default function ExportPage() {
           )}
 
           <p className="border-t border-g-border pt-3 text-center text-[0.65rem] font-semibold text-g-ink-3">
-            Made with MyPMOS 🌸 · This is a personal tracking summary, not a
+            Made with MyPMOS · This is a personal tracking summary, not a
             diagnosis or medical record. Please discuss with your doctor.
           </p>
         </div>
@@ -671,13 +661,13 @@ function PreItem({ label, children }: { label: string; children: React.ReactNode
 
 function AlbumSection({
   title,
-  emoji,
+  icon,
   soft,
   focus,
   children,
 }: {
   title: string
-  emoji: string
+  icon: string
   soft: string
   focus?: boolean
   children: React.ReactNode
@@ -685,9 +675,10 @@ function AlbumSection({
   return (
     <section className="rounded-2xl p-4" style={{ background: soft }}>
       <div className="mb-2 flex items-center gap-2">
-        <h3 className="font-cute text-base font-bold text-g-ink">
-          {emoji} {title}
-        </h3>
+        <div className="rounded-full bg-white/80 p-2 text-g-ink">
+          <MedicalIcon name={icon} size={18} className="text-current" />
+        </div>
+        <h3 className="font-cute text-base font-bold text-g-ink">{title}</h3>
         {focus && (
           <span className="rounded-full bg-white/80 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-wide text-g-ink-2">
             ★ Your focus

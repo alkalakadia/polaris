@@ -5,6 +5,7 @@ import type { User } from "@supabase/supabase-js"
 import { Eye, EyeOff } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { useAuth } from "@/lib/auth"
 import { cn } from "@/lib/cn"
 import {
@@ -505,7 +506,9 @@ function AccountHub({ user }: { user: User }) {
 function Stat({ emoji, value, label, tint }: { emoji: string; value: number; label: string; tint: string }) {
   return (
     <div className="rounded-3xl border border-g-border bg-white p-3 text-center shadow-girly">
-      <span className={`mx-auto grid h-9 w-9 place-items-center rounded-2xl text-base ${tint}`}>{emoji}</span>
+      <span className={`mx-auto grid h-9 w-9 place-items-center rounded-2xl text-base ${tint}`}>
+        <MedicalIcon name={emoji} size={18} className="text-current" />
+      </span>
       <p className="mt-1.5 font-cute text-xl font-bold text-g-ink">{value}</p>
       <p className="text-[0.6rem] font-bold leading-tight text-g-ink-3">{label}</p>
     </div>
@@ -520,15 +523,19 @@ function PostRow({ post }: { post: Post }) {
       className="block rounded-2xl border border-g-border bg-white p-3.5 shadow-girly active:scale-[0.99]"
     >
       <div className="flex items-center gap-2 text-xs font-bold text-g-ink-3">
-        <span className="rounded-full bg-candy-soft px-2 py-0.5 text-g-ink">
-          {sn.emoji} {sn.name}
+        <span className="rounded-full bg-candy-soft px-2 py-0.5 text-g-ink flex items-center gap-1">
+          <MedicalIcon name={sn.emoji} size={14} className="text-current" /> {sn.name}
         </span>
         <span>· {ago(post.created_at)}</span>
       </div>
       <p className="mt-1 font-cute text-base font-bold leading-snug text-g-ink">{post.title}</p>
       <div className="mt-1.5 flex items-center gap-3 text-xs font-bold text-g-ink-3">
-        <span className={post.liked_by_me ? "" : "opacity-70"}>💗 {post.hearts}</span>
-        <span>💬 {post.comment_count}</span>
+        <span className={post.liked_by_me ? "flex items-center gap-1" : "flex items-center gap-1 opacity-70"}>
+          <MedicalIcon name="💗" size={14} className="text-current" /> {post.hearts}
+        </span>
+        <span className="flex items-center gap-1">
+          <MedicalIcon name="💬" size={14} className="text-current" /> {post.comment_count}
+        </span>
       </div>
     </Link>
   )
@@ -554,9 +561,13 @@ function SettingRow({
         danger ? "text-g-pink-deep" : "text-g-ink"
       )}
     >
-      <span>{emoji}</span>
+      <span className="grid h-9 w-9 place-items-center rounded-2xl bg-g-canvas text-g-ink-3">
+        <MedicalIcon name={emoji} size={16} className="text-current" />
+      </span>
       <span className="flex-1">{label}</span>
-      <span className="text-g-ink-3">›</span>
+      <span className="text-g-ink-3">
+        <MedicalIcon name="›" size={16} className="text-current" />
+      </span>
     </div>
   )
   return href ? (
@@ -570,8 +581,10 @@ function SettingRow({
 
 function Hero({ emoji, title, sub }: { emoji: string; title: string; sub: string }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="animate-float text-3xl">{emoji}</span>
+    <div className="flex items-center gap-3">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-g-canvas text-g-ink-3">
+        <MedicalIcon name={emoji} size={20} className="text-current" />
+      </span>
       <div>
         <h1 className="font-cute text-3xl font-bold text-g-ink">{title}</h1>
         <p className="text-sm font-semibold text-g-ink-3">{sub}</p>

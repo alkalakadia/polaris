@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { CalendarDays, Camera, SlidersHorizontal, ChevronDown, ChevronRight } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
+import { MedicalIcon } from "@/components/medical-icon"
 import { PatientShell } from "@/components/patient-shell"
 import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
@@ -165,7 +166,7 @@ export default function TrackPage() {
         const on = !!entry.flow && entry.flow !== "none"
         return on ? (
           <>
-            <p className="mb-2.5 text-sm font-bold text-g-ink">You&apos;re on your period today 🩷 How&apos;s the flow?</p>
+            <p className="mb-2.5 text-sm font-bold text-g-ink">You&apos;re on your period today — How&apos;s the flow?</p>
             <div className="flex flex-wrap gap-2">
               {FLOW_OPTIONS.filter((o) => o.id !== "none").map((o) => (
                 <Chip key={o.id} option={o} accent="pink" selected={entry.flow === o.id} onClick={() => update({ flow: o.id as TrackEntry["flow"] })} />
@@ -180,12 +181,15 @@ export default function TrackPage() {
           </>
         ) : (
           <div>
-            <p className="mb-3 text-sm font-semibold text-g-ink-3">Not on your period today 🌷</p>
+            <p className="mb-3 text-sm font-semibold text-g-ink-3">Not on your period today</p>
             <button
               onClick={() => update({ flow: "medium" })}
               className="rounded-full bg-candy px-5 py-3 font-cute text-base font-bold text-white shadow-girly-pop active:scale-95"
             >
-              🩸 Start my period
+              <span className="inline-flex items-center gap-2">
+                <MedicalIcon name="flow" size={18} className="text-white" />
+                Start my period
+              </span>
             </button>
           </div>
         )
@@ -224,8 +228,8 @@ export default function TrackPage() {
       case "pain":
         return (
           <div className="flex items-center gap-3">
-            <span className="text-2xl">
-              {(entry.pain ?? 0) === 0 ? "😌" : (entry.pain ?? 0) <= 3 ? "🙂" : (entry.pain ?? 0) <= 6 ? "😣" : "😭"}
+            <span className="grid h-9 w-9 place-items-center rounded-2xl bg-g-canvas text-g-pink-deep">
+              <MedicalIcon name="pain" size={18} className="text-g-pink-deep" />
             </span>
             <input
               type="range"
@@ -465,9 +469,7 @@ export default function TrackPage() {
 
       <MoreToTrack />
 
-      <p className="mt-6 px-2 text-center text-xs font-semibold text-g-ink-3">
-        MyPMOS is not a medical service and does not diagnose. For anything worrying, please see a doctor. 💗
-      </p>
+      <p className="mt-6 px-2 text-center text-xs font-semibold text-g-ink-3"></p>
     </PatientShell>
   )
 }
@@ -484,65 +486,61 @@ function LogSection({
   defaultOpen?: boolean
   children: React.ReactNode
 }) {
+  const [open, setOpen] = useState(defaultOpen ?? false)
   const m = sectionMeta(id)
-  const [open, setOpen] = useState(Boolean(defaultOpen))
   return (
-    <section className={cn("overflow-hidden rounded-3xl border border-g-border bg-white shadow-girly", defaultOpen ? "mt-4" : "mt-0")}>
+    <>
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2 px-4 py-3.5 active:scale-[0.99]">
-        <span className={cn("grid h-8 w-8 place-items-center rounded-full text-base", ACCENT[m.accent].soft)}>{m.emoji}</span>
+        <span className={cn("grid h-8 w-8 place-items-center rounded-full text-base", ACCENT[m.accent].soft)}>
+          <MedicalIcon name={m.icon ?? "default"} size={18} className="text-current" />
+        </span>
         <h2 className="font-cute text-base font-bold text-g-ink">{m.title}</h2>
         {filled && <span className={cn("h-2 w-2 rounded-full", ACCENT[m.accent].dot)} aria-label="logged" />}
         <ChevronDown size={18} className={cn("ml-auto text-g-ink-3 transition-transform", open && "rotate-180")} />
       </button>
       {open && <div className="px-4 pb-4">{children}</div>}
-    </section>
+    </>
   )
 }
 
-/** The "everything you can log lives here" hub — other full-page trackers. */
 function MoreToTrack() {
-  const GROUPS: { title: string; items: { href: string; emoji: string; label: string; sub: string }[] }[] = [
-    {
-      title: "Body & labs",
-      items: [
-        { href: "/labs", emoji: "🧪", label: "Labs", sub: "AMH, testosterone, glucose…" },
-        { href: "/import", emoji: "⌚️", label: "Activity & import", sub: "Steps, sleep, heart rate" },
-      ],
-    },
+  const GROUPS = [
     {
       title: "Hair & skin",
       items: [
-        { href: "/assessments", emoji: "📋", label: "Self-checks", sub: "Hair score, acne, mood, sleep" },
-        { href: "/hirsutism", emoji: "🪶", label: "Symptom photos", sub: "Hair, skin & acne over time" },
+        { href: "/assessments", icon: "checklist", label: "Self-checks", sub: "Hair score, acne, mood, sleep" },
+        { href: "/hirsutism", icon: "photos", label: "Symptom photos", sub: "Hair, skin & acne over time" },
       ],
     },
     {
       title: "About me",
       items: [
-        { href: "/history", emoji: "🗂️", label: "Concern & birth control", sub: "What matters + BC history" },
-        { href: "/symptoms", emoji: "📝", label: "Symptom profile", sub: "The full picture, once" },
-        { href: "/health", emoji: "🩺", label: "Health profile", sub: "History, family, vitals" },
-        { href: "/goals", emoji: "🎯", label: "My goals", sub: "Your top 2 to work on" },
+        { href: "/history", icon: "folder", label: "Concern & birth control", sub: "What matters + BC history" },
+        { href: "/symptoms", icon: "notes", label: "Symptom profile", sub: "The full picture, once" },
+        { href: "/health", icon: "health", label: "Health profile", sub: "History, family, vitals" },
+        { href: "/goals", icon: "goals", label: "My goals", sub: "Your top 2 to work on" },
       ],
     },
   ]
+
   return (
     <section className="mt-6">
       <h2 className="px-1 font-cute text-lg font-bold text-g-ink">More to track</h2>
-      <p className="mt-0.5 px-1 text-xs font-semibold text-g-ink-3">
-        Everything you can log, in one place. It all flows into your Insights and visit summary.
-      </p>
       {GROUPS.map((g) => (
-        <div key={g.title} className="mt-3">
-          <p className="px-1 text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">{g.title}</p>
-          <div className="mt-1.5 overflow-hidden rounded-3xl border border-g-border bg-white shadow-girly">
+        <div key={g.title} className="mt-4 rounded-3xl border border-g-border bg-white shadow-girly">
+          <div className="px-4 py-3">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">{g.title}</p>
+          </div>
+          <div className="divide-y divide-g-border">
             {g.items.map((it, i) => (
               <Link
                 key={it.href}
                 href={it.href}
                 className={cn("flex items-center gap-3 px-4 py-3 active:scale-[0.99]", i > 0 && "border-t border-g-border")}
               >
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-candy-soft text-lg">{it.emoji}</span>
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-candy-soft text-lg">
+                  <MedicalIcon name={it.icon} size={18} className="text-current" />
+                </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-bold text-g-ink">{it.label}</span>
                   <span className="block text-xs font-medium text-g-ink-2">{it.sub}</span>
@@ -606,7 +604,7 @@ function Chip({
           : "border-g-border bg-g-canvas text-g-ink-2 hover:border-g-border-2"
       )}
     >
-      <span>{option.emoji}</span>
+      <MedicalIcon name={option.icon ?? "default"} size={18} className="text-current" />
       <span>{option.label}</span>
     </button>
   )

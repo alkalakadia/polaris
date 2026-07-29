@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { cn } from "@/lib/cn"
 import {
   FG_AREAS,
@@ -114,7 +115,9 @@ function HubCard({
       onClick={onOpen}
       className="flex w-full items-center gap-3 rounded-3xl border border-g-border bg-white p-3.5 text-left shadow-girly active:scale-[0.99]"
     >
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-candy-soft text-lg">{emoji}</span>
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+        <MedicalIcon name={emoji} size={20} className="text-current" />
+      </span>
       <div className="min-w-0 flex-1">
         <p className="font-cute text-sm font-bold leading-snug text-g-ink">{title}</p>
         <p className="line-clamp-1 text-xs font-medium text-g-ink-2">{sub}</p>
@@ -144,10 +147,12 @@ function RunnerShell({
   return (
     <PatientShell>
       <button onClick={onCancel} className="text-sm font-bold text-g-ink-3 active:scale-95">
-        ← All check-ins
+        <MedicalIcon name="←" size={16} className="text-current" /> All check-ins
       </button>
-      <div className="mt-3 flex items-center gap-2">
-        <span className="text-2xl">{emoji}</span>
+      <div className="mt-3 flex items-center gap-3">
+        <span className="grid h-11 w-11 place-items-center rounded-2xl bg-candy-soft text-current">
+          <MedicalIcon name={emoji} size={22} className="text-current" />
+        </span>
         <h1 className="font-cute text-2xl font-bold text-g-ink">{title}</h1>
       </div>
       {children}
