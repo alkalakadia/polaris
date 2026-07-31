@@ -471,7 +471,7 @@ function AccountHub({ user }: { user: User }) {
         <SettingRow emoji="📗" label="The basics (evidence-based)" href="/guide" />
         <SettingRow emoji="💬" label="Browse community" href="/community" />
         <SettingRow emoji="✨" label="About MyPMOS" href="/about" />
-	      <SettingRow emoji="💌" label="Share feedback" href="/feedback" />
+        <SettingRow emoji="💌" label="Share feedback" href="/feedback" />
       </div>
 
       {/* Account */}
