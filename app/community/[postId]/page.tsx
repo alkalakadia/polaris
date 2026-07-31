@@ -179,7 +179,6 @@ export default function PostDetailPage() {
                   <button onClick={() => blockAuthor(post.user_id)} className="text-g-pink-deep active:scale-95">🚫 Block</button>
                 </span>
               )}
-            </div>
             {user && post.user_id === user.id && !isEditable(post.created_at) && !editing && (
               <p className="mt-1.5 text-[0.7rem] font-semibold text-g-ink-3">Posts can be edited for 1 hour after posting.</p>
             )}

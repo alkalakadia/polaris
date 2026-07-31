@@ -51,6 +51,10 @@ import {
   Video,
 } from "lucide-react"
 
+/** Any icon key accepted by <MedicalIcon name>. Kept as string so callers can
+ *  pass content-derived names freely. */
+export type MedicalIconName = string
+
 const ICON_MAP: Record<string, LucideIcon> = {
   default: Star,
   cloud: Cloud,

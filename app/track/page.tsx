@@ -492,7 +492,7 @@ function LogSection({
     <>
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2 px-4 py-3.5 active:scale-[0.99]">
         <span className={cn("grid h-8 w-8 place-items-center rounded-full text-base", ACCENT[m.accent].soft)}>
-          <MedicalIcon name={m.icon ?? "default"} size={18} className="text-current" />
+          <MedicalIcon name={m.id} size={18} className="text-current" />
         </span>
         <h2 className="font-cute text-base font-bold text-g-ink">{m.title}</h2>
         {filled && <span className={cn("h-2 w-2 rounded-full", ACCENT[m.accent].dot)} aria-label="logged" />}
@@ -604,7 +604,7 @@ function Chip({
           : "border-g-border bg-g-canvas text-g-ink-2 hover:border-g-border-2"
       )}
     >
-      <MedicalIcon name={option.icon ?? "default"} size={18} className="text-current" />
+      <span>{option.emoji}</span>
       <span>{option.label}</span>
     </button>
   )
