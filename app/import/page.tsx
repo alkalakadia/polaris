@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
@@ -15,6 +15,7 @@ import {
 const MAX_FILE_MB = 80
 
 export default function ImportPage() {
+  const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [status, setStatus] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -76,9 +77,9 @@ export default function ImportPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
-        <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+        <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
-        </Link>
+        </button>
         <span className="animate-float text-3xl">⌚️</span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">Activity & import</h1>

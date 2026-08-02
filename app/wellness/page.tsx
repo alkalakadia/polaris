@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
@@ -35,6 +35,7 @@ const NOUN: Record<Category, string> = {
 }
 
 export default function WellnessPage() {
+  const router = useRouter()
   const [tab, setTab] = useState<Category>("calm")
   const [links, setLinks] = useState<UserLink[]>([])
   const [seed, setSeed] = useState(0)
@@ -52,9 +53,9 @@ export default function WellnessPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
-        <Link href="/learn" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Learn">
+        <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
-        </Link>
+        </button>
         <span className="animate-float text-3xl">💖</span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">Wellness</h1>

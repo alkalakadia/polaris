@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
@@ -78,6 +78,7 @@ function loadConfig(): ExportConfig {
 }
 
 export default function ExportPage() {
+  const router = useRouter()
   const [cfg, setCfg] = useState<ExportConfig>(loadConfig)
   const [entries, setEntries] = useState<TrackEntry[]>([])
   const [summary, setSummary] = useState<InsightSummary | null>(null)
@@ -212,9 +213,9 @@ export default function ExportPage() {
       {/* --- Builder controls (won't print) --- */}
       <div className="print-hide">
         <div className="flex items-center gap-2">
-          <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+          <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
             <ArrowLeft size={17} />
-          </Link>
+          </button>
           <span className="animate-float text-3xl">📄</span>
           <div>
             <h1 className="font-cute text-3xl font-bold text-g-ink">Gyno visit PDF</h1>

@@ -78,7 +78,7 @@ function ClinicalInsights({ profile, entries }: { profile: CycleProfile; entries
         emoji: "🌙",
         title: "Irregular cycles are worth raising",
         body: "Cycle irregularity is one of the three areas clinicians check for PMOS (the Rotterdam criteria). Bring it up at your visit.",
-        href: "/export",
+        href: "/period",
       })
 
     const fg = getResult("fg")

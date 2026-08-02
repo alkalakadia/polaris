@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
@@ -26,6 +26,7 @@ import {
 type View = "hub" | AssessmentId
 
 export default function AssessmentsPage() {
+  const router = useRouter()
   const [view, setView] = useState<View>("hub")
   const [results, setResults] = useState<Partial<Record<AssessmentId, AssessmentResult>>>({})
 
@@ -47,9 +48,9 @@ export default function AssessmentsPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
-        <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+        <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
-        </Link>
+        </button>
         <span className="animate-float text-3xl">📋</span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">Check-ins</h1>

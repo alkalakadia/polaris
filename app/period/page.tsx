@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { ArrowLeft, Droplet } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
@@ -24,6 +24,7 @@ function fmt(d: string): string {
 }
 
 export default function PeriodPage() {
+  const router = useRouter()
   const { user } = useAuth()
   const [entries, setEntries] = useState<TrackEntry[]>([])
   const [profile, setProfile] = useState<CycleProfile>({})
@@ -66,18 +67,6 @@ export default function PeriodPage() {
     await saveEntryAsync({ ...existing, date, flow: make ? "medium" : "none" })
     await load()
   }
-  async function logRange(start: string, end: string) {
-    let d = new Date(start + "T00:00:00")
-    const endD = new Date(end + "T00:00:00")
-    while (d <= endD) {
-      const dk = toDateKey(d)
-      const ex = entries.find((e) => e.date === dk) ?? { date: dk }
-      await saveEntryAsync({ ...ex, date: dk, flow: "medium" })
-      d = new Date(d.getTime() + 86_400_000)
-    }
-    await load()
-  }
-
   const anchor = deriveLastPeriodStart(entries)
   const flowChoices = FLOW_OPTIONS.filter((f) => f.id !== "none")
   const canPredict = history ? canPredictCycle(history, profile) : false
@@ -96,9 +85,9 @@ export default function PeriodPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
-        <Link href="/track" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Track">
+        <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
-        </Link>
+        </button>
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-g-pink-soft">
           <Droplet size={18} className="text-g-pink-deep" />
         </span>
@@ -213,7 +202,7 @@ export default function PeriodPage() {
         <p className="mb-2 px-1 text-xs font-semibold text-g-ink-3">
           Tap a day to mark or unmark your period, or log a whole period as a range.
         </p>
-        <CycleCalendar entries={entries} profile={profile} anchor={anchor} onTogglePeriod={togglePeriod} onLogRange={logRange} showPredictions={canPredict} />
+        <CycleCalendar entries={entries} profile={profile} anchor={anchor} onTogglePeriod={togglePeriod} showPredictions={canPredict} />
       </div>
 
       <p className="mt-5 px-2 text-center text-xs font-semibold text-g-ink-3">

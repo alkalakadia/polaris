@@ -30,7 +30,6 @@ export function CycleCalendar({
   profile,
   anchor,
   onTogglePeriod,
-  onLogRange,
   shaveDays,
   showPredictions = true,
 }: {
@@ -38,14 +37,12 @@ export function CycleCalendar({
   profile: CycleProfile
   anchor: string | null
   onTogglePeriod?: (date: string, makePeriod: boolean) => void
-  onLogRange?: (start: string, end: string) => void
   shaveDays?: Set<string>
   showPredictions?: boolean
 }) {
   const [offset, setOffset] = useState(0) // months from current
   const [selected, setSelected] = useState<string | null>(null)
-  const [rangeMode, setRangeMode] = useState(false)
-  const [rangeStart, setRangeStart] = useState<string | null>(null)
+  const [loggingMode, setLoggingMode] = useState(false)
 
   const byDate = new Map(entries.map((e) => [e.date, e]))
   const now = new Date()
@@ -96,18 +93,9 @@ export function CycleCalendar({
   }
 
   function handleDayClick(key: string) {
-    if (rangeMode && onLogRange) {
-      if (!rangeStart) {
-        setRangeStart(key)
-        return
-      }
-      let s = rangeStart
-      let e = key
-      if (s > e) [s, e] = [e, s]
-      if (e > todayKey) e = todayKey // never log a future period
-      onLogRange(s, e)
-      setRangeMode(false)
-      setRangeStart(null)
+    if (loggingMode && onTogglePeriod) {
+      if (key > todayKey) return // never log a future period
+      onTogglePeriod(key, !isFlowDay(key))
       return
     }
     setSelected(selected === key ? null : key)
@@ -160,7 +148,7 @@ export function CycleCalendar({
                       ? "bg-g-peach-soft text-g-ink"
                       : "text-g-ink-2",
                 d.isToday && !d.realPeriod && "ring-2 ring-g-ink ring-offset-1",
-                (isSel || rangeStart === d.key) && "ring-2 ring-g-pink ring-offset-1"
+                isSel && "ring-2 ring-g-pink ring-offset-1"
               )}
             >
               {date.getDate()}
@@ -173,31 +161,25 @@ export function CycleCalendar({
         })}
       </div>
 
-      {/* Log a period as a range of days */}
-      {onLogRange && (
+      {/* Log a period: tap the button, tap every day it covers, tap again when finished. */}
+      {onTogglePeriod && (
         <div className="mt-3">
-          {!rangeMode ? (
-            <button
-              onClick={() => {
-                setRangeMode(true)
-                setRangeStart(null)
-                setSelected(null)
-              }}
-              className="w-full rounded-full bg-g-pink py-3 text-sm font-bold text-white shadow-girly-pop active:scale-95"
-            >
-              🩸 Log a whole period (pick start + end)
-            </button>
-          ) : (
-            <div className="rounded-2xl bg-g-pink-soft/60 px-3 py-2.5">
-              <p className="text-sm font-bold text-g-ink">
-                {rangeStart
-                  ? `Now tap the LAST day (started ${new Date(rangeStart + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })})`
-                  : "Tap the FIRST day of your period"}
-              </p>
-              <button onClick={() => { setRangeMode(false); setRangeStart(null) }} className="mt-1 text-xs font-bold text-g-ink-3">
-                Cancel
-              </button>
-            </div>
+          <button
+            onClick={() => {
+              setLoggingMode((v) => !v)
+              setSelected(null)
+            }}
+            className={cn(
+              "w-full rounded-full py-3 text-sm font-bold shadow-girly-pop transition active:scale-95",
+              loggingMode ? "bg-g-ink text-white" : "bg-g-pink text-white"
+            )}
+          >
+            {loggingMode ? "✅ Done logging" : "🩸 Log your period"}
+          </button>
+          {loggingMode && (
+            <p className="mt-2 text-center text-xs font-bold text-g-ink-3">
+              Tap every day of your period below, then tap Done logging.
+            </p>
           )}
         </div>
       )}

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
@@ -16,6 +17,7 @@ import {
 } from "@/lib/profile"
 
 export default function HealthPage() {
+  const router = useRouter()
   const [p, setP] = useState<CycleProfile>(() => getProfile())
   const [saved, setSaved] = useState(false)
   const set = (patch: Partial<CycleProfile>) => {
@@ -46,9 +48,9 @@ export default function HealthPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
-        <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+        <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
-        </Link>
+        </button>
         <span className="animate-float text-3xl">🩺</span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">My health</h1>

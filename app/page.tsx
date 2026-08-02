@@ -215,7 +215,7 @@ export default function TodayPage() {
             <p className="text-sm font-semibold text-white/90">
               {filled === 0
                 ? "Tap to track how you feel right now"
-                : `${filled} things logged so far — keep going!`}
+                : `${filled} thing${filled === 1 ? "" : "s"} logged so far — keep going!`}
             </p>
           </div>
           <span className="animate-float text-4xl">🌸</span>

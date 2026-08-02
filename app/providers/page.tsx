@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { ArrowLeft, Search, Video, Stethoscope, HeartPulse, ExternalLink } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
@@ -25,6 +25,7 @@ const DIRECTORIES: Resource[] = [
 ]
 
 export default function ProvidersPage() {
+  const router = useRouter()
   const [where, setWhere] = useState("")
 
   function search() {
@@ -35,9 +36,9 @@ export default function ProvidersPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
-        <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+        <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
-        </Link>
+        </button>
         <span className="grid h-10 w-10 place-items-center rounded-2xl bg-g-pink-soft">
           <Stethoscope size={18} className="text-g-pink-deep" />
         </span>

@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ArrowLeft, Shield, Heart, AlertCircle, Lock } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
 import { GirlyLogo } from "@/components/patient-shell"
@@ -13,11 +13,12 @@ const PROMISES = [
 ]
 
 export default function AboutPage() {
+  const router = useRouter()
   return (
     <PatientShell>
-      <Link href="/account" className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Back to Account">
+      <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
         <ArrowLeft size={17} />
-      </Link>
+      </button>
 
       {/* Hero */}
       <div className="mt-3 flex flex-col items-center rounded-3xl border border-g-border bg-candy-soft px-6 py-8 text-center">
