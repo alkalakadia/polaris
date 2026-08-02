@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       maxTokens: 900,
       prompt: `Suggest 4 fresh, specific, genuinely useful PMOS (formerly PCOS) article ideas${
         topics ? ` for someone who ${topics}` : ""
-      }. Vary them (seed ${seed}). Each needs: "title" (catchy, specific), "blurb" (one warm line), "brief" (one sentence describing what the article should cover, grounded in mainstream research, non-diagnostic), "topic" (one of: PMOS 101, Insulin & food, Skin & hair, Fertility, Mental health, New research), and "emoji" (one). Return ONLY a JSON array of 4 objects with keys: title, blurb, brief, topic, emoji.`,
+      }. Vary them (seed ${seed}). Each needs: "title" (catchy, specific), "blurb" (one warm line), "brief" (one sentence describing what the article should cover, grounded in mainstream research, non-diagnostic), and "topic" (one of: PMOS 101, Insulin & food, Skin & hair, Fertility, Mental health, New research). Return ONLY a JSON array of 4 objects with keys: title, blurb, brief, topic.`,
     })
     if (error) return NextResponse.json({ error }, { status: 502 })
     let articles: unknown = []

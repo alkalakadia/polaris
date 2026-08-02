@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { RichText } from "@/components/rich-text"
+import { MedicalIcon } from "@/components/medical-icon"
 import { cn } from "@/lib/cn"
 import {
   ARTICLES,
@@ -21,6 +22,50 @@ import { useAuth } from "@/lib/auth"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
 import { getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
 import { healthContext } from "@/lib/clinical"
+
+import {
+  Book,
+  Heart,
+  ScrollText,
+  MessageCircleQuestion,
+  Hourglass,
+  HeartCrack,
+  Stethoscope,
+  FlaskConical,
+  Search,
+  LinkIcon,
+  HeartHandshake,
+  ClipboardList,
+  Sparkles,
+  BookOpen,
+  Check,
+  HeartPulse,
+  Soup,
+  Egg,
+  Brain,
+  Lightbulb,
+  type LucideIcon,
+} from "lucide-react"
+
+const topicIconMap: Record<string, LucideIcon> = {
+  "PMOS 101": HeartPulse,
+  "Insulin & food": Soup,
+  "Skin & hair": Sparkles, // Reusing Sparkles for now, could be more specific
+  Fertility: Egg,
+  "Mental health": Brain,
+  "New research": Lightbulb,
+  "For you": Heart, // Default for "For you"
+  Read: BookOpen, // Default for "Read"
+}
+
+interface TopicIconProps {
+  topic: string
+}
+
+function TopicIcon({ topic }: TopicIconProps) {
+  const IconComponent = topicIconMap[topic] || Lightbulb // Default to Lightbulb for unknown topics
+  return <IconComponent size={24} /> // Adjust size as needed
+}
 
 const SUGGESTIONS = [
   "Is dairy bad for PMOS?",
@@ -90,7 +135,7 @@ export default function LearnPage() {
         body: JSON.stringify({ mode: "freshtopics", topics: interestTopics(prof), seed: String(Date.now() % 100000) }),
       })
       const data = await res.json()
-      const raw: { title?: string; blurb?: string; brief?: string; topic?: string; emoji?: string }[] = data.articles || []
+      const raw: { title?: string; blurb?: string; brief?: string; topic?: string }[] = data.articles || []
       const stamp = Date.now()
       const items: Article[] = raw
         .filter((a) => a.title)
@@ -98,7 +143,6 @@ export default function LearnPage() {
         .map((a, i) => ({
           id: `fresh-${stamp}-${i}`,
           topic: a.topic && TOPICS.includes(a.topic) ? a.topic : "New research",
-          emoji: a.emoji || "✨",
           title: a.title!,
           blurb: a.blurb || "",
           brief: a.brief || a.title!,
@@ -194,24 +238,24 @@ export default function LearnPage() {
   return (
     <PatientShell>
       <div className="flex items-center gap-2">
-        <span className="animate-float text-3xl">📚</span>
+        <Book className="animate-float text-3xl" />
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">Learn</h1>
-          <p className="text-sm font-semibold text-g-ink-3">Real research, made cute & clear ✨</p>
+          <p className="text-sm font-semibold text-g-ink-3">Real research, made cute & clear <Sparkles size={14} className="inline-block" /></p>
         </div>
       </div>
 
       {/* Quick links to the rest of "take it in" */}
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Link href="/wellness" className="flex items-center gap-2 rounded-3xl border border-g-border bg-white p-3.5 shadow-girly active:scale-[0.98]">
-          <span className="text-2xl">💖</span>
+          <Heart className="text-2xl" />
           <span className="min-w-0">
             <span className="block font-cute text-sm font-bold text-g-ink">Wellness</span>
             <span className="block text-[0.7rem] font-semibold text-g-ink-3">Calm, move, eat, listen</span>
           </span>
         </Link>
         <Link href="/guide" className="flex items-center gap-2 rounded-3xl border border-g-border bg-white p-3.5 shadow-girly active:scale-[0.98]">
-          <span className="text-2xl">📗</span>
+          <ScrollText className="text-2xl" />
           <span className="min-w-0">
             <span className="block font-cute text-sm font-bold text-g-ink">The basics</span>
             <span className="block text-[0.7rem] font-semibold text-g-ink-3">Evidence-based facts</span>
@@ -221,7 +265,10 @@ export default function LearnPage() {
 
       {/* Ask MyPMOS */}
       <div className="mt-4 rounded-3xl bg-candy p-5 shadow-girly-pop">
-        <p className="font-cute text-lg font-bold text-white">Ask MyPMOS 💭</p>
+        <div className="flex items-center gap-2">
+          <MessageCircleQuestion size={20} className="text-white" />
+          <p className="font-cute text-lg font-bold text-white">Ask MyPMOS</p>
+        </div>
         <p className="mt-0.5 text-sm font-semibold text-white/90">A clear answer pulled from trusted research, personalized to you.</p>
         <div className="mt-3 flex items-center gap-2 rounded-full bg-white px-2 py-1.5">
           <input
@@ -249,14 +296,14 @@ export default function LearnPage() {
       {(asking || answer || askError) && (
         <div className="mt-3 rounded-3xl border border-g-border bg-white p-5 shadow-girly">
           {asking ? (
-            <p className="text-sm font-bold text-g-ink-3">MyPMOS is thinking… 🌸</p>
+            <p className="text-sm font-bold text-g-ink-3">MyPMOS is thinking…</p>
           ) : askError ? (
-            <p className="text-sm font-bold text-g-pink-deep">💔 {askError}</p>
+            <p className="text-sm font-bold text-g-pink-deep">Error: {askError}</p>
           ) : (
             <>
               <RichText text={answer!} />
               <p className="mt-4 rounded-2xl bg-g-lavender-soft px-3 py-2 text-xs font-bold text-g-ink">
-                🩺 General info, not medical advice. MyPMOS never diagnoses — please see a doctor.
+                General info, not medical advice. MyPMOS never diagnoses — please see a doctor.
               </p>
             </>
           )}
@@ -306,7 +353,7 @@ export default function LearnPage() {
               </div>
             )}
             <p className="mt-3 text-[0.7rem] font-semibold text-g-ink-3">
-              Pulled from the web and summarized. Always check with your doctor before acting on anything. 💗
+              Pulled from the web and summarized. Always check with your doctor before acting on anything.
             </p>
           </div>
         )}
@@ -323,7 +370,7 @@ export default function LearnPage() {
               topic === t ? "border-transparent bg-candy text-white shadow-girly" : "border-g-border bg-white text-g-ink-2"
             )}
           >
-            {t === "Read" ? `📑 Read${readIds.length ? ` (${readIds.length})` : ""}` : t}
+            {t === "Read" ? `Read${readIds.length ? ` (${readIds.length})` : ""}` : t}
           </button>
         ))}
       </div>
@@ -340,15 +387,17 @@ export default function LearnPage() {
             return (
               <article key={a.id} className="flex gap-3 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
                 <Link href={`/learn/${a.id}`} onClick={() => setReadIds((r) => (r.includes(a.id) ? r : [...r, a.id]))} className="flex min-w-0 flex-1 gap-3 active:scale-[0.99]">
-                  <span className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl", a.tint)}>{a.emoji}</span>
+                  <span className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-2xl", a.tint)}>
+                    <MedicalIcon name="document" size={24} className="text-g-ink" />
+                  </span>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-bold text-g-ink-3">{a.topic}</span>
-                      {a.fresh && <span className="rounded-full bg-candy px-2 py-0.5 text-[0.6rem] font-bold text-white">NEW ✨</span>}
+                      {a.fresh && <span className="rounded-full bg-candy px-2 py-0.5 text-[0.6rem] font-bold text-white">NEW</span>}
                     </div>
                     <h3 className="font-cute text-base font-bold leading-snug text-g-ink">{a.title}</h3>
                     <p className="mt-0.5 line-clamp-2 text-sm font-medium text-g-ink-2">{a.blurb}</p>
-                    <p className="mt-1.5 text-xs font-bold text-g-pink-deep">📖 {a.read} read</p>
+                    <p className="mt-1.5 text-xs font-bold text-g-pink-deep">{a.read} read</p>
                   </div>
                 </Link>
                 <button
@@ -359,7 +408,7 @@ export default function LearnPage() {
                     read ? "bg-candy text-white" : "bg-g-canvas text-g-ink-3"
                   )}
                 >
-                  ✓
+                  <MedicalIcon name="✓" size={14} className={read ? "text-white" : "text-g-ink-3"} />
                 </button>
               </article>
             )

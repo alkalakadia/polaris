@@ -1,3 +1,4 @@
+import { FeedbackButton } from "@/components/feedback-button"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono, Fraunces, Quicksand, Baloo_2, DM_Serif_Display, DM_Sans } from "next/font/google"
 import { AuthProvider } from "@/lib/auth"
@@ -75,6 +76,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <PwaRegister />
+        <FeedbackButton />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

@@ -120,8 +120,6 @@ export default function PostDetailPage() {
         <div className="mt-4 h-32 animate-pulse rounded-3xl bg-white/70" />
       ) : post === "missing" ? (
         <div className="mt-6 rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
-          <span className="text-4xl">🌸</span>
-          <p className="mt-3 font-cute text-lg font-bold text-g-ink">This post is gone</p>
           <Link href="/community" className="mt-3 inline-block rounded-full bg-candy px-5 py-2.5 text-sm font-bold text-white">
             Back to community
           </Link>
@@ -167,26 +165,20 @@ export default function PostDetailPage() {
               </>
             )}
 
-            <div className="mt-4 flex items-center gap-4 text-sm font-bold text-g-ink-3">
-              <button onClick={onLike} className="inline-flex items-center gap-1.5 active:scale-90">
-                <span className={post.liked_by_me ? "" : "grayscale"}>💗</span> {post.hearts}
-              </button>
-              <span className="inline-flex items-center gap-1.5">💬 {post.comment_count}</span>
-              {user && post.user_id === user.id && !editing && (
-                <span className="ml-auto flex items-center gap-3">
-                  {isEditable(post.created_at) && (
-                    <button onClick={startEdit} className="text-g-ink-3 active:scale-95">✏️ Edit</button>
-                  )}
-                  <button onClick={removePost} className="text-g-pink-deep active:scale-95">🗑 Delete</button>
-                </span>
-              )}
-              {user && post.user_id !== user.id && !editing && (
+            {user && post.user_id === user.id && !editing && (
+              <span className="ml-auto flex items-center gap-3">
+                {isEditable(post.created_at) && (
+                  <button onClick={startEdit} className="text-g-ink-3 active:scale-95">Edit</button>
+                )}
+                <button onClick={removePost} className="text-g-pink-deep active:scale-95">Delete</button>
+              </span>
+            )}
+            {user && post.user_id !== user.id && !editing && (
                 <span className="ml-auto flex items-center gap-3">
                   <button onClick={() => report({ postId: post.id })} className="text-g-ink-3 active:scale-95">⚠️ Report</button>
                   <button onClick={() => blockAuthor(post.user_id)} className="text-g-pink-deep active:scale-95">🚫 Block</button>
                 </span>
               )}
-            </div>
             {user && post.user_id === user.id && !isEditable(post.created_at) && !editing && (
               <p className="mt-1.5 text-[0.7rem] font-semibold text-g-ink-3">Posts can be edited for 1 hour after posting.</p>
             )}
@@ -217,7 +209,6 @@ export default function PostDetailPage() {
             ))}
             {comments && comments.length === 0 && (
               <p className="rounded-2xl bg-candy-soft px-4 py-3 text-sm font-bold text-g-ink">
-                No replies yet — be the first to send some love 💗
               </p>
             )}
           </div>

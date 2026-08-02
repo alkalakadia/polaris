@@ -5,6 +5,7 @@ import { useParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { RichText } from "@/components/rich-text"
+import { MedicalIcon } from "@/components/medical-icon"
 import { cn } from "@/lib/cn"
 import { getArticle, markRead } from "@/lib/learn"
 
@@ -71,8 +72,8 @@ export default function ArticlePage() {
 
       {/* Article header */}
       <div className="mt-3 flex items-center gap-3">
-        <span className={cn("grid h-16 w-16 shrink-0 place-items-center rounded-3xl text-3xl", article.tint)}>
-          {article.emoji}
+        <span className={cn("grid h-16 w-16 shrink-0 place-items-center rounded-3xl", article.tint)}>
+          <MedicalIcon name="help" size={28} className="text-g-ink" />
         </span>
         <div>
           <p className="text-xs font-bold text-g-ink-3">{article.topic}</p>
@@ -90,7 +91,7 @@ export default function ArticlePage() {
           </div>
         ) : error ? (
           <div className="text-center">
-            <p className="text-sm font-bold text-g-pink-deep">💔 {error}</p>
+            <p className="text-sm font-bold text-g-pink-deep">{error}</p>
             <button
               onClick={() => generate(true)}
               className="mt-3 rounded-full bg-candy px-5 py-2.5 text-sm font-bold text-white active:scale-95"
@@ -102,8 +103,7 @@ export default function ArticlePage() {
           <>
             <RichText text={content!} />
             <p className="mt-5 rounded-2xl bg-g-lavender-soft px-3 py-2.5 text-xs font-bold text-g-ink">
-              🩺 This is general education, not medical advice. MyPMOS never diagnoses — please talk to
-              your gynecologist about your own health.
+              This is general education, not medical advice. MyPMOS never diagnoses — please talk to your gynecologist about your own health.
             </p>
           </>
         )}

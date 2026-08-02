@@ -13,23 +13,24 @@ export interface Sub {
   id: string
   name: string
   emoji: string
+  icon: string
   tint: string
 }
 
 /** Fixed community categories (the "subs"). */
 export const SUBS: Sub[] = [
-  { id: "all", name: "For you", emoji: "🌸", tint: "bg-candy-soft" },
-  { id: "newly", name: "Newly diagnosed", emoji: "🫧", tint: "bg-g-pink-soft" },
-  { id: "ttc", name: "Trying to conceive", emoji: "🤍", tint: "bg-g-peach-soft" },
-  { id: "skin", name: "Skin & hair", emoji: "✨", tint: "bg-g-lavender-soft" },
-  { id: "food", name: "Food & cravings", emoji: "🍓", tint: "bg-g-mint-soft" },
-  { id: "wins", name: "Wins", emoji: "🎉", tint: "bg-g-butter-soft" },
-  { id: "vent", name: "Vent space", emoji: "💗", tint: "bg-g-sky-soft" },
+  { id: "all", name: "For you", emoji: "🌸", icon: "community", tint: "bg-candy-soft" },
+  { id: "newly", name: "Newly diagnosed", emoji: "🫧", icon: "alertTriangle", tint: "bg-g-pink-soft" },
+  { id: "ttc", name: "Trying to conceive", emoji: "🤍", icon: "target", tint: "bg-g-peach-soft" },
+  { id: "skin", name: "Skin & hair", emoji: "✨", icon: "sparkles", tint: "bg-g-lavender-soft" },
+  { id: "food", name: "Food & cravings", emoji: "🍓", icon: "leaf", tint: "bg-g-mint-soft" },
+  { id: "wins", name: "Wins", emoji: "🎉", icon: "star", tint: "bg-g-butter-soft" },
+  { id: "vent", name: "Vent space", emoji: "💗", icon: "messageCircle", tint: "bg-g-sky-soft" },
 ]
 
-export function subName(id: string): { name: string; emoji: string } {
+export function subName(id: string): { name: string; emoji: string; icon: string } {
   const s = SUBS.find((x) => x.id === id)
-  return s ? { name: s.name, emoji: s.emoji } : { name: id, emoji: "🌸" }
+  return s ? { name: s.name, emoji: s.emoji, icon: s.icon } : { name: id, emoji: "🌸", icon: "community" }
 }
 
 export interface PostMedia {

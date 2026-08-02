@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { GirlyLogo, PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { useAuth } from "@/lib/auth"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
 import { getResult } from "@/lib/assessments"
@@ -48,19 +49,19 @@ function greeting(): string {
 
 /** "For you" nudges: what's worth logging next, from what you've captured so far. */
 function SmartPrompts({ filledToday, onPeriod }: { filledToday: number; onPeriod: boolean }) {
-  const [prompts, setPrompts] = useState<{ emoji: string; text: string; href: string }[]>([])
+  const [prompts, setPrompts] = useState<{ icon: string; text: string; href: string }[]>([])
   useEffect(() => {
-    const out: { emoji: string; text: string; href: string }[] = []
-    if (onPeriod) out.push({ emoji: "🩸", text: "You're on your period — log today's flow", href: "/track" })
-    if (filledToday === 0 && !onPeriod) out.push({ emoji: "📝", text: "Log how you're feeling today", href: "/track" })
+    const out: { icon: string; text: string; href: string }[] = []
+    if (onPeriod) out.push({ icon: "period", text: "You're on your period — log today's flow", href: "/track" })
+    if (filledToday === 0 && !onPeriod) out.push({ icon: "checklist", text: "Log how you're feeling today", href: "/track" })
     const h = getHistory()
-    if (!h.mainConcern) out.push({ emoji: "🎯", text: "Tell us your main concern", href: "/history" })
-    if (getGoals().length === 0) out.push({ emoji: "✨", text: "Set your top 2 goals", href: "/goals" })
+    if (!h.mainConcern) out.push({ icon: "target", text: "Tell us your main concern", href: "/history" })
+    if (getGoals().length === 0) out.push({ icon: "lightbulb", text: "Set your top 2 goals", href: "/goals" })
     const fg = getResult("fg")
     if (!fg || Date.now() - fg.updatedAt > 21 * 86_400_000)
-      out.push({ emoji: "🪶", text: fg ? "Update your hair self-score" : "Try the hair self-score", href: "/assessments" })
-    if (getLabs().length === 0) out.push({ emoji: "🧪", text: "Add your latest labs", href: "/labs" })
-    if (h.contraception.length === 0) out.push({ emoji: "💊", text: "Add your birth control history", href: "/history" })
+      out.push({ icon: "scissors", text: fg ? "Update your hair self-score" : "Try the hair self-score", href: "/assessments" })
+    if (getLabs().length === 0) out.push({ icon: "labs", text: "Add your latest labs", href: "/labs" })
+    if (h.contraception.length === 0) out.push({ icon: "medication", text: "Add your birth control history", href: "/history" })
     setPrompts(out.slice(0, 3))
   }, [filledToday, onPeriod])
 
@@ -75,9 +76,11 @@ function SmartPrompts({ filledToday, onPeriod }: { filledToday: number; onPeriod
             href={p.href}
             className="flex items-center gap-3 rounded-3xl border border-g-border bg-white px-4 py-3 shadow-girly active:scale-[0.99]"
           >
-            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-candy-soft text-lg">{p.emoji}</span>
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-candy-soft text-lg">
+              <MedicalIcon name={p.icon} size={18} className="text-g-ink" />
+            </span>
             <span className="flex-1 text-sm font-bold text-g-ink">{p.text}</span>
-            <span className="text-g-ink-3">›</span>
+            <ChevronRight size={18} className="text-g-ink-3" />
           </Link>
         ))}
       </div>
@@ -126,13 +129,13 @@ export default function TodayPage() {
   // A friendly list of what's been logged today, for the summary card.
   const loggedTags: string[] = []
   if (entry) {
-    if (flowLabel) loggedTags.push(`${flowLabel.emoji} ${flowLabel.label}`)
-    if (energyLabel) loggedTags.push(`${energyLabel.emoji} ${energyLabel.label}`)
+    if (flowLabel) loggedTags.push(flowLabel.label)
+    if (energyLabel) loggedTags.push(energyLabel.label)
     for (const g of CHIP_GROUPS) {
       const v = entry[g.key] as string[] | undefined
       if (v && v.length) {
         const opt = g.options.find((o) => o.id === v[0])
-        if (opt) loggedTags.push(`${opt.emoji} ${opt.label}${v.length > 1 ? ` +${v.length - 1}` : ""}`)
+        if (opt) loggedTags.push(`${opt.label}${v.length > 1 ? ` +${v.length - 1}` : ""}`)
       }
     }
   }
@@ -218,7 +221,9 @@ export default function TodayPage() {
                 : `${filled} thing${filled === 1 ? "" : "s"} logged so far — keep going!`}
             </p>
           </div>
-          <span className="animate-float text-4xl">🌸</span>
+          <span className="animate-float text-g-white">
+            <MedicalIcon name="health" size={34} className="text-white" />
+          </span>
         </div>
       </Link>
 
@@ -241,7 +246,9 @@ export default function TodayPage() {
         href="/export"
         className="mt-5 flex items-center gap-3 rounded-3xl border-2 border-g-peach bg-white p-4 shadow-girly-pop transition active:scale-[0.98]"
       >
-        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-g-peach-soft text-2xl">📄</span>
+        <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-g-peach-soft">
+          <MedicalIcon name="document" size={28} className="text-g-ink" />
+        </span>
         <div className="min-w-0 flex-1">
           <p className="font-cute text-lg font-bold text-g-ink">Gyno visit PDF</p>
           <p className="text-sm font-semibold text-g-ink-3">Turn what you&apos;ve tracked into a doctor-ready summary</p>
@@ -251,14 +258,14 @@ export default function TodayPage() {
 
       {/* Quick links to the rest of the app */}
       <div className="mt-3 grid grid-cols-3 gap-3">
-        <FeatureCard href="/insights" emoji="✨" title="Insights" sub="Your patterns" tint="bg-g-lavender-soft" />
-        <FeatureCard href="/community" emoji="💬" title="Community" sub="Connect & ask" tint="bg-g-pink-soft" />
-        <FeatureCard href="/learn" emoji="📚" title="Learn" sub="Real research" tint="bg-g-mint-soft" />
+        <FeatureCard href="/insights" icon="insights" title="Insights" sub="Your patterns" tint="bg-g-lavender-soft" />
+        <FeatureCard href="/community" icon="community" title="Community" sub="Connect & ask" tint="bg-g-pink-soft" />
+        <FeatureCard href="/learn" icon="learn" title="Learn" sub="Real research" tint="bg-g-mint-soft" />
       </div>
 
       <p className="mt-6 px-2 text-center text-xs font-semibold text-g-ink-3">
         MyPMOS is your companion, not a doctor. We never diagnose. For medical
-        concerns, please see a healthcare provider. 💗
+        concerns, please see a healthcare provider.
       </p>
     </PatientShell>
   )
@@ -345,7 +352,9 @@ function FocusSection({
               href={c.href}
               className="flex items-center gap-3 rounded-3xl border border-g-border bg-white px-4 py-3.5 shadow-girly active:scale-[0.99]"
             >
-              <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-xl", TINT[id])}>{m.emoji}</span>
+              <span className={cn("grid h-11 w-11 shrink-0 place-items-center rounded-2xl text-xl", TINT[id])}>
+          <MedicalIcon name={m.id} size={22} className="text-current" />
+        </span>
               <span className="min-w-0 flex-1">
                 <span className="block font-cute text-base font-bold text-g-ink">{m.label}</span>
                 <span className="block text-xs font-semibold text-g-ink-3">{c.sub}</span>
@@ -369,7 +378,10 @@ function LearningCard({ anchorDate }: { anchorDate: string | null }) {
     : null
   return (
     <section className="mt-5 rounded-[2rem] border border-g-border bg-white p-5 shadow-girly">
-      <p className="font-cute text-lg text-g-ink">🌙 Learning your cycle</p>
+      <div className="flex items-center gap-2">
+        <MedicalIcon name="cycle" size={24} className="text-g-ink" />
+        <p className="font-cute text-lg text-g-ink">Learning your cycle</p>
+      </div>
       {anchorDate ? (
         <p className="mt-1 text-sm font-semibold text-g-ink-3">
           Last period: {fmtDate(anchorDate)}
@@ -386,7 +398,10 @@ function LearningCard({ anchorDate }: { anchorDate: string | null }) {
         href="/period"
         className="mt-3 flex items-center justify-between rounded-2xl bg-g-pink-soft px-4 py-2.5 text-sm font-bold text-g-pink-deep active:scale-[0.99]"
       >
-        <span>🩸 Log or update my period</span>
+        <span className="inline-flex items-center gap-2">
+          <MedicalIcon name="period" size={14} className="text-g-pink-deep" />
+          Log or update my period
+        </span>
         <span>›</span>
       </Link>
     </section>
@@ -395,8 +410,13 @@ function LearningCard({ anchorDate }: { anchorDate: string | null }) {
 
 function CycleCard({ cycle, profile, onPeriodLogged }: { cycle: CycleStatus; profile: CycleProfile; onPeriodLogged: boolean }) {
   const meta = PHASE_META[cycle.phase]
-  // Only say "Period" if she actually logged flow; otherwise it's an estimate.
+  const pct = Math.min(100, Math.round((cycle.cycleDay ?? 0) / cycle.cycleLength * 100))
   const phaseLabel = cycle.phase === "menstrual" && !onPeriodLogged ? "Period expected" : meta.label
+  const nextLine = cycle.isLate
+    ? `Period was expected ~${cycle.daysLate} day${cycle.daysLate === 1 ? "" : "s"} ago`
+    : `Period in ~${cycle.nextPeriodInDays} day${cycle.nextPeriodInDays === 1 ? "" : "s"}${
+        cycle.nextPeriodDate ? ` · around ${fmtDate(cycle.nextPeriodDate)}` : ""
+      }`
 
   // Onboarded but no period date yet → invite them to add it.
   if (cycle.cycleDay === null) {
@@ -405,26 +425,22 @@ function CycleCard({ cycle, profile, onPeriodLogged }: { cycle: CycleStatus; pro
         href="/period"
         className="mt-5 block rounded-[2rem] border border-g-border bg-white p-5 shadow-girly transition active:scale-[0.99]"
       >
-        <p className="font-cute text-lg text-g-ink">🌸 Add your last period</p>
-        <p className="mt-1 text-sm font-semibold text-g-ink-3">
+        <div className="flex items-center gap-2">
+          <MedicalIcon name="calendar" size={24} className="text-g-ink" />
+          <p className="font-cute text-lg text-g-ink">Add your last period</p>
+        </div>
+        <p className="mt-3 text-sm font-semibold text-g-ink-3">
           Tell the tracker when your last period started and MyPMOS will show your cycle day + what to expect.
         </p>
       </Link>
     )
   }
 
-  const pct = Math.min(100, Math.round((cycle.cycleDay / cycle.cycleLength) * 100))
-  const nextLine = cycle.isLate
-    ? `Period was expected ~${cycle.daysLate} day${cycle.daysLate === 1 ? "" : "s"} ago`
-    : `Period in ~${cycle.nextPeriodInDays} day${cycle.nextPeriodInDays === 1 ? "" : "s"}${
-        cycle.nextPeriodDate ? ` · around ${fmtDate(cycle.nextPeriodDate)}` : ""
-      }`
-
   return (
     <section className="mt-5 rounded-[2rem] border border-g-border bg-white p-5 shadow-girly">
       <div className="flex items-center gap-3">
-        <span className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-3xl", meta.tint)}>
-          {meta.emoji}
+        <span className={cn("grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-current", meta.tint)}>
+          <MedicalIcon name={cycle.phase} size={22} className="text-current" />
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-cute text-xl leading-tight text-g-ink">
@@ -433,13 +449,13 @@ function CycleCard({ cycle, profile, onPeriodLogged }: { cycle: CycleStatus; pro
           <p className="text-sm font-semibold text-g-ink-3">{nextLine}</p>
         </div>
         {cycle.fertileWindow && !cycle.isLate && (
-          <span className="shrink-0 rounded-full bg-g-peach-soft px-2.5 py-1 text-xs font-bold text-g-ink">
-            ✨ Fertile
+          <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-g-peach-soft px-2.5 py-1 text-xs font-bold text-g-ink">
+            <MedicalIcon name="target" size={12} className="text-g-ink" />
+            Fertile
           </span>
         )}
       </div>
 
-      {/* cycle progress */}
       <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-g-canvas-2">
         <div className="h-full rounded-full bg-candy" style={{ width: `${pct}%` }} />
       </div>
@@ -450,13 +466,13 @@ function CycleCard({ cycle, profile, onPeriodLogged }: { cycle: CycleStatus; pro
         href="/period"
         className="mt-3 flex items-center justify-between rounded-2xl bg-g-pink-soft px-4 py-2.5 text-sm font-bold text-g-pink-deep active:scale-[0.99]"
       >
-        <span>🩸 Log or update my period</span>
-        <span>›</span>
+        <span>Log or update my period</span>
+        <ChevronRight size={18} className="text-g-pink-deep" />
       </Link>
 
       <p className="mt-3 text-[0.7rem] font-semibold text-g-ink-3">
         Estimate from your average{cycle.irregular ? ", and your cycles vary so it's a rough guide" : ""}.
-        Not medical advice. 💗
+        Not medical advice.
       </p>
     </section>
   )
@@ -464,13 +480,13 @@ function CycleCard({ cycle, profile, onPeriodLogged }: { cycle: CycleStatus; pro
 
 function FeatureCard({
   href,
-  emoji,
+  icon,
   title,
   sub,
   tint,
 }: {
   href: string
-  emoji: string
+  icon: string
   title: string
   sub: string
   tint: string
@@ -480,7 +496,9 @@ function FeatureCard({
       href={href}
       className="rounded-3xl border border-g-border bg-white p-4 shadow-girly transition active:scale-[0.97]"
     >
-      <span className={`grid h-11 w-11 place-items-center rounded-2xl text-xl ${tint}`}>{emoji}</span>
+      <span className={`grid h-11 w-11 place-items-center rounded-2xl text-xl ${tint}`}>
+        <MedicalIcon name={icon} size={22} className="text-current" />
+      </span>
       <p className="mt-3 font-cute text-base font-bold text-g-ink">{title}</p>
       <p className="text-sm font-semibold text-g-ink-3">{sub}</p>
     </Link>

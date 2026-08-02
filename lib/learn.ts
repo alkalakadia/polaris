@@ -7,7 +7,6 @@ import type { CycleProfile } from "@/lib/profile"
 export interface Article {
   id: string
   topic: string
-  emoji: string
   title: string
   blurb: string
   read: string
@@ -31,7 +30,6 @@ export const ARTICLES: Article[] = [
   {
     id: "pcos-101",
     topic: "PMOS 101",
-    emoji: "🌸",
     tint: "bg-g-pink-soft",
     title: "What PMOS actually is (in plain words)",
     blurb: "The four phenotypes, why periods get irregular, and what the name really means.",
@@ -43,7 +41,6 @@ export const ARTICLES: Article[] = [
   {
     id: "insulin-resistance",
     topic: "Insulin & food",
-    emoji: "🍓",
     tint: "bg-g-mint-soft",
     title: "Insulin resistance, explained gently",
     blurb: "Why so many of us hear about it, and small food swaps research actually supports.",
@@ -55,7 +52,6 @@ export const ARTICLES: Article[] = [
   {
     id: "inositol-2026",
     topic: "New research",
-    emoji: "🔬",
     tint: "bg-g-lavender-soft",
     fresh: true,
     title: "What the research says about inositol",
@@ -68,7 +64,6 @@ export const ARTICLES: Article[] = [
   {
     id: "skin-hair",
     topic: "Skin & hair",
-    emoji: "✨",
     tint: "bg-g-peach-soft",
     title: "Hirsutism & acne: your options",
     blurb: "From everyday care to talking to a derm — what each approach is and isn't.",
@@ -80,7 +75,6 @@ export const ARTICLES: Article[] = [
   {
     id: "mood",
     topic: "Mental health",
-    emoji: "💗",
     tint: "bg-g-sky-soft",
     title: "PMOS and your mood",
     blurb: "The link between hormones and how you feel, and when to reach out for support.",
@@ -92,7 +86,6 @@ export const ARTICLES: Article[] = [
   {
     id: "fertility",
     topic: "Fertility",
-    emoji: "🤍",
     tint: "bg-g-pink-soft",
     title: "PMOS & trying to conceive",
     blurb: "How PMOS affects ovulation, and the paths people explore with their doctor.",
