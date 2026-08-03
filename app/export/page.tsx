@@ -363,7 +363,13 @@ export default function ExportPage() {
         )}
 
         {/* Download */}
-NO_OP        <p className="mt-2 text-center text-xs font-semibold text-g-ink-3">
+        <button
+          onClick={() => window.print()}
+          className="mt-5 w-full rounded-full bg-candy py-4 font-cute text-lg font-bold text-white shadow-girly-pop active:scale-[0.98]"
+        >
+          Download my PDF
+        </button>
+        <p className="mt-2 text-center text-xs font-semibold text-g-ink-3">
           Tip: choose “Save as PDF” in the print dialog. Preview below.
         </p>
       </div>
@@ -372,7 +378,11 @@ NO_OP        <p className="mt-2 text-center text-xs font-semibold text-g-ink-3">
       <div className="print-area mt-6 overflow-hidden rounded-3xl border border-g-border bg-white shadow-girly">
         {/* Cover */}
         <div className="p-6 text-white" style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}>
-NO_OP          <p className="mt-1 text-sm font-semibold opacity-90">Tracked {dateRange}</p>
+          <p className="text-sm font-bold opacity-90">MyPMOS · My health summary</p>
+          <h2 className="font-cute text-3xl font-extrabold leading-tight">
+            {cfg.name ? `${cfg.name}'s` : "My"} gyno visit notes
+          </h2>
+          <p className="mt-1 text-sm font-semibold opacity-90">Tracked {dateRange}</p>
         </div>
 
         <div className="space-y-5 p-6">

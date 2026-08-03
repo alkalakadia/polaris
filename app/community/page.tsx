@@ -216,7 +216,7 @@ function Composer({ defaultSub, onPosted }: { defaultSub: string; onPosted: () =
         onChange={(e) => setBody(e.target.value)}
         rows={3}
         placeholder="Share a little more (optional)"
-        className="mt-2 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-sm font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
+        className="mt-2 w-full resize-none rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       {/* Photo / video picker */}
       <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -284,7 +284,10 @@ function Loading() {
 function Empty({ signedIn, onCompose }: { signedIn: boolean; onCompose: () => void }) {
   return (
     <div className="rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
-NO_OP      <p className="mt-3 font-cute text-lg font-bold text-g-ink">No posts here yet</p>
+      <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-g-canvas text-g-pink-deep">
+        <MedicalIcon name="community" size={24} />
+      </span>
+      <p className="mt-3 font-cute text-lg font-bold text-g-ink">No posts here yet</p>
       <p className="mt-1 text-sm font-semibold text-g-ink-3">
         {signedIn ? "Be the first to start the conversation" : "Sign in to start the conversation"}
       </p>
