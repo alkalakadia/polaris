@@ -1,5 +1,6 @@
 "use client"
 
+import { LearnChat } from "@/components/learn-chat";
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { PatientShell } from "@/components/patient-shell"
@@ -86,11 +87,6 @@ export default function LearnPage() {
   const [readIds, setReadIds] = useState<string[]>([])
   const [context, setContext] = useState("")
 
-  // Ask MyPMOS
-  const [q, setQ] = useState("")
-  const [answer, setAnswer] = useState<string | null>(null)
-  const [asking, setAsking] = useState(false)
-  const [askError, setAskError] = useState<string | null>(null)
 
   // Latest research (grounded, cited)
   const [resText, setResText] = useState<string | null>(null)
@@ -200,29 +196,6 @@ export default function LearnPage() {
     }
   }
 
-  async function ask(question: string) {
-    const text = question.trim()
-    if (!text || asking) return
-    setQ(text)
-    setAsking(true)
-    setAskError(null)
-    setAnswer(null)
-    try {
-      const res = await fetch("/api/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mode: "qa", question: text, context }),
-      })
-      const data = await res.json()
-      if (!res.ok) setAskError(data.error || "Something went wrong.")
-      else setAnswer(data.answer)
-    } catch {
-      setAskError("Couldn't reach MyPMOS. Try again?")
-    } finally {
-      setAsking(false)
-    }
-  }
-
   function onToggleRead(id: string) {
     setReadIds(toggleRead(id))
   }
@@ -263,52 +236,8 @@ export default function LearnPage() {
         </Link>
       </div>
 
-      {/* Ask MyPMOS */}
-      <div className="mt-4 rounded-3xl bg-candy p-5 shadow-girly-pop">
-        <div className="flex items-center gap-2">
-          <MessageCircleQuestion size={20} className="text-white" />
-          <p className="font-cute text-lg font-bold text-white">Ask MyPMOS</p>
-        </div>
-        <p className="mt-0.5 text-sm font-semibold text-white/90">A clear answer pulled from trusted research, personalized to you.</p>
-        <div className="mt-3 flex items-center gap-2 rounded-full bg-white px-2 py-1.5">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && ask(q)}
-            placeholder="e.g. is dairy bad for PMOS?"
-            className="flex-1 bg-transparent px-3 py-1.5 text-base font-semibold text-g-ink outline-none placeholder:text-g-ink-3"
-          />
-          <button onClick={() => ask(q)} disabled={asking || !q.trim()} className="rounded-full bg-candy px-4 py-2 text-sm font-bold text-white active:scale-95 disabled:opacity-60">
-            {asking ? "…" : "Ask"}
-          </button>
-        </div>
-        {!answer && !asking && !askError && (
-          <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
-            {SUGGESTIONS.map((s) => (
-              <button key={s} onClick={() => ask(s)} className="shrink-0 rounded-full bg-white/25 px-3 py-1.5 text-xs font-bold text-white active:scale-95">
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {(asking || answer || askError) && (
-        <div className="mt-3 rounded-3xl border border-g-border bg-white p-5 shadow-girly">
-          {asking ? (
-            <p className="text-sm font-bold text-g-ink-3">MyPMOS is thinking…</p>
-          ) : askError ? (
-            <p className="text-sm font-bold text-g-pink-deep">Error: {askError}</p>
-          ) : (
-            <>
-              <RichText text={answer!} />
-              <p className="mt-4 rounded-2xl bg-g-lavender-soft px-3 py-2 text-xs font-bold text-g-ink">
-                General info, not medical advice. MyPMOS never diagnoses — please see a doctor.
-              </p>
-            </>
-          )}
-        </div>
-      )}
+      <LearnChat />
+  
 
       {/* Latest research — live, credible, cited, and personalized */}
       <section className="mt-4 rounded-3xl border border-g-border bg-white p-5 shadow-girly">
