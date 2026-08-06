@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { cn } from "@/lib/cn"
 import {
   GOAL_CATEGORIES,
@@ -31,14 +32,16 @@ export default function GoalsPage() {
 
   return (
     <PatientShell>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
         </button>
-        <span className="animate-float text-3xl">🎯</span>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+          <MedicalIcon name="goals" size={22} className="text-current" />
+        </span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">My goals</h1>
-          <p className="text-sm font-semibold text-g-ink-3">Your two most important goals, one day at a time 💕</p>
+          <p className="text-sm font-semibold text-g-ink-3">Your two most important goals, one day at a time.</p>
         </div>
       </div>
 
@@ -77,7 +80,7 @@ export default function GoalsPage() {
 
       {goals.length >= MAX_GOALS && (
         <p className="mt-4 px-2 text-center text-xs font-semibold text-g-ink-3">
-          Two goals is the sweet spot. Reach these and you can always swap in new ones 🌷
+          Two goals is the sweet spot. Reach these and you can always swap in new ones.
         </p>
       )}
     </PatientShell>
@@ -103,8 +106,8 @@ function GoalCard({ goal, onCheck, onRemove }: { goal: Goal; onCheck: () => void
             {weekCount}/7 this week
           </p>
         </div>
-        <button onClick={onRemove} className="shrink-0 text-xs font-bold text-g-ink-3 active:scale-90" aria-label="Remove goal">
-          ✕
+        <button onClick={onRemove} className="shrink-0 text-g-ink-3 active:scale-90" aria-label="Remove goal">
+          <MedicalIcon name="x" size={14} className="text-current" />
         </button>
       </div>
 
@@ -169,13 +172,19 @@ function AddGoal({ onAdded, onCancel }: { onAdded: () => void; onCancel: () => v
               cat === c.id ? "border-transparent bg-candy text-white" : "border-g-border bg-g-canvas text-g-ink-2"
             )}
           >
-            <span>{c.emoji}</span>
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-white text-current">
+              <MedicalIcon name={c.emoji} size={12} className="text-current" />
+            </span>
             <span>{c.label}</span>
           </button>
         ))}
       </div>
 
-      {meta.hint && <p className="mt-2 rounded-2xl bg-g-mint-soft px-3 py-2 text-xs font-semibold text-g-ink">💡 {meta.hint}</p>}
+      {meta.hint && (
+        <p className="mt-2 rounded-2xl bg-g-mint-soft px-3 py-2 text-xs font-semibold text-g-ink">
+          <MedicalIcon name="lightbulb" size={14} className="mr-1 inline-block align-text-bottom text-g-ink" /> {meta.hint}
+        </p>
+      )}
 
       <input
         value={title}

@@ -46,7 +46,7 @@ export const MYTHS: MythFact[] = [
 ]
 
 export interface GuideFact {
-  emoji: string
+  icon: string
   title: string
   body: string
 }
@@ -54,32 +54,32 @@ export interface GuideFact {
 /** What the 2023 international guidelines actually say (lifestyle focus). */
 export const GUIDELINE_FACTS: GuideFact[] = [
   {
-    emoji: "🌱",
+    icon: "leaf",
     title: "Lifestyle comes first, for everyone",
     body: "Healthy eating, movement, and sleep are recommended first-line for everyone with PMOS, for overall health and how you feel, not just for weight, and whether you're lean or not.",
   },
   {
-    emoji: "🏃",
+    icon: "activity",
     title: "Movement: aim for 150-300 min a week",
     body: "At least 150-300 minutes of moderate activity weekly (or 75-150 of vigorous), plus muscle-strengthening on 2 days. More (around 250+ min) supports weight goals. Reducing long sitting helps too.",
   },
   {
-    emoji: "🥗",
+    icon: "leaf",
     title: "Food: balanced and sustainable beats 'perfect'",
     body: "No single diet is best. General healthy eating, plenty of whole foods, fiber, and protein, that fits your life and culture is what works. Any calorie reduction (only if you have a weight goal) should be modest and healthy.",
   },
   {
-    emoji: "⚖️",
+    icon: "scale",
     title: "Weight isn't the whole story",
     body: "For those with extra weight, a 5-10% loss can improve cycles, skin, and metabolism. But PMOS affects normal-weight people too, and it's never only about a number on the scale.",
   },
   {
-    emoji: "💗",
+    icon: "heartPulse",
     title: "Mental health is part of care",
     body: "Anxiety and depression are more common with PMOS and are part of guideline care. Screening and support matter, your feelings are not 'in your head'.",
   },
   {
-    emoji: "😴",
+    icon: "moon",
     title: "Sleep and sleep apnea matter",
     body: "Poor sleep affects mood and insulin. If you snore or feel very sleepy by day, it's worth asking your doctor to screen for sleep apnea.",
   },

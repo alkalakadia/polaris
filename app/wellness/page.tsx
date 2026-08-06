@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { WellnessEmbed } from "@/components/wellness-embed"
 import { cn } from "@/lib/cn"
 import {
@@ -22,10 +23,10 @@ import {
 } from "@/lib/wellness"
 
 const HEADING: Record<Category, string> = {
-  calm: "Calm picks 🧘",
-  listen: "Shows we love 🎧",
-  move: "Workouts to try 💪",
-  eat: "Recipes to try 🍓",
+  calm: "Calm picks",
+  listen: "Shows we love",
+  move: "Workouts to try",
+  eat: "Recipes to try",
 }
 const NOUN: Record<Category, string> = {
   calm: "playlists",
@@ -56,10 +57,12 @@ export default function WellnessPage() {
         <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
         </button>
-        <span className="animate-float text-3xl">💖</span>
+        <span className="grid h-10 w-10 place-items-center rounded-2xl bg-g-sky-soft text-g-sky">
+          <MedicalIcon name="heartPulse" size={20} className="text-current" />
+        </span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">Wellness</h1>
-          <p className="text-sm font-semibold text-g-ink-3">Calm, listen, and move — at your own pace 🌷</p>
+          <p className="text-sm font-semibold text-g-ink-3">Calm, listen, and move at your own pace</p>
         </div>
       </div>
 
@@ -70,13 +73,17 @@ export default function WellnessPage() {
             key={c.id}
             onClick={() => setTab(c.id)}
             className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-bold transition active:scale-95",
+              "flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition active:scale-95",
               tab === c.id
                 ? "border-transparent bg-candy text-white shadow-girly"
                 : "border-g-border bg-white text-g-ink"
             )}
           >
-            <span>{c.emoji}</span>
+            <MedicalIcon
+              name={c.icon}
+              size={14}
+              className={tab === c.id ? "text-white" : "text-g-ink"}
+            />
             <span>{c.name}</span>
           </button>
         ))}
@@ -89,19 +96,26 @@ export default function WellnessPage() {
           href="/guide"
           className="mt-2 flex items-center justify-between rounded-2xl border border-g-border bg-white px-4 py-2.5 text-sm font-bold text-g-ink shadow-girly active:scale-[0.99]"
         >
-          <span>📗 No single diet is &ldquo;best&rdquo; — see what the guidelines say</span>
-          <span className="text-g-ink-3">›</span>
+          <span className="inline-flex items-center gap-2">
+            <MedicalIcon name="bookOpen" size={16} className="text-g-ink-3" />
+            No single diet is “best” — see what the guidelines say
+          </span>
+          <MedicalIcon name="chevronRight" size={16} className="text-g-ink-3" />
         </a>
       )}
 
       {/* Featured today — plays embedded, rotates daily + on refresh */}
       <div className="mt-4 flex items-center justify-between px-1">
-        <h2 className="font-cute text-base font-bold text-g-ink">✨ Featured today</h2>
+        <div className="inline-flex items-center gap-2">
+          <MedicalIcon name="lightbulb" size={18} className="text-g-ink" />
+          <h2 className="font-cute text-base font-bold text-g-ink">Featured today</h2>
+        </div>
         <button
           onClick={() => setSeed((s) => s + 1)}
-          className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-g-pink-deep shadow-girly active:scale-95"
+          className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-xs font-bold text-g-pink-deep shadow-girly active:scale-95"
         >
-          🔄 Refresh
+          <MedicalIcon name="refreshCw" size={14} className="text-g-pink-deep" />
+          Refresh
         </button>
       </div>
       {featured && (
@@ -117,14 +131,17 @@ export default function WellnessPage() {
       {/* Quick ideas (e.g. food tips) */}
       {ideas.length > 0 && (
         <section className="mt-5">
-          <h2 className="px-1 font-cute text-base font-bold text-g-ink">Quick ideas 💡</h2>
+          <div className="inline-flex items-center gap-2 px-1 text-base font-bold text-g-ink">
+            <MedicalIcon name="lightbulb" size={18} className="text-g-ink" />
+            <h2 className="font-cute text-base font-bold text-g-ink">Quick ideas</h2>
+          </div>
           <div className="mt-2 space-y-2">
             {ideas.map((idea, i) => (
               <div
                 key={i}
                 className="flex items-start gap-2.5 rounded-2xl border border-g-border bg-white px-3.5 py-2.5 text-sm font-medium text-g-ink-2 shadow-girly"
               >
-                <span className="text-base leading-snug">🍽️</span>
+                <MedicalIcon name="lightbulb" size={16} className="text-g-ink-3" />
                 <span className="leading-snug">{idea}</span>
               </div>
             ))}
@@ -141,7 +158,10 @@ export default function WellnessPage() {
       {/* Your saved links (embedded players) */}
       {mine.length > 0 && (
         <section className="mt-5">
-          <h2 className="px-1 font-cute text-base font-bold text-g-ink">Your library 💝</h2>
+          <div className="inline-flex items-center gap-2 px-1 text-base font-bold text-g-ink">
+            <MedicalIcon name="bookOpen" size={18} className="text-g-ink" />
+            <h2 className="font-cute text-base font-bold text-g-ink">Your library</h2>
+          </div>
           <div className="mt-2 space-y-3">
             {mine.map((l) => (
               <div key={l.id} className="rounded-3xl border border-g-border bg-white p-3 shadow-girly">
@@ -177,13 +197,13 @@ export default function WellnessPage() {
 
       {tab === "move" && (
         <p className="mt-5 rounded-2xl bg-g-mint-soft px-4 py-3 text-xs font-semibold text-g-ink">
-          🌿 Movement should feel good. Rest when your body asks for it, and check with your doctor before
+          Movement should feel good. Rest when your body asks for it, and check with your doctor before
           starting something new. This isn't medical advice.
         </p>
       )}
       {tab === "eat" && (
         <p className="mt-5 rounded-2xl bg-g-peach-soft px-4 py-3 text-xs font-semibold text-g-ink">
-          🍓 Food ideas, not a meal plan. Everyone's body is different, so take what works for you and check
+          Food ideas, not a meal plan. Everyone's body is different, so take what works for you and check
           with your doctor or a dietitian before big changes. This isn't medical advice.
         </p>
       )}
@@ -205,14 +225,18 @@ function PickCard({ pick }: { pick: Pick }) {
           pick.provider === "spotify" ? "bg-g-mint-soft" : "bg-g-pink-soft"
         )}
       >
-        {pick.provider === "spotify" ? "🎵" : "▶️"}
+        <MedicalIcon
+          name={pick.provider === "spotify" ? "music" : "play"}
+          size={18}
+          className="text-g-ink"
+        />
       </span>
       <div className="min-w-0 flex-1">
         <p className="font-cute text-sm font-bold leading-snug text-g-ink">{pick.title}</p>
         {pick.by && <p className="text-[0.7rem] font-bold text-g-ink-3">{pick.by}</p>}
         <p className="mt-0.5 line-clamp-2 text-xs font-medium text-g-ink-2">{pick.why}</p>
       </div>
-      <span className="shrink-0 text-g-ink-3">↗</span>
+      <MedicalIcon name="chevronRight" size={16} className="shrink-0 text-g-ink-3" />
     </a>
   )
 }
@@ -251,14 +275,14 @@ function AddYourOwn({ category, onAdded }: { category: Category; onAdded: () => 
 
   return (
     <div className="mt-3 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
-      <p className="font-cute text-sm font-bold text-g-ink">Paste a link 💕</p>
+      <p className="font-cute text-sm font-bold text-g-ink">Paste a link</p>
       <p className="mt-0.5 text-xs font-semibold text-g-ink-3">
         A Spotify playlist/podcast or a YouTube video — we&apos;ll play it right here.
       </p>
       <input
         value={url}
         onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://open.spotify.com/… or https://youtu.be/…"
+        placeholder="https://open.spotify.com/... or https://youtu.be/..."
         className="mt-2 w-full rounded-2xl border border-g-border bg-g-canvas px-4 py-3 text-base font-medium text-g-ink outline-none placeholder:text-g-ink-3 focus:border-g-pink"
       />
       <input

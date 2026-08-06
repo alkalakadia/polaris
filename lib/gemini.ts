@@ -20,7 +20,7 @@ export async function askGemini(opts: {
   temperature?: number
   json?: boolean
 }): Promise<{ text?: string; error?: string }> {
-  if (!KEY) return { error: "AI isn't connected yet." }
+  if (!KEY) return { error: "AI assistant unavailable." }
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${KEY}`
   const body = {
     contents: [{ parts: [{ text: opts.prompt }] }],
@@ -64,7 +64,7 @@ export async function askGeminiGrounded(opts: {
   maxTokens?: number
   temperature?: number
 }): Promise<{ text?: string; sources?: { title: string; url: string }[]; error?: string }> {
-  if (!KEY) return { error: "AI isn't connected yet." }
+  if (!KEY) return { error: "AI assistant unavailable." }
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${KEY}`
   const body = {
     contents: [{ parts: [{ text: opts.prompt }] }],

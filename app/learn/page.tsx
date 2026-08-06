@@ -37,7 +37,6 @@ import {
   LinkIcon,
   HeartHandshake,
   ClipboardList,
-  Sparkles,
   BookOpen,
   Check,
   HeartPulse,
@@ -51,7 +50,7 @@ import {
 const topicIconMap: Record<string, LucideIcon> = {
   "PMOS 101": HeartPulse,
   "Insulin & food": Soup,
-  "Skin & hair": Sparkles, // Reusing Sparkles for now, could be more specific
+  "Skin & hair": HeartPulse,
   Fertility: Egg,
   "Mental health": Brain,
   "New research": Lightbulb,
@@ -214,21 +213,28 @@ export default function LearnPage() {
         <Book className="animate-float text-3xl" />
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">Learn</h1>
-          <p className="text-sm font-semibold text-g-ink-3">Real research, made cute & clear <Sparkles size={14} className="inline-block" /></p>
+          <p className="text-sm font-semibold text-g-ink-3 inline-flex items-center gap-1">
+            <MedicalIcon name="research" size={14} className="text-g-ink-3" />
+            Real research, made clear
+          </p>
         </div>
       </div>
 
       {/* Quick links to the rest of "take it in" */}
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Link href="/wellness" className="flex items-center gap-2 rounded-3xl border border-g-border bg-white p-3.5 shadow-girly active:scale-[0.98]">
-          <Heart className="text-2xl" />
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-g-mint-soft text-g-ink">
+            <MedicalIcon name="headphones" size={24} className="text-current" />
+          </span>
           <span className="min-w-0">
             <span className="block font-cute text-sm font-bold text-g-ink">Wellness</span>
             <span className="block text-[0.7rem] font-semibold text-g-ink-3">Calm, move, eat, listen</span>
           </span>
         </Link>
         <Link href="/guide" className="flex items-center gap-2 rounded-3xl border border-g-border bg-white p-3.5 shadow-girly active:scale-[0.98]">
-          <ScrollText className="text-2xl" />
+          <span className="grid h-11 w-11 place-items-center rounded-2xl bg-candy-soft text-g-ink">
+            <MedicalIcon name="bookOpen" size={24} className="text-current" />
+          </span>
           <span className="min-w-0">
             <span className="block font-cute text-sm font-bold text-g-ink">The basics</span>
             <span className="block text-[0.7rem] font-semibold text-g-ink-3">Evidence-based facts</span>
@@ -242,7 +248,12 @@ export default function LearnPage() {
       {/* Latest research — live, credible, cited, and personalized */}
       <section className="mt-4 rounded-3xl border border-g-border bg-white p-5 shadow-girly">
         <div className="flex items-center justify-between">
-          <h2 className="font-cute text-base font-bold text-g-ink">🔬 Latest research for you</h2>
+          <div className="inline-flex items-center gap-2">
+            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-g-sky-soft text-g-sky">
+              <MedicalIcon name="research" size={20} className="text-current" />
+            </span>
+            <h2 className="font-cute text-base font-bold text-g-ink">Latest research for you</h2>
+          </div>
           <button
             onClick={refreshAll}
             disabled={resLoading}
@@ -256,10 +267,16 @@ export default function LearnPage() {
           <div className="mt-3 space-y-2">
             <div className="h-3 w-2/3 animate-pulse rounded-full bg-g-canvas-2" />
             <div className="h-3 w-full animate-pulse rounded-full bg-g-canvas-2" />
-            <p className="pt-1 text-xs font-bold text-g-ink-3">Finding fresh, credible studies… 🔎</p>
+            <div className="mt-1 flex items-center gap-2 text-xs font-bold text-g-ink-3">
+              <MedicalIcon name="search" size={14} className="text-g-ink-3" />
+              <span>Finding fresh, credible studies…</span>
+            </div>
           </div>
         ) : resError ? (
-          <p className="mt-2 text-sm font-bold text-g-pink-deep">💔 {resError}</p>
+          <div className="mt-2 inline-flex items-center gap-2 rounded-2xl bg-g-pink-soft px-3 py-2 text-sm font-bold text-g-pink-deep">
+            <MedicalIcon name="heartCrack" size={16} className="text-g-pink-deep" />
+            <span>{resError}</span>
+          </div>
         ) : (
           <div className="mt-2">
             <RichText text={resText || ""} />
@@ -273,9 +290,10 @@ export default function LearnPage() {
                       href={s.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-full bg-g-canvas px-2.5 py-1 text-xs font-bold text-g-pink-deep underline-offset-2 hover:underline"
+                      className="inline-flex items-center gap-1 rounded-full bg-g-canvas px-2.5 py-1 text-xs font-bold text-g-pink-deep underline-offset-2 hover:underline"
                     >
-                      🔗 {s.title.slice(0, 28)}
+                      <LinkIcon size={12} />
+                      <span>{s.title.slice(0, 28)}</span>
                     </a>
                   ))}
                 </div>
@@ -308,7 +326,7 @@ export default function LearnPage() {
       <div className="mt-4 space-y-3">
         {list.length === 0 ? (
           <p className="rounded-2xl bg-candy-soft px-4 py-4 text-center text-sm font-bold text-g-ink">
-            {topic === "Read" ? "No saved reads yet — tap ✓ on an article to keep it here" : "Nothing here yet."}
+            {topic === "Read" ? "No saved reads yet — tap the checkmark on an article to keep it here" : "Nothing here yet."}
           </p>
         ) : (
           list.map((a) => {
@@ -337,7 +355,7 @@ export default function LearnPage() {
                     read ? "bg-candy text-white" : "bg-g-canvas text-g-ink-3"
                   )}
                 >
-                  <MedicalIcon name="✓" size={14} className={read ? "text-white" : "text-g-ink-3"} />
+                  <MedicalIcon name="check" size={14} className={read ? "text-white" : "text-g-ink-3"} />
                 </button>
               </article>
             )

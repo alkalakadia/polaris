@@ -15,11 +15,11 @@
 export type Category = "calm" | "listen" | "move" | "eat"
 export type Provider = "spotify" | "youtube"
 
-export const CATEGORIES: { id: Category; name: string; emoji: string; tagline: string }[] = [
-  { id: "calm", name: "Calm", emoji: "🧘", tagline: "Meditation & music for cramps, anxiety, and rest" },
-  { id: "listen", name: "Listen", emoji: "🎧", tagline: "Podcasts on PMOS, periods, hormones & mental health" },
-  { id: "move", name: "Move", emoji: "💪", tagline: "Gentle, PMOS- and period-friendly workouts" },
-  { id: "eat", name: "Eat", emoji: "🍓", tagline: "Recipes & ideas for hormones, blood sugar & cravings" },
+export const CATEGORIES: { id: Category; name: string; icon: string; tagline: string }[] = [
+  { id: "calm", name: "Calm", icon: "heartPulse", tagline: "Meditation and music for cramps, anxiety, and rest" },
+  { id: "listen", name: "Listen", icon: "headphones", tagline: "Podcasts on PMOS, periods, hormones and mental health" },
+  { id: "move", name: "Move", icon: "activity", tagline: "Gentle, PMOS- and period-friendly workouts" },
+  { id: "eat", name: "Eat", icon: "leaf", tagline: "Recipes and ideas for hormones, blood sugar, and cravings" },
 ]
 
 /** Quick, no-recipe food ideas shown at the top of a tab. */

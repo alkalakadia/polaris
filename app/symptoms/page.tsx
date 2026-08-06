@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useMemo, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { SupportResource } from "@/components/support-resource"
 import { cn } from "@/lib/cn"
 import { getProfile, saveProfile, type CycleProfile } from "@/lib/profile"
@@ -40,14 +41,16 @@ export default function SymptomsPage() {
 
   return (
     <PatientShell>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
         </button>
-        <span className="animate-float text-3xl">📝</span>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+          <MedicalIcon name="checklist" size={22} className="text-current" />
+        </span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">My symptom profile</h1>
-          <p className="text-sm font-semibold text-g-ink-3">Tap anything you experience 💗</p>
+          <p className="text-sm font-semibold text-g-ink-3">Tap anything you experience.</p>
         </div>
       </div>
 
@@ -66,9 +69,12 @@ export default function SymptomsPage() {
         const sel = sp[cat.id] ?? []
         return (
           <section key={cat.id} className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
-            <h2 className="font-cute text-base font-bold text-g-ink">
-              {cat.emoji} {cat.title}
-              {sel.length > 0 && <span className="ml-2 text-sm font-bold text-g-pink-deep">{sel.length}</span>}
+            <h2 className="flex items-center gap-2 font-cute text-base font-bold text-g-ink">
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+                <MedicalIcon name={cat.emoji} size={16} className="text-current" />
+              </span>
+              <span>{cat.title}</span>
+              {sel.length > 0 && <span className="ml-auto text-sm font-bold text-g-pink-deep">{sel.length}</span>}
             </h2>
             {cat.intro && <p className="mt-0.5 text-xs font-semibold text-g-ink-3">{cat.intro}</p>}
             <div className="mt-3 flex flex-wrap gap-2">
@@ -97,7 +103,7 @@ export default function SymptomsPage() {
       })}
 
       <p className="mt-5 px-2 text-center text-xs font-semibold text-g-ink-3">
-        {total > 0 ? `${total} selected` : "Tap the ones that sound like you"} · MyPMOS never diagnoses 💗
+        {total > 0 ? `${total} selected` : "Tap the ones that sound like you"} · MyPMOS never diagnoses.
       </p>
 
       <button

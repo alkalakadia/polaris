@@ -41,21 +41,23 @@ export default function AssessmentsPage() {
   }
 
   if (view === "fg") return <FGRunner onDone={refresh} onCancel={() => setView("hub")} />
-  if (view === "acne") return <SeverityRunner id="acne" title="Acne severity" emoji="🌸" onDone={refresh} onCancel={() => setView("hub")} />
-  if (view === "hairloss") return <SeverityRunner id="hairloss" title="Scalp hair loss / thinning" emoji="💇" onDone={refresh} onCancel={() => setView("hub")} />
+  if (view === "acne") return <SeverityRunner id="acne" title="Acne severity" emoji="heartPulse" onDone={refresh} onCancel={() => setView("hub")} />
+  if (view === "hairloss") return <SeverityRunner id="hairloss" title="Scalp hair loss / thinning" emoji="scissors" onDone={refresh} onCancel={() => setView("hub")} />
   const s = screenerById(view as AssessmentId)
   if (s) return <ScreenerRunner screener={s} onDone={refresh} onCancel={() => setView("hub")} />
 
   return (
     <PatientShell>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
         </button>
-        <span className="animate-float text-3xl">📋</span>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+          <MedicalIcon name="checklist" size={22} className="text-current" />
+        </span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">Check-ins</h1>
-          <p className="text-sm font-semibold text-g-ink-3">Quick, private self-checks your doctor will recognize 💕</p>
+          <p className="text-sm font-semibold text-g-ink-3">Quick, private self-checks your doctor will recognize.</p>
         </div>
       </div>
 

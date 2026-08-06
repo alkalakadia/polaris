@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { cn } from "@/lib/cn"
 import { toDateKey } from "@/lib/tracker"
 import {
@@ -39,14 +40,16 @@ export default function HistoryPage() {
 
   return (
     <PatientShell>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
         </button>
-        <span className="animate-float text-3xl">🗂️</span>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+          <MedicalIcon name="folder" size={22} className="text-current" />
+        </span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">My history</h1>
-          <p className="text-sm font-semibold text-g-ink-3">What matters to you + your birth control 💕</p>
+          <p className="text-sm font-semibold text-g-ink-3">What matters to you, including your birth control.</p>
         </div>
       </div>
 
@@ -64,7 +67,9 @@ export default function HistoryPage() {
                 h.mainConcern?.id === c.id ? "border-transparent bg-candy text-white" : "border-g-border bg-white text-g-ink"
               )}
             >
-              <span className="text-lg">{c.emoji}</span>
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+                <MedicalIcon name={c.emoji} size={16} className="text-current" />
+              </span>
               <span>{c.label}</span>
             </button>
           ))}
@@ -83,7 +88,12 @@ export default function HistoryPage() {
       {/* Birth control timeline */}
       <section className="mt-4">
         <div className="flex items-center justify-between px-1">
-          <h2 className="font-cute text-base font-bold text-g-ink">Birth control history 💊</h2>
+          <h2 className="flex items-center gap-2 font-cute text-base font-bold text-g-ink">
+            <span className="grid h-7 w-7 place-items-center rounded-2xl bg-candy-soft text-current">
+              <MedicalIcon name="pill" size={14} className="text-current" />
+            </span>
+            Birth control history
+          </h2>
           {!adding && (
             <button onClick={() => setAdding(true)} className="rounded-full bg-candy px-3.5 py-1.5 text-xs font-bold text-white active:scale-95">
               + Add
@@ -109,8 +119,8 @@ export default function HistoryPage() {
             <div key={c.id} className="rounded-2xl border border-g-border bg-white p-3.5 shadow-girly">
               <div className="flex items-start justify-between gap-2">
                 <p className="text-sm font-bold text-g-ink">{contraSummary(c)}</p>
-                <button onClick={() => setH(removeContra(c.id))} className="shrink-0 text-xs font-bold text-g-ink-3 active:scale-90" aria-label="Remove">
-                  ✕
+                <button onClick={() => setH(removeContra(c.id))} className="shrink-0 text-g-ink-3 active:scale-90" aria-label="Remove">
+                  <MedicalIcon name="x" size={14} className="text-current" />
                 </button>
               </div>
               {c.current && <span className="mt-1 inline-block rounded-full bg-g-mint-soft px-2 py-0.5 text-[0.65rem] font-bold text-g-ink">Currently using</span>}
@@ -124,7 +134,7 @@ export default function HistoryPage() {
       </section>
 
       <p className="mt-5 px-2 text-center text-xs font-semibold text-g-ink-3">
-        Private to you. Flows into your visit summary so you don&apos;t have to remember it all. 💗
+        Private to you. Flows into your visit summary so you don&apos;t have to remember it all.
       </p>
     </PatientShell>
   )

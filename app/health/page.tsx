@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { ArrowLeft } from "lucide-react"
 import { PatientShell } from "@/components/patient-shell"
+import { MedicalIcon } from "@/components/medical-icon"
 import { cn } from "@/lib/cn"
 import {
   DIAGNOSIS_OPTIONS,
@@ -47,14 +48,16 @@ export default function HealthPage() {
 
   return (
     <PatientShell>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button onClick={() => router.back()} className="grid h-9 w-9 place-items-center rounded-full bg-white text-g-ink-2 shadow-girly active:scale-90" aria-label="Go back">
           <ArrowLeft size={17} />
         </button>
-        <span className="animate-float text-3xl">🩺</span>
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+          <MedicalIcon name="doctor" size={22} className="text-current" />
+        </span>
         <div>
           <h1 className="font-cute text-3xl font-bold text-g-ink">My health</h1>
-          <p className="text-sm font-semibold text-g-ink-3">The details your gyno will want 💗</p>
+          <p className="text-sm font-semibold text-g-ink-3">The details your gyno will want.</p>
         </div>
       </div>
 
@@ -67,14 +70,17 @@ export default function HealthPage() {
         className="mt-3 flex items-center justify-between rounded-3xl bg-candy px-4 py-3.5 shadow-girly-pop active:scale-[0.99]"
       >
         <span>
-          <span className="block font-cute text-base font-bold text-white">My symptom profile 📝</span>
+          <span className="flex items-center gap-2 font-cute text-base font-bold text-white">
+            <MedicalIcon name="checklist" size={18} className="text-white" />
+            My symptom profile
+          </span>
           <span className="text-xs font-semibold text-white/90">Tap anything you experience — covers the full picture</span>
         </span>
         <span className="text-xl text-white">›</span>
       </Link>
 
       {/* Units */}
-      <Section title="Units" emoji="📐">
+      <Section title="Units" icon="scale">
         <div className="flex rounded-full bg-g-canvas p-1">
           {(["us", "metric"] as const).map((u) => (
             <button
@@ -92,7 +98,7 @@ export default function HealthPage() {
       </Section>
 
       {/* Body */}
-      <Section title="Height" emoji="📏">
+      <Section title="Height" icon="scale">
         {units === "us" ? (
           <div className="flex items-center gap-2">
             <NumInput placeholder="5" suffix="ft" value={ft} onChange={(v) => setHeightImperial(Number(v || 0), Number(inch || 0))} />
@@ -105,7 +111,7 @@ export default function HealthPage() {
       </Section>
 
       {/* Menstrual history */}
-      <Section title="Menstrual history" emoji="🌙">
+      <Section title="Menstrual history" icon="moon">
         <div className="grid grid-cols-2 gap-3">
           <Labeled label="First period (age)">
             <NumInput placeholder="13" value={p.menarcheAge ?? ""} onChange={(v) => set({ menarcheAge: v === "" ? undefined : Number(v) })} />
@@ -117,17 +123,17 @@ export default function HealthPage() {
       </Section>
 
       {/* Diagnosis */}
-      <Section title="PMOS status" emoji="🌸">
+      <Section title="PMOS status" icon="heartPulse">
         <SingleChips options={DIAGNOSIS_OPTIONS} value={p.diagnosis} onPick={(id) => set({ diagnosis: id as CycleProfile["diagnosis"] })} />
       </Section>
 
       {/* Family history */}
-      <Section title="Family history" emoji="👪">
+      <Section title="Family history" icon="users">
         <MultiChips options={FAMILY_HISTORY} value={p.familyHistory ?? []} onToggle={(id) => set({ familyHistory: toggle(p.familyHistory ?? [], id) })} />
       </Section>
 
       {/* Contraception is captured (with history + reasons) under "Concern & birth control". */}
-      <Section title="Birth control" emoji="💊">
+      <Section title="Birth control" icon="pill">
         <Link
           href="/history"
           className="flex items-center justify-between rounded-2xl border border-g-border bg-white px-4 py-3 text-sm font-bold text-g-ink shadow-girly active:scale-[0.99]"
@@ -138,12 +144,12 @@ export default function HealthPage() {
       </Section>
 
       {/* Pregnancy intent */}
-      <Section title="Pregnancy plans" emoji="🤍">
+      <Section title="Pregnancy plans" icon="heart">
         <SingleChips options={PREGNANCY_INTENT} value={p.pregnancyIntent} onPick={(id) => set({ pregnancyIntent: id })} />
       </Section>
 
       {/* Labs */}
-      <Section title="Lab results" emoji="🧪">
+      <Section title="Lab results" icon="flaskRound">
         <p className="mb-2 text-xs font-semibold text-g-ink-3">Add any results you have (e.g. testosterone, fasting glucose).</p>
         <div className="space-y-2">
           {labs.map((l, i) => (
@@ -160,7 +166,9 @@ export default function HealthPage() {
                 placeholder="Value"
                 className="w-24 rounded-2xl border border-g-border bg-g-canvas px-3 py-2.5 text-base font-semibold text-g-ink outline-none focus:border-g-pink"
               />
-              <button onClick={() => removeLab(i)} className="text-g-ink-3 active:scale-90" aria-label="Remove">✕</button>
+              <button onClick={() => removeLab(i)} className="text-g-ink-3 active:scale-90" aria-label="Remove">
+                <MedicalIcon name="x" size={14} className="text-current" />
+              </button>
             </div>
           ))}
         </div>
@@ -185,11 +193,16 @@ function toggle(arr: string[], id: string): string[] {
   return arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id]
 }
 
-function Section({ title, emoji, children }: { title: string; emoji: string; children: React.ReactNode }) {
+function Section({ title, icon, children }: { title: string; icon?: string; children: React.ReactNode }) {
   return (
     <section className="mt-4 rounded-3xl border border-g-border bg-white p-4 shadow-girly">
-      <h2 className="mb-3 font-cute text-base font-bold text-g-ink">
-        {emoji} {title}
+      <h2 className="mb-3 flex items-center gap-2 font-cute text-base font-bold text-g-ink">
+        {icon ? (
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-2xl bg-candy-soft text-current">
+            <MedicalIcon name={icon} size={16} className="text-current" />
+          </span>
+        ) : null}
+        {title}
       </h2>
       {children}
     </section>

@@ -288,9 +288,9 @@ export default function TrackPage() {
       case "moods":
         return renderChips("moods", "lavender", true, true)
       case "skinHair":
-        return renderChips("skinHair", "peach", true)
+        return renderChips("skinHair", "peach", true, true)
       case "discharge":
-        return renderChips("discharge", "sky", false)
+        return renderChips("discharge", "sky", false, true)
       case "cravings":
         return renderChips("cravings", "butter", true, true)
       case "digestion":
@@ -298,7 +298,7 @@ export default function TrackPage() {
       case "movement":
         return renderChips("movement", "sky", true, true)
       case "meds":
-        return renderChips("meds", "lavender", true)
+        return renderChips("meds", "lavender", true, true)
       case "water":
         return (
           <div className="flex items-center gap-1.5">

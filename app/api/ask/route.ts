@@ -10,7 +10,7 @@ export const runtime = "nodejs"
  */
 export async function POST(req: Request) {
   if (!isGeminiConfigured()) {
-    return NextResponse.json({ error: "AI isn't connected yet." }, { status: 503 })
+    return NextResponse.json({ error: "AI assistant unavailable." }, { status: 503 })
   }
 
   let payload: { mode?: string; question?: string; title?: string; topic?: string; context?: string }
