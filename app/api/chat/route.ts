@@ -33,12 +33,25 @@ Tone: warm, supportive, clear. You are a knowledgeable friend, not a clinician.`
 // page-data collection, which crashed the whole deploy when any env var was
 // missing. Keep all env access + client creation inside the handler.
 function getConfig() {
-  const project = process.env.GOOGLE_VERTEX_PROJECT;
+  // On Vercel there is no ADC file, so pass the service-account creds directly.
+  // GOOGLE_VERTEX_CREDENTIALS = the full service-account JSON (as a string).
+  const rawCreds = process.env.GOOGLE_VERTEX_CREDENTIALS;
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey =
     process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!project || !supabaseUrl || !supabaseKey) return null;
-  return { project, supabaseUrl, supabaseKey };
+  if (!rawCreds || !supabaseUrl || !supabaseKey) return null;
+
+  let credentials: { project_id?: string; client_email?: string; private_key?: string };
+  try {
+    credentials = JSON.parse(rawCreds);
+  } catch {
+    return null;
+  }
+  const project = process.env.GOOGLE_VERTEX_PROJECT || credentials.project_id;
+  if (!project) return null;
+  const location = process.env.GOOGLE_VERTEX_LOCATION || "us-central1";
+  const chatModel = process.env.GOOGLE_VERTEX_CHAT_MODEL || "gemini-2.5-flash";
+  return { credentials, project, location, chatModel, supabaseUrl, supabaseKey };
 }
 
 export async function POST(req: NextRequest) {
@@ -54,11 +67,11 @@ export async function POST(req: NextRequest) {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
 
-    const vertexEmbedding = createVertex({ project: cfg.project, location: "us-central1" });
-    const vertexChat = createVertex({
-      project: cfg.project,
-      location: process.env.GOOGLE_VERTEX_LOCATION ?? "us",
-    });
+    const auth = { googleAuthOptions: { credentials: cfg.credentials, projectId: cfg.project } };
+    // Embeddings live in us-central1 (matches the ingestion script); chat uses
+    // the configured location.
+    const vertexEmbedding = createVertex({ project: cfg.project, location: "us-central1", ...auth });
+    const vertexChat = createVertex({ project: cfg.project, location: cfg.location, ...auth });
     const supabase = createClient(cfg.supabaseUrl, cfg.supabaseKey);
 
     // Embed the user's question
@@ -83,7 +96,7 @@ export async function POST(req: NextRequest) {
 
     // Generate response with Gemini (via Vertex)
     const { text } = await generateText({
-      model: vertexChat("gemini-3.5-flash"),
+      model: vertexChat(cfg.chatModel),
       system: SYSTEM_PROMPT + `\n\nRelevant information from medical literature:\n${context}`,
       messages,
     });
