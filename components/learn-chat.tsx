@@ -24,11 +24,21 @@ export function LearnChat() {
   const [error, setError] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const latestAssistantRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  if (loading) {
+    containerRef.current?.scrollTo({ top: containerRef.current.scrollHeight, behavior: "smooth" });
+  }
+}, [loading]);
+
+useEffect(() => {
+  if (!loading && messages.length > 0 && messages[messages.length - 1].role === "assistant") {
+    containerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }
+}, [messages]);
 
   async function sendMessage(text: string) {
     const trimmed = text.trim();
@@ -110,9 +120,15 @@ export function LearnChat() {
 
       {/* Conversation history */}
       {messages.length > 0 && (
-        <div className="mt-3 max-h-72 overflow-y-auto space-y-3 rounded-2xl bg-white/10 p-3">
-          {messages.map((m, i) => (
-            <div key={i} className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}>
+        <div ref={containerRef} className="mt-3 max-h-72 overflow-y-auto space-y-3 rounded-2xl bg-white/10 p-3">
+          {messages.map((m, i) => {
+  const isLatestAssistant = m.role === "assistant" && i === messages.length - 1;
+  return (
+    <div
+      key={i}
+      ref={isLatestAssistant ? latestAssistantRef : undefined}
+      className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
+    >
               <div
                 className={cn(
                   "max-w-[85%] rounded-2xl px-3 py-2 text-sm font-medium leading-relaxed",
@@ -128,7 +144,8 @@ export function LearnChat() {
                 )}
               </div>
             </div>
-          ))}
+  );
+})}
           {loading && (
             <div className="flex justify-start">
               <div className="bg-white/20 rounded-2xl rounded-bl-sm px-3 py-2">
