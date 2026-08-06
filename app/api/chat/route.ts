@@ -3,20 +3,7 @@ import { createVertex } from "@ai-sdk/google-vertex";
 import { generateText, embed } from "ai";
 import { createClient } from "@supabase/supabase-js";
 
-const vertexEmbedding = createVertex({
-  project: process.env.GOOGLE_VERTEX_PROJECT!,
-  location: "us-central1",
-});
-
-const vertexChat = createVertex({
-  project: process.env.GOOGLE_VERTEX_PROJECT!,
-  location: process.env.GOOGLE_VERTEX_LOCATION ?? "us",
-});
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const runtime = "nodejs";
 
 const SYSTEM_PROMPT = `You are a health education assistant for MyPMOS, a companion app for people with Polyendocrine Metabolic Ovarian Syndrome (PMOS, formerly known as PCOS).
 
@@ -41,10 +28,38 @@ If a user expresses distress or mentions eating disorder behaviors, respond with
 
 Tone: warm, supportive, clear. You are a knowledgeable friend, not a clinician.`;
 
+// Resolve config at REQUEST time, never at module load. Creating the Vertex /
+// Supabase clients at the top level made Next evaluate them during the build's
+// page-data collection, which crashed the whole deploy when any env var was
+// missing. Keep all env access + client creation inside the handler.
+function getConfig() {
+  const project = process.env.GOOGLE_VERTEX_PROJECT;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!project || !supabaseUrl || !supabaseKey) return null;
+  return { project, supabaseUrl, supabaseKey };
+}
+
 export async function POST(req: NextRequest) {
+  const cfg = getConfig();
+  if (!cfg) {
+    return NextResponse.json(
+      { error: "The chat assistant isn't set up yet. Please try again later." },
+      { status: 503 }
+    );
+  }
+
   try {
     const { messages } = await req.json();
     const lastMessage = messages[messages.length - 1].content;
+
+    const vertexEmbedding = createVertex({ project: cfg.project, location: "us-central1" });
+    const vertexChat = createVertex({
+      project: cfg.project,
+      location: process.env.GOOGLE_VERTEX_LOCATION ?? "us",
+    });
+    const supabase = createClient(cfg.supabaseUrl, cfg.supabaseKey);
 
     // Embed the user's question
     const { embedding } = await embed({
@@ -61,11 +76,12 @@ export async function POST(req: NextRequest) {
 
     if (error) console.error("Retrieval error:", error);
 
-    const context = chunks && chunks.length > 0
-      ? chunks.map((c: any) => `Source: ${c.source}\n${c.content}`).join("\n\n")
-      : "No relevant sources found in medical literature.";
+    const context =
+      chunks && chunks.length > 0
+        ? chunks.map((c: any) => `Source: ${c.source}\n${c.content}`).join("\n\n")
+        : "No relevant sources found in medical literature.";
 
-    // Generate response with Gemini
+    // Generate response with Gemini (via Vertex)
     const { text } = await generateText({
       model: vertexChat("gemini-3.5-flash"),
       system: SYSTEM_PROMPT + `\n\nRelevant information from medical literature:\n${context}`,
