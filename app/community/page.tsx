@@ -284,10 +284,10 @@ function Loading() {
 function Empty({ signedIn, onCompose }: { signedIn: boolean; onCompose: () => void }) {
   return (
     <div className="rounded-3xl border border-g-border bg-white p-6 text-center shadow-girly">
-      <span className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-g-canvas text-g-pink-deep">
-        <MedicalIcon name="community" size={24} />
-      </span>
-      <p className="mt-3 font-cute text-lg font-bold text-g-ink">No posts here yet</p>
+      <div className="mx-auto grid h-14 w-14 place-items-center rounded-3xl bg-g-sky-soft text-g-sky">
+        <MedicalIcon name="community" size={28} className="text-current" />
+      </div>
+      <p className="mt-4 font-cute text-lg font-bold text-g-ink">No posts here yet</p>
       <p className="mt-1 text-sm font-semibold text-g-ink-3">
         {signedIn ? "Be the first to start the conversation" : "Sign in to start the conversation"}
       </p>

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { ArrowLeft, Pin, PinOff, Eye, EyeOff, ChevronUp, ChevronDown, Lock } from "lucide-react"
+import { MedicalIcon } from "@/components/medical-icon"
 import { PatientShell } from "@/components/patient-shell"
 import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
@@ -109,7 +110,9 @@ export default function CustomizeTrackingPage() {
             const isPinned = (prefs.pinned ?? []).includes(id)
             return (
               <div key={id} className="flex items-center gap-2.5 rounded-2xl border border-g-border bg-white px-3 py-2.5 shadow-girly">
-                <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-2xl text-base", ACCENT[m.accent].soft)}>{m.emoji}</span>
+                <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-2xl text-base", ACCENT[m.accent].soft)}>
+                  <MedicalIcon name={m.icon} size={18} className="text-current" />
+                </span>
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-1.5">
                     <span className="text-sm font-bold text-g-ink">{m.title}</span>

@@ -140,7 +140,7 @@ export default function TrackPage() {
     setDateKey(toDateKey(d))
   }
 
-  function renderChips(key: keyof TrackEntry, accent: GirlyAccent, multi: boolean) {
+  function renderChips(key: keyof TrackEntry, accent: GirlyAccent, multi: boolean, useCircleCheckIcon = false) {
     const group = CHIP_GROUP_BY_KEY.get(key as string)
     if (!group) return null
     const selected = (entry[key] as string[] | undefined) ?? []
@@ -152,6 +152,7 @@ export default function TrackPage() {
             option={o}
             accent={accent}
             selected={selected.includes(o.id)}
+            useCircleCheckIcon={useCircleCheckIcon}
             onClick={() => (multi ? toggleMulti(key, o.id) : toggleSingleArray(key, o.id))}
           />
         ))}
@@ -198,7 +199,7 @@ export default function TrackPage() {
         return (
           <div className="flex flex-wrap gap-2">
             {ENERGY_OPTIONS.map((o) => (
-              <Chip key={o.id} option={o} accent="butter" selected={entry.energy === o.id} onClick={() => toggleSingle("energy", o.id)} />
+              <Chip key={o.id} option={o} accent="butter" selected={entry.energy === o.id} useCircleCheckIcon onClick={() => toggleSingle("energy", o.id)} />
             ))}
           </div>
         )
@@ -206,7 +207,7 @@ export default function TrackPage() {
         return (
           <div className="flex flex-wrap items-center gap-2">
             {SLEEP_QUALITY_OPTIONS.map((o) => (
-              <Chip key={o.id} option={o} accent="lavender" selected={entry.sleepQuality === o.id} onClick={() => toggleSingle("sleepQuality", o.id)} />
+              <Chip key={o.id} option={o} accent="lavender" selected={entry.sleepQuality === o.id} useCircleCheckIcon onClick={() => toggleSingle("sleepQuality", o.id)} />
             ))}
             <div className="ml-auto flex items-center gap-2 rounded-full bg-g-lavender-soft px-3 py-1.5">
               <span className="text-sm font-bold text-g-ink">
@@ -252,22 +253,29 @@ export default function TrackPage() {
             <div className="flex flex-wrap gap-2">
               {group.options.map((o) => {
                 const level: number = sev[o.id] ?? 0
+                const selected = level > 0
                 return (
                   <button
                     key={o.id}
                     onClick={() => cycleSeverity(o.id)}
                     className={cn(
-                      "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-bold transition active:scale-95",
-                      level === 0
-                        ? "border-g-border bg-g-canvas text-g-ink-2"
-                        : level === 1
+                      "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-bold transition active:scale-95",
+                      selected
+                        ? level === 1
                           ? "border-transparent bg-g-pink-soft text-g-pink-deep"
                           : level === 2
                             ? "border-transparent bg-g-pink text-white"
                             : "border-transparent bg-g-pink-deep text-white"
+                        : "border-g-border bg-g-canvas text-g-ink-2"
                     )}
                   >
-                    <span>{o.emoji}</span>
+                    {selected ? (
+                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-white">
+                        <MedicalIcon name="check" size={12} className={selected ? "text-g-pink-deep" : "text-g-ink-3"} strokeWidth={3} />
+                      </span>
+                    ) : (
+                      <span className="inline-flex h-3.5 w-3.5 rounded-full bg-g-ink-3" />
+                    )}
                     <span>{o.label}</span>
                     {level > 0 && <span className="ml-0.5 text-[0.6rem] font-extrabold tracking-tight">{"●".repeat(level)}</span>}
                   </button>
@@ -278,17 +286,17 @@ export default function TrackPage() {
         )
       }
       case "moods":
-        return renderChips("moods", "lavender", true)
+        return renderChips("moods", "lavender", true, true)
       case "skinHair":
         return renderChips("skinHair", "peach", true)
       case "discharge":
         return renderChips("discharge", "sky", false)
       case "cravings":
-        return renderChips("cravings", "butter", true)
+        return renderChips("cravings", "butter", true, true)
       case "digestion":
-        return renderChips("digestion", "mint", true)
+        return renderChips("digestion", "mint", true, true)
       case "movement":
-        return renderChips("movement", "sky", true)
+        return renderChips("movement", "sky", true, true)
       case "meds":
         return renderChips("meds", "lavender", true)
       case "water":
@@ -300,10 +308,13 @@ export default function TrackPage() {
                 <button
                   key={i}
                   onClick={() => update({ water: on && (entry.water ?? 0) === i + 1 ? i : i + 1 })}
-                  className={cn("text-2xl transition active:scale-90", on ? "opacity-100" : "opacity-30 grayscale")}
+                  className={cn(
+                    "transition active:scale-90",
+                    on ? "opacity-100 text-g-sky" : "opacity-30 grayscale text-g-ink-3"
+                  )}
                   aria-label={`${i + 1} glasses of water`}
                 >
-                  🥤
+                  <MedicalIcon name="glassWater" size={22} />
                 </button>
               )
             })}
@@ -492,7 +503,7 @@ function LogSection({
     <>
       <button onClick={() => setOpen((o) => !o)} className="flex w-full items-center gap-2 px-4 py-3.5 active:scale-[0.99]">
         <span className={cn("grid h-8 w-8 place-items-center rounded-full text-base", ACCENT[m.accent].soft)}>
-          <MedicalIcon name={m.id} size={18} className="text-current" />
+          <MedicalIcon name={m.icon ?? m.id} size={18} className="text-current" />
         </span>
         <h2 className="font-cute text-base font-bold text-g-ink">{m.title}</h2>
         {filled && <span className={cn("h-2 w-2 rounded-full", ACCENT[m.accent].dot)} aria-label="logged" />}
@@ -587,24 +598,40 @@ function Chip({
   option,
   accent,
   selected,
+  useCircleCheckIcon,
   onClick,
 }: {
   option: ChipOption
   accent: GirlyAccent
   selected: boolean
+  useCircleCheckIcon?: boolean
   onClick: () => void
 }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-sm font-bold transition active:scale-95",
+        "inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-bold transition active:scale-95",
         selected
           ? cn(ACCENT[accent].solid, "border-transparent text-white shadow-girly animate-pop")
           : "border-g-border bg-g-canvas text-g-ink-2 hover:border-g-border-2"
       )}
     >
-      <span>{option.emoji}</span>
+      {useCircleCheckIcon ? (
+        selected ? (
+          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-white">
+            <MedicalIcon name="check" size={12} className="text-g-pink-deep" strokeWidth={3} />
+          </span>
+        ) : (
+          <span className="inline-flex h-3.5 w-3.5 rounded-full bg-g-ink-3" />
+        )
+      ) : option.icon ? (
+        <MedicalIcon
+          name={option.icon}
+          size={14}
+          className={selected ? "text-white" : "text-g-ink-3"}
+        />
+      ) : null}
       <span>{option.label}</span>
     </button>
   )

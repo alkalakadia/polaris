@@ -54,12 +54,14 @@ export interface ChipOption {
   id: string
   label: string
   emoji: string
+  icon?: string
 }
 
 export interface ChipGroup {
   key: keyof TrackEntry
   title: string
   emoji: string
+  icon: string
   accent: GirlyAccent
   multi: boolean
   options: ChipOption[]
@@ -100,127 +102,127 @@ export const ACCENT: Record<
 
 /** Period flow has its own little scale (single-select, drop shape). */
 export const FLOW_OPTIONS: ChipOption[] = [
-  { id: "none", label: "None", emoji: "🤍" },
-  { id: "spotting", label: "Spotting", emoji: "🩷" },
-  { id: "light", label: "Light", emoji: "💧" },
-  { id: "medium", label: "Medium", emoji: "🌸" },
-  { id: "heavy", label: "Heavy", emoji: "🌹" },
+  { id: "none", label: "None", emoji: "🤍", icon: "x" },
+  { id: "spotting", label: "Spotting", emoji: "🩷", icon: "droplet" },
+  { id: "light", label: "Light", emoji: "💧", icon: "droplet" },
+  { id: "medium", label: "Medium", emoji: "🌸", icon: "heartPulse" },
+  { id: "heavy", label: "Heavy", emoji: "🌹", icon: "heartPulse" },
 ]
 
 export const ENERGY_OPTIONS: ChipOption[] = [
-  { id: "high", label: "Buzzing", emoji: "⚡️" },
-  { id: "ok", label: "Steady", emoji: "🙂" },
-  { id: "low", label: "Low", emoji: "🥱" },
-  { id: "drained", label: "Drained", emoji: "🫠" },
+  { id: "high", label: "Buzzing", emoji: "⚡️", icon: "activity" },
+  { id: "ok", label: "Steady", emoji: "🙂", icon: "checkCircle2" },
+  { id: "low", label: "Low", emoji: "🥱", icon: "moon" },
+  { id: "drained", label: "Drained", emoji: "🫠", icon: "cloud" },
 ]
 
 export const SLEEP_QUALITY_OPTIONS: ChipOption[] = [
-  { id: "great", label: "Great", emoji: "😴" },
-  { id: "ok", label: "Okay", emoji: "🌙" },
-  { id: "rough", label: "Rough", emoji: "🥲" },
+  { id: "great", label: "Great", emoji: "😴", icon: "moon" },
+  { id: "ok", label: "Okay", emoji: "🌙", icon: "sun" },
+  { id: "rough", label: "Rough", emoji: "🥲", icon: "cloud" },
 ]
 
 /** Multi-select chip groups — the breadth that makes the tracker the moat. */
 export const CHIP_GROUPS: ChipGroup[] = [
   {
-    key: "moods", title: "Mood", emoji: "💭", accent: "lavender", multi: true,
+    key: "moods", title: "Mood", emoji: "💭", icon: "messageCircle", accent: "lavender", multi: true,
     options: [
-      { id: "happy", label: "Happy", emoji: "😊" },
-      { id: "calm", label: "Calm", emoji: "🧘" },
-      { id: "confident", label: "Confident", emoji: "💅" },
-      { id: "sensitive", label: "Sensitive", emoji: "🥹" },
-      { id: "anxious", label: "Anxious", emoji: "😰" },
-      { id: "irritable", label: "Irritable", emoji: "😤" },
-      { id: "sad", label: "Sad", emoji: "😢" },
-      { id: "moodswings", label: "Mood swings", emoji: "🎢" },
-      { id: "unmotivated", label: "Unmotivated", emoji: "😶‍🌫️" },
+      { id: "happy", label: "Happy", emoji: "😊", icon: "happy" },
+      { id: "calm", label: "Calm", emoji: "🧘", icon: "calm" },
+      { id: "confident", label: "Confident", emoji: "💅", icon: "confident" },
+      { id: "sensitive", label: "Sensitive", emoji: "🥹", icon: "sensitive" },
+      { id: "anxious", label: "Anxious", emoji: "😰", icon: "anxious" },
+      { id: "irritable", label: "Irritable", emoji: "😤", icon: "irritable" },
+      { id: "sad", label: "Sad", emoji: "😢", icon: "sad" },
+      { id: "moodswings", label: "Mood swings", emoji: "🎢", icon: "moodswings" },
+      { id: "unmotivated", label: "Unmotivated", emoji: "😶‍🌫️", icon: "unmotivated" },
     ],
   },
   {
-    key: "symptoms", title: "Symptoms", emoji: "🩹", accent: "pink", multi: true,
+    key: "symptoms", title: "Symptoms", emoji: "🩹", icon: "heartPulse", accent: "pink", multi: true,
     options: [
-      { id: "cramps", label: "Cramps", emoji: "🤕" },
-      { id: "bloating", label: "Bloating", emoji: "🎈" },
-      { id: "headache", label: "Headache", emoji: "💥" },
-      { id: "backache", label: "Back pain", emoji: "🦴" },
-      { id: "pelvic", label: "Pelvic pain", emoji: "🌷" },
-      { id: "breast", label: "Tender chest", emoji: "🫶" },
-      { id: "nausea", label: "Nausea", emoji: "🤢" },
-      { id: "fatigue", label: "Fatigue", emoji: "🪫" },
-      { id: "brainfog", label: "Brain fog", emoji: "🌫️" },
-      { id: "dizzy", label: "Dizzy", emoji: "😵‍💫" },
-      { id: "hotflash", label: "Hot flashes", emoji: "🥵" },
-      { id: "insomnia", label: "Can't sleep", emoji: "🌜" },
+      { id: "cramps", label: "Cramps", emoji: "🤕", icon: "cramps" },
+      { id: "bloating", label: "Bloating", emoji: "🎈", icon: "bloating" },
+      { id: "headache", label: "Headache", emoji: "💥", icon: "headache" },
+      { id: "backache", label: "Back pain", emoji: "🦴", icon: "backache" },
+      { id: "pelvic", label: "Pelvic pain", emoji: "🌷", icon: "pelvic" },
+      { id: "breast", label: "Tender chest", emoji: "🫶", icon: "breast" },
+      { id: "nausea", label: "Nausea", emoji: "🤢", icon: "nausea" },
+      { id: "fatigue", label: "Fatigue", emoji: "🪫", icon: "fatigue" },
+      { id: "brainfog", label: "Brain fog", emoji: "🌫️", icon: "brainfog" },
+      { id: "dizzy", label: "Dizzy", emoji: "😵‍💫", icon: "dizzy" },
+      { id: "hotflash", label: "Hot flashes", emoji: "🥵", icon: "hotflash" },
+      { id: "insomnia", label: "Can't sleep", emoji: "🌜", icon: "insomnia" },
     ],
   },
   {
-    key: "skinHair", title: "Skin & hair", emoji: "✨", accent: "peach", multi: true,
+    key: "skinHair", title: "Skin & hair", emoji: "✨", icon: "heartPulse", accent: "peach", multi: true,
     options: [
-      { id: "clear", label: "Clear skin", emoji: "🌟" },
-      { id: "acne", label: "Breakouts", emoji: "🔴" },
-      { id: "oily", label: "Oily skin", emoji: "💧" },
-      { id: "dry", label: "Dry skin", emoji: "🍂" },
-      { id: "hairloss", label: "Hair shedding", emoji: "🍃" },
-      { id: "newhair", label: "New facial hair", emoji: "🪒" },
-      { id: "darkpatches", label: "Dark patches", emoji: "🟤" },
-      { id: "skintags", label: "Skin tags", emoji: "📍" },
+      { id: "clear", label: "Clear skin", emoji: "🌟", icon: "star" },
+      { id: "acne", label: "Breakouts", emoji: "🔴", icon: "heartPulse" },
+      { id: "oily", label: "Oily skin", emoji: "💧", icon: "droplet" },
+      { id: "dry", label: "Dry skin", emoji: "🍂", icon: "cloud" },
+      { id: "hairloss", label: "Hair shedding", emoji: "🍃", icon: "leaf" },
+      { id: "newhair", label: "New facial hair", emoji: "🪒", icon: "scissors" },
+      { id: "darkpatches", label: "Dark patches", emoji: "🟤", icon: "square" },
+      { id: "skintags", label: "Skin tags", emoji: "📍", icon: "mapPin" },
     ],
   },
   {
-    key: "discharge", title: "Discharge", emoji: "💧", accent: "sky", multi: false,
+    key: "discharge", title: "Discharge", emoji: "💧", icon: "droplet", accent: "sky", multi: false,
     options: [
-      { id: "dry", label: "Dry", emoji: "🍂" },
-      { id: "sticky", label: "Sticky", emoji: "🍯" },
-      { id: "creamy", label: "Creamy", emoji: "🥛" },
-      { id: "eggwhite", label: "Egg-white", emoji: "🥚" },
-      { id: "watery", label: "Watery", emoji: "💦" },
-      { id: "unusual", label: "Unusual", emoji: "❓" },
+      { id: "dry", label: "Dry", emoji: "🍂", icon: "cloud" },
+      { id: "sticky", label: "Sticky", emoji: "🍯", icon: "droplet" },
+      { id: "creamy", label: "Creamy", emoji: "🥛", icon: "glassWater" },
+      { id: "eggwhite", label: "Egg-white", emoji: "🥚", icon: "circle" },
+      { id: "watery", label: "Watery", emoji: "💦", icon: "droplet" },
+      { id: "unusual", label: "Unusual", emoji: "❓", icon: "help" },
     ],
   },
   {
-    key: "cravings", title: "Cravings", emoji: "🍫", accent: "butter", multi: true,
+    key: "cravings", title: "Cravings", emoji: "🍫", icon: "leaf", accent: "butter", multi: true,
     options: [
-      { id: "sugar", label: "Sugar", emoji: "🍬" },
-      { id: "chocolate", label: "Chocolate", emoji: "🍫" },
-      { id: "carbs", label: "Carbs", emoji: "🍞" },
-      { id: "salty", label: "Salty", emoji: "🥨" },
-      { id: "caffeine", label: "Caffeine", emoji: "☕️" },
-      { id: "none", label: "None", emoji: "🚫" },
+      { id: "sugar", label: "Sugar", emoji: "🍬", icon: "sugar" },
+      { id: "chocolate", label: "Chocolate", emoji: "🍫", icon: "chocolate" },
+      { id: "carbs", label: "Carbs", emoji: "🍞", icon: "carbs" },
+      { id: "salty", label: "Salty", emoji: "🥨", icon: "salty" },
+      { id: "caffeine", label: "Caffeine", emoji: "☕️", icon: "caffeine" },
+      { id: "none", label: "None", emoji: "🚫", icon: "none" },
     ],
   },
   {
-    key: "digestion", title: "Digestion", emoji: "🌿", accent: "mint", multi: true,
+    key: "digestion", title: "Digestion", emoji: "🌿", icon: "leaf", accent: "mint", multi: true,
     options: [
-      { id: "normal", label: "Normal", emoji: "👍" },
-      { id: "bloated", label: "Bloated", emoji: "🎈" },
-      { id: "constipated", label: "Constipated", emoji: "🪨" },
-      { id: "loose", label: "Loose", emoji: "💨" },
-      { id: "gassy", label: "Gassy", emoji: "🌬️" },
-      { id: "reflux", label: "Reflux", emoji: "🔥" },
+      { id: "normal", label: "Normal", emoji: "👍", icon: "normal" },
+      { id: "bloated", label: "Bloated", emoji: "🎈", icon: "bloating" },
+      { id: "constipated", label: "Constipated", emoji: "🪨", icon: "constipated" },
+      { id: "loose", label: "Loose", emoji: "💨", icon: "loose" },
+      { id: "gassy", label: "Gassy", emoji: "🌬️", icon: "gassy" },
+      { id: "reflux", label: "Reflux", emoji: "🔥", icon: "reflux" },
     ],
   },
   {
-    key: "movement", title: "Movement", emoji: "🤸", accent: "sky", multi: true,
+    key: "movement", title: "Movement", emoji: "🤸", icon: "activity", accent: "sky", multi: true,
     options: [
-      { id: "walk", label: "Walk", emoji: "🚶" },
-      { id: "strength", label: "Strength", emoji: "🏋️" },
-      { id: "yoga", label: "Yoga", emoji: "🧘" },
-      { id: "cardio", label: "Cardio", emoji: "🏃" },
-      { id: "dance", label: "Dance", emoji: "💃" },
-      { id: "rest", label: "Rest day", emoji: "🛋️" },
+      { id: "walk", label: "Walk", emoji: "🚶", icon: "walk" },
+      { id: "strength", label: "Strength", emoji: "🏋️", icon: "strength" },
+      { id: "yoga", label: "Yoga", emoji: "🧘", icon: "yoga" },
+      { id: "cardio", label: "Cardio", emoji: "🏃", icon: "cardio" },
+      { id: "dance", label: "Dance", emoji: "💃", icon: "dance" },
+      { id: "rest", label: "Rest day", emoji: "🛋️", icon: "rest" },
     ],
   },
   {
-    key: "meds", title: "Meds & supplements", emoji: "💊", accent: "lavender", multi: true,
+    key: "meds", title: "Meds & supplements", emoji: "💊", icon: "pill", accent: "lavender", multi: true,
     options: [
-      { id: "inositol", label: "Inositol", emoji: "🩷" },
-      { id: "metformin", label: "Metformin", emoji: "💊" },
-      { id: "bc", label: "Birth control", emoji: "🗓️" },
-      { id: "spiro", label: "Spironolactone", emoji: "💊" },
-      { id: "vitd", label: "Vitamin D", emoji: "☀️" },
-      { id: "omega", label: "Omega-3", emoji: "🐟" },
-      { id: "magnesium", label: "Magnesium", emoji: "🪨" },
-      { id: "iron", label: "Iron", emoji: "🩸" },
+      { id: "inositol", label: "Inositol", emoji: "🩷", icon: "heartPulse" },
+      { id: "metformin", label: "Metformin", emoji: "💊", icon: "pill" },
+      { id: "bc", label: "Birth control", emoji: "🗓️", icon: "calendar" },
+      { id: "spiro", label: "Spironolactone", emoji: "💊", icon: "pill" },
+      { id: "vitd", label: "Vitamin D", emoji: "☀️", icon: "sun" },
+      { id: "omega", label: "Omega-3", emoji: "🐟", icon: "fish" },
+      { id: "magnesium", label: "Magnesium", emoji: "🪨", icon: "square" },
+      { id: "iron", label: "Iron", emoji: "🩸", icon: "droplet" },
     ],
   },
 ]

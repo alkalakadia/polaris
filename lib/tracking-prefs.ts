@@ -35,6 +35,7 @@ export interface SectionMeta {
   id: SectionId
   title: string
   emoji: string
+  icon: string
   accent: GirlyAccent
   /** Goals that feature this section up top. */
   goals: Goal[]
@@ -49,21 +50,21 @@ export interface SectionMeta {
  * handful a gyno needs regardless. Order here is the default vertical order.
  */
 export const LOG_SECTIONS: SectionMeta[] = [
-  { id: "period", title: "Period", emoji: "🌹", accent: "pink", core: true, goals: ["regulate", "ttc", "understand"], desc: "Flow & period days" },
-  { id: "moods", title: "Mood", emoji: "💭", accent: "lavender", core: true, goals: ["symptoms", "understand"], desc: "How you feel emotionally" },
-  { id: "symptoms", title: "Symptoms", emoji: "🩹", accent: "pink", goals: ["symptoms", "regulate", "understand"], desc: "Cramps, bloating, fatigue…" },
-  { id: "pain", title: "Pain level", emoji: "🩹", accent: "pink", goals: ["symptoms"], desc: "0–10 pain scale" },
-  { id: "energy", title: "Energy", emoji: "⚡️", accent: "butter", goals: ["weight", "understand"], desc: "How energized you feel" },
-  { id: "sleep", title: "Sleep", emoji: "😴", accent: "lavender", goals: ["symptoms", "weight", "regulate"], desc: "Quality & hours" },
-  { id: "skinHair", title: "Skin & hair", emoji: "✨", accent: "peach", goals: ["symptoms"], desc: "Breakouts, hair changes" },
-  { id: "discharge", title: "Discharge", emoji: "💧", accent: "sky", goals: ["ttc", "regulate"], desc: "Cervical fluid" },
-  { id: "cravings", title: "Cravings", emoji: "🍫", accent: "butter", goals: ["weight"], desc: "What you're craving" },
-  { id: "digestion", title: "Digestion", emoji: "🌿", accent: "mint", goals: ["symptoms", "weight"], desc: "Bloating, gut feel" },
-  { id: "movement", title: "Movement", emoji: "🤸", accent: "sky", goals: ["weight"], desc: "Activity you did" },
-  { id: "water", title: "Water", emoji: "💦", accent: "sky", goals: ["weight"], desc: "Glasses today" },
-  { id: "meds", title: "Meds & supplements", emoji: "💊", accent: "lavender", goals: ["symptoms", "regulate"], desc: "What you took" },
-  { id: "measurements", title: "Measurements", emoji: "📏", accent: "sky", goals: ["ttc", "weight"], desc: "Weight, temp, BP, ov test" },
-  { id: "notes", title: "Notes", emoji: "📝", accent: "mint", core: true, goals: [], desc: "Anything else on your mind" },
+  { id: "period", title: "Period", emoji: "🌹", icon: "period", accent: "pink", core: true, goals: ["regulate", "ttc", "understand"], desc: "Flow & period days" },
+  { id: "moods", title: "Mood", emoji: "💭", icon: "moods", accent: "lavender", core: true, goals: ["symptoms", "understand"], desc: "How you feel emotionally" },
+  { id: "symptoms", title: "Symptoms", emoji: "🩹", icon: "symptoms", accent: "pink", goals: ["symptoms", "regulate", "understand"], desc: "Cramps, bloating, fatigue…" },
+  { id: "pain", title: "Pain level", emoji: "🩹", icon: "pain", accent: "pink", goals: ["symptoms"], desc: "0–10 pain scale" },
+  { id: "energy", title: "Energy", emoji: "⚡️", icon: "energy", accent: "butter", goals: ["weight", "understand"], desc: "How energized you feel" },
+  { id: "sleep", title: "Sleep", emoji: "😴", icon: "sleep", accent: "lavender", goals: ["symptoms", "weight", "regulate"], desc: "Quality & hours" },
+  { id: "skinHair", title: "Skin & hair", emoji: "✨", icon: "skin", accent: "peach", goals: ["symptoms"], desc: "Breakouts, hair changes" },
+  { id: "discharge", title: "Discharge", emoji: "💧", icon: "discharge", accent: "sky", goals: ["ttc", "regulate"], desc: "Cervical fluid" },
+  { id: "cravings", title: "Cravings", emoji: "🍫", icon: "cravings", accent: "butter", goals: ["weight"], desc: "What you're craving" },
+  { id: "digestion", title: "Digestion", emoji: "🌿", icon: "digestion", accent: "mint", goals: ["symptoms", "weight"], desc: "Bloating, gut feel" },
+  { id: "movement", title: "Movement", emoji: "🤸", icon: "movement", accent: "sky", goals: ["weight"], desc: "Activity you did" },
+  { id: "water", title: "Water", emoji: "💦", icon: "glassWater", accent: "sky", goals: ["weight"], desc: "Glasses today" },
+  { id: "meds", title: "Meds & supplements", emoji: "💊", icon: "meds", accent: "lavender", goals: ["symptoms", "regulate"], desc: "What you took" },
+  { id: "measurements", title: "Measurements", emoji: "📏", icon: "measurements", accent: "sky", goals: ["ttc", "weight"], desc: "Weight, temp, BP, ov test" },
+  { id: "notes", title: "Notes", emoji: "📝", icon: "notes", accent: "mint", core: true, goals: [], desc: "Anything else on your mind" },
 ]
 
 export const SECTION_ORDER: SectionId[] = LOG_SECTIONS.map((s) => s.id)
