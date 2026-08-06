@@ -5,13 +5,14 @@ import { useEffect, useState, type ReactNode } from "react"
 import { PatientShell } from "@/components/patient-shell"
 import { CycleCalendar } from "@/components/cycle-calendar"
 import { SupportResource } from "@/components/support-resource"
+import { CycleLengthChart, TrendSparkline } from "@/components/charts"
 import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
-import { buildCyclePatterns, buildInsights, type CyclePattern, type InsightSummary } from "@/lib/insights"
+import { buildCyclePatterns, buildInsights, monthlySeries, type CyclePattern, type InsightSummary } from "@/lib/insights"
 import { buildScreening, type ScreeningPrompt } from "@/lib/clinical"
 import { getAllEntriesAsync, saveEntryAsync } from "@/lib/tracker-store"
 import { MedicalIcon, type MedicalIconName } from "@/components/medical-icon"
-import { canPredictCycle, cycleHistory, deriveLastPeriodStart, type CycleHistory } from "@/lib/cycle"
+import { canPredictCycle, cycleHistory, cycleLengthSeries, deriveLastPeriodStart, type CycleHistory } from "@/lib/cycle"
 import { getProfile, hydrateProfileFromMetadata, type CycleProfile, type Goal } from "@/lib/profile"
 import { profileGoals } from "@/lib/tracking-prefs"
 import { type TrackEntry } from "@/lib/tracker"
@@ -284,6 +285,7 @@ export default function InsightsPage() {
 
   const anchor = deriveLastPeriodStart(entries) ?? profile.lastPeriodStart ?? null
   const canPredict = history ? canPredictCycle(history, profile) : false
+  const weightSeries = monthlySeries(entries, "weightKg")
 
   return (
     <PatientShell>
@@ -356,11 +358,15 @@ export default function InsightsPage() {
                   {history.regularity === "irregular" ? "Cycles vary a lot" : "Fairly regular"}
                 </span>
               </div>
-              {history.lengths.length > 0 && (
+              {history.lengths.length >= 3 ? (
+                <div className="mt-3 rounded-2xl bg-g-canvas px-3 py-3">
+                  <CycleLengthChart points={cycleLengthSeries(entries)} average={history.average} />
+                </div>
+              ) : history.lengths.length > 0 ? (
                 <p className="mt-2 text-sm font-semibold text-g-ink-3">
                   Recent cycles: {history.lengths.slice(-6).join(", ")} days
                 </p>
-              )}
+              ) : null}
             </>
           ) : (
             <p className="text-sm font-semibold text-g-ink-3">
@@ -436,6 +442,12 @@ export default function InsightsPage() {
             <Stat icon="heart" value={summary.avgPain != null ? summary.avgPain.toFixed(1) : "—"} label="avg pain /10" tint="bg-g-lavender-soft" />
             <Stat icon="sleep" value={summary.avgSleep != null ? `${summary.avgSleep.toFixed(1)}h` : "—"} label="avg sleep" tint="bg-g-sky-soft" />
           </div>
+
+          {weightSeries.length >= 2 && (
+            <Section title="Weight trend">
+              <TrendSparkline points={weightSeries.map((p) => ({ label: p.label, value: p.value }))} unit=" kg" />
+            </Section>
+          )}
 
           {summary.topSymptoms.length > 0 && (
             <Section title="Top symptoms">

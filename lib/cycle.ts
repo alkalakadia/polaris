@@ -96,6 +96,22 @@ export function cycleHistory(entries: TrackEntry[]): CycleHistory {
   return { starts, lengths: valid, average, shortest, longest, regularity, count: starts.length, periodLengths, averagePeriod }
 }
 
+export interface CycleLengthPoint {
+  length: number
+  startDate: string // the cycle's own start date, for labeling charts by month
+}
+
+/** Cycle lengths paired with the date each cycle started (for month-labeled charts). */
+export function cycleLengthSeries(entries: TrackEntry[]): CycleLengthPoint[] {
+  const starts = detectPeriodStarts(entries)
+  const out: CycleLengthPoint[] = []
+  for (let i = 1; i < starts.length; i++) {
+    const length = diffDays(starts[i], starts[i - 1])
+    if (length >= 15 && length <= 90) out.push({ length, startDate: starts[i - 1] })
+  }
+  return out
+}
+
 /** Is the user on their period today (logged flow on this date)? */
 export function isOnPeriod(entries: TrackEntry[], todayKey: string): boolean {
   const e = entries.find((x) => x.date === todayKey)

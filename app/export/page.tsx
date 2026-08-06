@@ -1,22 +1,24 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { ArrowLeft } from "lucide-react"
 import { MedicalIcon } from "@/components/medical-icon"
 import { PatientShell } from "@/components/patient-shell"
+import { FrequencyBars, CycleLengthChart, TrendSparkline, type FrequencyItem } from "@/components/charts"
 import { cn } from "@/lib/cn"
 import { useAuth } from "@/lib/auth"
-import { buildCyclePatterns, buildInsights, type CyclePattern, type InsightSummary } from "@/lib/insights"
+import { buildCyclePatterns, buildInsights, monthlySeries, type CyclePattern, type InsightSummary } from "@/lib/insights"
 import { getAllEntriesAsync } from "@/lib/tracker-store"
 import {
   CHIP_GROUPS,
   FLOW_OPTIONS,
   type TrackEntry,
 } from "@/lib/tracker"
-import { GOALS, getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
+import { bmi, GOALS, getProfile, hydrateProfileFromMetadata, type CycleProfile } from "@/lib/profile"
 import { profileGoals } from "@/lib/tracking-prefs"
 import { buildClinicalSummary, buildPreVisit } from "@/lib/clinical"
+import { cycleHistory, cycleLengthSeries } from "@/lib/cycle"
 import { getGoals, type Goal } from "@/lib/goals"
 import { fgCutoff, getAllResults, SCREENERS, type AssessmentResult } from "@/lib/assessments"
 import { getLabs, labDef, type LabEntry } from "@/lib/labs"
@@ -31,7 +33,8 @@ const THEMES = [
   { id: "mint", label: "Mint", from: "#A8E6CF", to: "#8FE0C2", soft: "#D6F6EA" },
 ] as const
 
-type ThemeId = (typeof THEMES)[number]["id"]
+type Theme = (typeof THEMES)[number]
+type ThemeId = Theme["id"]
 
 interface ExportConfig {
   name: string
@@ -53,6 +56,10 @@ const SECTION_DEFS = [
   { key: "questions", label: "My questions for the doctor", icon: "question" },
   { key: "notes", label: "Personal notes", icon: "notes" },
 ]
+
+// The printable body sections. previsit/clinical always lead and notes always
+// trails; summary/symptoms/cycle/watchouts reorder by focus (see orderedBody).
+type BodySectionKey = "previsit" | "clinical" | "summary" | "symptoms" | "cycle" | "watchouts" | "notes"
 
 const CONFIG_KEY = "polaris.export.v1"
 
@@ -122,7 +129,8 @@ export default function ExportPage() {
   })()
 
   // Her chosen focus areas (multi-goal). Shown to the provider as priorities,
-  // and used to badge (never hide) the sections tied to what she cares about.
+  // and used to badge + reorder the sections tied to what she cares about, so
+  // two people with different focuses get visibly different reports.
   const focusGoalLabels = profileGoals(profile)
     .map((id) => GOALS.find((g) => g.id === id)?.label)
     .filter(Boolean) as string[]
@@ -135,6 +143,13 @@ export default function ExportPage() {
   }
   const focusedSections = new Set(profileGoals(profile).flatMap((g) => GOAL_SECTIONS[g] ?? []))
   const clinical = buildClinicalSummary(profile, entries)
+  const cycleStats = cycleHistory(entries)
+  const weightSeries = monthlySeries(entries, "weightKg")
+  const bbtSeries = monthlySeries(entries, "bbt")
+  const ovTestCount = entries.filter((e) => e.ovTest).length
+  const ovPeakCount = entries.filter((e) => e.ovTest === "peak").length
+  const latestWeight = weightSeries.length ? weightSeries[weightSeries.length - 1].value : null
+  const weightBmi = bmi(profile.heightCm, latestWeight ?? undefined)
 
   // --- Pre-visit summary inputs (from assessments + labs) ---
   const fg = assessments.fg
@@ -207,6 +222,319 @@ export default function ExportPage() {
     : "No entries yet"
 
   const notesEntries = entries.filter((e) => e.notes && e.notes.trim()).slice(0, 5)
+
+  // --- "Your focus" hero card: the one thing that makes a TTC report look
+  // different from a weight-focus report at a glance, using data that would
+  // otherwise be buried mid-page (or, for BBT, not shown anywhere at all). ---
+  let focusCard: ReactNode = null
+  if (profile.goal === "ttc" && (cycleStats.average != null || ovTestCount > 0 || bbtSeries.length >= 2)) {
+    focusCard = (
+      <FocusCard theme={theme} title="Fertility focus" subtitle="Cycle, ovulation & temperature patterns">
+        <div className="grid grid-cols-3 gap-2">
+          <Mini label="Avg cycle" value={cycleStats.average != null ? `${cycleStats.average}d` : "—"} />
+          <Mini label="Ovulation tests" value={`${ovTestCount}`} />
+          <Mini label="Peak results" value={`${ovPeakCount}`} />
+        </div>
+        {bbtSeries.length >= 2 && (
+          <div className="mt-3">
+            <p className="text-[0.65rem] font-bold uppercase tracking-wide text-g-ink-3">Basal body temperature</p>
+            <TrendSparkline points={bbtSeries.map((p) => ({ label: p.label, value: p.value }))} unit="°C" decimals={2} accent={theme.to} />
+          </div>
+        )}
+      </FocusCard>
+    )
+  } else if (profile.goal === "weight" && weightSeries.length >= 2) {
+    focusCard = (
+      <FocusCard theme={theme} title="Weight & metabolic focus" subtitle="Weight logged over time">
+        <div className="grid grid-cols-2 gap-2">
+          <Mini label="Latest weight" value={latestWeight != null ? `${latestWeight.toFixed(1)} kg` : "—"} />
+          <Mini label="BMI" value={weightBmi != null ? `${weightBmi}` : "—"} />
+        </div>
+        <div className="mt-3">
+          <TrendSparkline points={weightSeries.map((p) => ({ label: p.label, value: p.value }))} unit=" kg" accent={theme.to} />
+        </div>
+      </FocusCard>
+    )
+  } else if (profile.goal === "symptoms" && summary && (summary.topSymptoms.length > 0 || summary.topMoods.length > 0)) {
+    focusCard = (
+      <FocusCard theme={theme} title="Symptom focus" subtitle="What shows up most often">
+        <FrequencyBars
+          items={[...summary.topSymptoms, ...summary.topMoods]
+            .slice(0, 3)
+            .map((s): FrequencyItem => ({ key: `${s.group}-${s.option.id}`, emoji: s.option.emoji, label: s.option.label, count: s.count }))}
+          accent={theme.to}
+        />
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          <Mini label="Avg pain" value={summary.avgPain != null ? `${summary.avgPain.toFixed(1)}/10` : "—"} />
+          <Mini label="Days tracked" value={`${summary.daysTracked}`} />
+        </div>
+      </FocusCard>
+    )
+  }
+
+  // --- The printable body sections, computed once then reordered so the
+  // ones tied to her focus areas surface first (a stable sort keeps the
+  // rest in their original order). ---
+  const previsitSection =
+    cfg.sections.previsit !== false && hasPreVisit ? (
+      <AlbumSection key="previsit" title="Pre-visit summary (Rotterdam)" icon="doctor" soft={theme.soft}>
+        {mainConcern && (
+          <div className="mb-2 rounded-xl bg-white/70 p-2.5">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Main concern</p>
+            <p className="text-sm font-bold text-g-ink">
+              {mainConcern}
+              {hist.mainConcern?.note ? ` — ${hist.mainConcern.note}` : ""}
+            </p>
+          </div>
+        )}
+        <p className="mb-2 text-xs font-semibold text-g-ink-2">{preVisit.note}</p>
+        <div className="space-y-1.5">
+          {preVisit.criteria.map((c) => (
+            <div key={c.key} className="rounded-xl bg-white/70 p-2.5">
+              <p className="text-sm font-bold text-g-ink">
+                {c.label}
+                <span className="ml-1 text-[0.7rem] font-bold text-g-ink-3">
+                  {c.key === "morphology" ? "· clinician-assessed" : c.signal ? "· signal reported" : "· not reported"}
+                </span>
+              </p>
+              <p className="text-xs font-medium text-g-ink-2">{c.detail}</p>
+            </div>
+          ))}
+        </div>
+
+        {shaves.count > 0 && shaves.averageInterval != null && (
+          <div className="mt-2">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Hair removal cadence</p>
+            <p className="text-xs font-medium text-g-ink-2">
+              Shaving/waxing about every {shaves.averageInterval} days (a slow proxy for hirsutism over time; longer
+              gaps may reflect treatment response).
+            </p>
+          </div>
+        )}
+
+        {screenerResults.length > 0 && (
+          <div className="mt-2">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Wellbeing & sleep screens</p>
+            <ul className="mt-0.5 space-y-0.5">
+              {screenerResults.map((s) => (
+                <li key={s.name} className="text-xs font-medium text-g-ink-2">
+                  <span className="font-bold text-g-ink">{s.name}:</span> {s.r!.score}
+                  {s.r!.band ? ` (${s.r!.band})` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {labs.length > 0 && (
+          <div className="mt-2">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Labs (self-entered)</p>
+            <ul className="mt-0.5 space-y-0.5">
+              {labs.slice(0, 16).map((l) => (
+                <li key={l.id} className="text-xs font-medium text-g-ink-2">
+                  <span className="font-bold text-g-ink">{labDef(l.labId)?.label ?? l.labId}:</span> {l.value} {l.unit}
+                  <span className="text-g-ink-3"> · {l.date}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {hist.contraception.length > 0 && (
+          <div className="mt-2">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Birth control history</p>
+            <ul className="mt-0.5 space-y-0.5">
+              {hist.contraception.map((c) => (
+                <li key={c.id} className="text-xs font-medium text-g-ink-2">
+                  {contraSummary(c)}
+                  {c.note ? ` · ${c.note}` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {goals.length > 0 && (
+          <div className="mt-2">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">My goals</p>
+            <ul className="mt-0.5 space-y-0.5">
+              {goals.map((g) => (
+                <li key={g.id} className="text-xs font-medium text-g-ink-2">
+                  <span className="font-bold text-g-ink">{g.title}</span>
+                  {g.target ? ` — ${g.target}` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <p className="mt-2 text-[0.65rem] font-semibold text-g-ink-3">
+          Patient-reported, for discussion. Not a diagnosis; PMOS diagnosis is clinical and one of exclusion.
+        </p>
+      </AlbumSection>
+    ) : null
+
+  const clinicalSection =
+    cfg.sections.clinical && hasClinical ? (
+      <AlbumSection key="clinical" title="Clinical summary" icon="doctor" soft={theme.soft}>
+        {clinical.menstrual.length > 0 && <ClinList label="Menstrual history" items={clinical.menstrual} />}
+        {clinical.body.length > 0 && <ClinList label="Body & vitals" items={clinical.body} />}
+        {weightSeries.length >= 2 && profile.goal !== "weight" && (
+          <div className="mb-2 rounded-xl bg-white/70 p-2.5">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Weight trend</p>
+            <TrendSparkline points={weightSeries.map((p) => ({ label: p.label, value: p.value }))} unit=" kg" accent={theme.to} />
+          </div>
+        )}
+        {clinical.history.length > 0 && <ClinList label="Relevant history" items={clinical.history} />}
+        {clinical.meds.length > 0 && (
+          <ClinList
+            label="Meds & supplements (days logged)"
+            items={clinical.meds.map((m) => `${m.label}: ${m.days} day${m.days === 1 ? "" : "s"}`)}
+          />
+        )}
+        {clinical.measurements.length > 0 && <ClinList label="Measurements" items={clinical.measurements} />}
+        {clinical.labs.length > 0 && (
+          <ClinList label="Lab results (self-reported)" items={clinical.labs.filter((l) => l.name).map((l) => `${l.name}: ${l.value}`)} />
+        )}
+        {clinical.symptomsByCategory.length > 0 && (
+          <div className="mb-2">
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Symptoms reported</p>
+            <ul className="mt-0.5 space-y-0.5">
+              {clinical.symptomsByCategory.map((c) => (
+                <li key={c.title} className="text-sm font-medium text-g-ink-2">
+                  <span className="font-bold text-g-ink">{c.title}:</span> {c.items.join(", ")}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {clinical.screening.length > 0 && (
+          <div className="mb-2 rounded-xl p-2.5" style={{ background: theme.soft }}>
+            <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Worth discussing / screening</p>
+            <ul className="mt-0.5 space-y-0.5">
+              {clinical.screening.map((s) => (
+                <li key={s.label} className="text-xs font-medium text-g-ink-2">
+                  <span className="font-bold text-g-ink">{s.label}:</span> {s.detail}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div className="mt-2 rounded-xl bg-white/70 p-2.5">
+          <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Signals (data, not a diagnosis)</p>
+          <ul className="mt-1 space-y-0.5">
+            {clinical.rotterdam.map((r) => (
+              <li key={r.label} className="text-xs font-medium text-g-ink-2">
+                <span className="font-bold text-g-ink">{r.label}:</span> {r.detail}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1.5 text-[0.65rem] font-semibold text-g-ink-3">
+            These are patient-logged data points, not a diagnosis. PMOS diagnosis requires clinical evaluation.
+          </p>
+        </div>
+      </AlbumSection>
+    ) : null
+
+  const summarySection =
+    cfg.sections.summary && summary ? (
+      <AlbumSection key="summary" title="Tracking summary" icon="calendar" soft={theme.soft} focus={focusedSections.has("summary")}>
+        <div className="grid grid-cols-2 gap-3">
+          <Mini label="Days tracked" value={`${summary.daysTracked}`} />
+          <Mini label="Period days" value={`${summary.flowDays}`} />
+          <Mini label="Avg pain" value={summary.avgPain != null ? `${summary.avgPain.toFixed(1)}/10` : "—"} />
+          <Mini label="Avg sleep" value={summary.avgSleep != null ? `${summary.avgSleep.toFixed(1)}h` : "—"} />
+        </div>
+      </AlbumSection>
+    ) : null
+
+  const symptomsSection =
+    cfg.sections.symptoms && summary && (summary.topSymptoms.length > 0 || summary.topMoods.length > 0) ? (
+      <AlbumSection key="symptoms" title="Most common" icon="symptoms" soft={theme.soft} focus={focusedSections.has("symptoms")}>
+        <div className="rounded-2xl bg-white/70 p-3">
+          <FrequencyBars
+            items={[...summary.topSymptoms, ...summary.topMoods].map(
+              (s): FrequencyItem => ({
+                key: `${s.group}-${s.option.id}`,
+                emoji: s.option.emoji,
+                label: s.option.label,
+                count: s.count,
+              })
+            )}
+            accent={theme.to}
+          />
+        </div>
+      </AlbumSection>
+    ) : null
+
+  const cycleSection =
+    cfg.sections.cycle && summary ? (
+      <AlbumSection key="cycle" title="Period & pain" icon="period" soft={theme.soft} focus={focusedSections.has("cycle")}>
+        <p className="text-sm font-semibold text-g-ink-2">
+          {summary.flowDays} day{summary.flowDays === 1 ? "" : "s"} of period logged over {summary.daysTracked} tracked
+          day{summary.daysTracked === 1 ? "" : "s"}.
+          {summary.avgPain != null && ` Average pain reported around ${summary.avgPain.toFixed(1)} out of 10.`}
+        </p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {FLOW_OPTIONS.filter((f) => entries.some((e) => e.flow === f.id && f.id !== "none")).map((f) => (
+            <span key={f.id} className="rounded-full px-2.5 py-1 text-xs font-bold text-g-ink" style={{ background: theme.soft }}>
+              {f.emoji} {f.label}
+            </span>
+          ))}
+        </div>
+        {cycleStats.lengths.length >= 3 && (
+          <div className="mt-3 rounded-2xl bg-white/70 p-3">
+            <p className="mb-1 text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Cycle length</p>
+            <CycleLengthChart points={cycleLengthSeries(entries)} average={cycleStats.average} accent={theme.to} />
+          </div>
+        )}
+      </AlbumSection>
+    ) : null
+
+  const watchoutsSection =
+    cfg.sections.watchouts && summary && summary.watchOuts.length > 0 ? (
+      <AlbumSection key="watchouts" title="Things I'd like to discuss" icon="doctor" soft={theme.soft} focus={focusedSections.has("watchouts")}>
+        <ul className="space-y-2">
+          {summary.watchOuts.map((w, i) => (
+            <li key={i} className="text-sm font-semibold text-g-ink">
+              {w.emoji} {w.title}
+              <span className="block text-xs font-medium text-g-ink-2">{w.body}</span>
+            </li>
+          ))}
+        </ul>
+      </AlbumSection>
+    ) : null
+
+  const notesSection =
+    cfg.sections.notes && (cfg.notes.trim() || notesEntries.length > 0) ? (
+      <AlbumSection key="notes" title="Notes" icon="notes" soft={theme.soft}>
+        {cfg.notes.trim() && <p className="text-sm font-medium text-g-ink">{cfg.notes}</p>}
+        {notesEntries.map((e) => (
+          <p key={e.date} className="mt-1 text-xs font-medium text-g-ink-2">
+            <span className="font-bold">{e.date}:</span> {e.notes}
+          </p>
+        ))}
+      </AlbumSection>
+    ) : null
+
+  const sectionNodes: Record<BodySectionKey, ReactNode> = {
+    previsit: previsitSection,
+    clinical: clinicalSection,
+    summary: summarySection,
+    symptoms: symptomsSection,
+    cycle: cycleSection,
+    watchouts: watchoutsSection,
+    notes: notesSection,
+  }
+  // Pre-visit + clinical summary always lead — they're the core clinical
+  // context a provider reads first, regardless of focus. Only the
+  // day-to-day tracking sections reorder by focus (stable sort, so a TTC
+  // report and a weight-focus report differ in order, not just badges).
+  // Notes always trail, since it's the least clinical section.
+  const FIXED_HEAD = ["previsit", "clinical"] as const
+  const FLEXIBLE = ["summary", "symptoms", "cycle", "watchouts"] as const
+  const orderedFlexible = [...FLEXIBLE].sort((a, b) => Number(!focusedSections.has(a)) - Number(!focusedSections.has(b)))
+  const orderedBody: BodySectionKey[] = [...FIXED_HEAD, ...orderedFlexible, "notes"]
 
   return (
     <PatientShell>
@@ -386,12 +714,15 @@ export default function ExportPage() {
         </div>
 
         <div className="space-y-5 p-6">
-          {/* Pre-visit summary — surfaced FIRST so the clinician sees what matters */}
+          {focusCard}
+
+          {/* Visit snapshot — a condensed lead-in, surfaced FIRST. The fuller
+              "Pre-visit summary (Rotterdam)" section below has the detail. */}
           <section className="rounded-2xl border-2 p-4" style={{ borderColor: theme.to }}>
             <p className="text-[0.65rem] font-extrabold uppercase tracking-wider" style={{ color: theme.to }}>
               For your provider
             </p>
-            <h3 className="font-cute text-lg font-bold text-g-ink">Pre-visit summary</h3>
+            <h3 className="font-cute text-lg font-bold text-g-ink">Visit snapshot</h3>
 
             {cfg.chiefConcern.trim() && (
               <PreItem label="Why I'm here">{cfg.chiefConcern}</PreItem>
@@ -425,218 +756,7 @@ export default function ExportPage() {
             )}
           </section>
 
-          {cfg.sections.previsit !== false && hasPreVisit && (
-            <AlbumSection title="Pre-visit summary" icon="doctor" soft={theme.soft}>
-              {mainConcern && (
-                <div className="mb-2 rounded-xl bg-white/70 p-2.5">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Main concern</p>
-                  <p className="text-sm font-bold text-g-ink">
-                    {mainConcern}
-                    {hist.mainConcern?.note ? ` — ${hist.mainConcern.note}` : ""}
-                  </p>
-                </div>
-              )}
-              <p className="mb-2 text-xs font-semibold text-g-ink-2">{preVisit.note}</p>
-              <div className="space-y-1.5">
-                {preVisit.criteria.map((c) => (
-                  <div key={c.key} className="rounded-xl bg-white/70 p-2.5">
-                    <p className="text-sm font-bold text-g-ink">{c.label}
-                      <span className="ml-1 text-[0.7rem] font-bold text-g-ink-3">
-                        {c.key === "morphology" ? "· clinician-assessed" : c.signal ? "· signal reported" : "· not reported"}
-                      </span>
-                    </p>
-                    <p className="text-xs font-medium text-g-ink-2">{c.detail}</p>
-                  </div>
-                ))}
-              </div>
-
-              {shaves.count > 0 && shaves.averageInterval != null && (
-                <div className="mt-2">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Hair removal cadence</p>
-                  <p className="text-xs font-medium text-g-ink-2">
-                    Shaving/waxing about every {shaves.averageInterval} days (a slow proxy for hirsutism over time;
-                    longer gaps may reflect treatment response).
-                  </p>
-                </div>
-              )}
-
-              {screenerResults.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Wellbeing & sleep screens</p>
-                  <ul className="mt-0.5 space-y-0.5">
-                    {screenerResults.map((s) => (
-                      <li key={s.name} className="text-xs font-medium text-g-ink-2">
-                        <span className="font-bold text-g-ink">{s.name}:</span> {s.r!.score}
-                        {s.r!.band ? ` (${s.r!.band})` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {labs.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Labs (self-entered)</p>
-                  <ul className="mt-0.5 space-y-0.5">
-                    {labs.slice(0, 16).map((l) => (
-                      <li key={l.id} className="text-xs font-medium text-g-ink-2">
-                        <span className="font-bold text-g-ink">{labDef(l.labId)?.label ?? l.labId}:</span> {l.value} {l.unit}
-                        <span className="text-g-ink-3"> · {l.date}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {hist.contraception.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Birth control history</p>
-                  <ul className="mt-0.5 space-y-0.5">
-                    {hist.contraception.map((c) => (
-                      <li key={c.id} className="text-xs font-medium text-g-ink-2">
-                        {contraSummary(c)}
-                        {c.note ? ` · ${c.note}` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {goals.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">My goals</p>
-                  <ul className="mt-0.5 space-y-0.5">
-                    {goals.map((g) => (
-                      <li key={g.id} className="text-xs font-medium text-g-ink-2">
-                        <span className="font-bold text-g-ink">{g.title}</span>
-                        {g.target ? ` — ${g.target}` : ""}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <p className="mt-2 text-[0.65rem] font-semibold text-g-ink-3">
-                Patient-reported, for discussion. Not a diagnosis; PMOS diagnosis is clinical and one of exclusion.
-              </p>
-            </AlbumSection>
-          )}
-
-          {cfg.sections.clinical && hasClinical && (
-            <AlbumSection title="Clinical summary" icon="doctor" soft={theme.soft}>
-              {clinical.menstrual.length > 0 && <ClinList label="Menstrual history" items={clinical.menstrual} />}
-              {clinical.body.length > 0 && <ClinList label="Body & vitals" items={clinical.body} />}
-              {clinical.history.length > 0 && <ClinList label="Relevant history" items={clinical.history} />}
-              {clinical.meds.length > 0 && (
-                <ClinList label="Meds & supplements (days logged)" items={clinical.meds.map((m) => `${m.label}: ${m.days} day${m.days === 1 ? "" : "s"}`)} />
-              )}
-              {clinical.measurements.length > 0 && <ClinList label="Measurements" items={clinical.measurements} />}
-              {clinical.labs.length > 0 && (
-                <ClinList label="Lab results (self-reported)" items={clinical.labs.filter((l) => l.name).map((l) => `${l.name}: ${l.value}`)} />
-              )}
-              {clinical.symptomsByCategory.length > 0 && (
-                <div className="mb-2">
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Symptoms reported</p>
-                  <ul className="mt-0.5 space-y-0.5">
-                    {clinical.symptomsByCategory.map((c) => (
-                      <li key={c.title} className="text-sm font-medium text-g-ink-2">
-                        <span className="font-bold text-g-ink">{c.title}:</span> {c.items.join(", ")}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {clinical.screening.length > 0 && (
-                <div className="mb-2 rounded-xl p-2.5" style={{ background: theme.soft }}>
-                  <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Worth discussing / screening</p>
-                  <ul className="mt-0.5 space-y-0.5">
-                    {clinical.screening.map((s) => (
-                      <li key={s.label} className="text-xs font-medium text-g-ink-2">
-                        <span className="font-bold text-g-ink">{s.label}:</span> {s.detail}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <div className="mt-2 rounded-xl bg-white/70 p-2.5">
-                <p className="text-[0.7rem] font-bold uppercase tracking-wide text-g-ink-3">Signals (data, not a diagnosis)</p>
-                <ul className="mt-1 space-y-0.5">
-                  {clinical.rotterdam.map((r) => (
-                    <li key={r.label} className="text-xs font-medium text-g-ink-2">
-                      <span className="font-bold text-g-ink">{r.label}:</span> {r.detail}
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-1.5 text-[0.65rem] font-semibold text-g-ink-3">
-                  These are patient-logged data points, not a diagnosis. PMOS diagnosis requires clinical evaluation.
-                </p>
-              </div>
-            </AlbumSection>
-          )}
-
-          {cfg.sections.summary && summary && (
-            <AlbumSection title="Tracking summary" icon="calendar" soft={theme.soft} focus={focusedSections.has("summary")}>
-              <div className="grid grid-cols-2 gap-3">
-                <Mini label="Days tracked" value={`${summary.daysTracked}`} />
-                <Mini label="Period days" value={`${summary.flowDays}`} />
-                <Mini label="Avg pain" value={summary.avgPain != null ? `${summary.avgPain.toFixed(1)}/10` : "—"} />
-                <Mini label="Avg sleep" value={summary.avgSleep != null ? `${summary.avgSleep.toFixed(1)}h` : "—"} />
-              </div>
-            </AlbumSection>
-          )}
-
-          {cfg.sections.symptoms && summary && (summary.topSymptoms.length > 0 || summary.topMoods.length > 0) && (
-            <AlbumSection title="Most common" icon="symptoms" soft={theme.soft} focus={focusedSections.has("symptoms")}>
-              <div className="flex flex-wrap gap-2">
-                {[...summary.topSymptoms, ...summary.topMoods].map((s) => (
-                  <span key={`${s.group}-${s.option.id}`} className="rounded-full bg-white px-3 py-1.5 text-sm font-bold text-g-ink shadow-sm">
-                    {s.option.emoji} {s.option.label} · {s.count}×
-                  </span>
-                ))}
-              </div>
-            </AlbumSection>
-          )}
-
-          {cfg.sections.cycle && summary && (
-            <AlbumSection title="Period & pain" icon="period" soft={theme.soft} focus={focusedSections.has("cycle")}>
-              <p className="text-sm font-semibold text-g-ink-2">
-                {summary.flowDays} day{summary.flowDays === 1 ? "" : "s"} of period logged over {summary.daysTracked} tracked
-                day{summary.daysTracked === 1 ? "" : "s"}.
-                {summary.avgPain != null && ` Average pain reported around ${summary.avgPain.toFixed(1)} out of 10.`}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {FLOW_OPTIONS.filter((f) => entries.some((e) => e.flow === f.id && f.id !== "none")).map((f) => (
-                  <span key={f.id} className="rounded-full px-2.5 py-1 text-xs font-bold text-g-ink" style={{ background: theme.soft }}>
-                    {f.emoji} {f.label}
-                  </span>
-                ))}
-              </div>
-            </AlbumSection>
-          )}
-
-          {cfg.sections.watchouts && summary && summary.watchOuts.length > 0 && (
-            <AlbumSection title="Things I'd like to discuss" icon="doctor" soft={theme.soft} focus={focusedSections.has("watchouts")}>
-              <ul className="space-y-2">
-                {summary.watchOuts.map((w, i) => (
-                  <li key={i} className="text-sm font-semibold text-g-ink">
-                    {w.emoji} {w.title}
-                    <span className="block text-xs font-medium text-g-ink-2">{w.body}</span>
-                  </li>
-                ))}
-              </ul>
-            </AlbumSection>
-          )}
-
-          {cfg.sections.notes && (cfg.notes.trim() || notesEntries.length > 0) && (
-            <AlbumSection title="Notes" icon="notes" soft={theme.soft}>
-              {cfg.notes.trim() && <p className="text-sm font-medium text-g-ink">{cfg.notes}</p>}
-              {notesEntries.map((e) => (
-                <p key={e.date} className="mt-1 text-xs font-medium text-g-ink-2">
-                  <span className="font-bold">{e.date}:</span> {e.notes}
-                </p>
-              ))}
-            </AlbumSection>
-          )}
+          {orderedBody.map((key) => sectionNodes[key])}
 
           <p className="border-t border-g-border pt-3 text-center text-[0.65rem] font-semibold text-g-ink-3">
             Made with MyPMOS · This is a personal tracking summary, not a
@@ -670,6 +790,20 @@ function PreItem({ label, children }: { label: string; children: React.ReactNode
   )
 }
 
+/** Bold, colorful hero card for the one focus area the report leads with. */
+function FocusCard({ theme, title, subtitle, children }: { theme: Theme; title: string; subtitle: string; children: ReactNode }) {
+  return (
+    <section className="overflow-hidden rounded-2xl text-white" style={{ background: `linear-gradient(135deg, ${theme.from}, ${theme.to})` }}>
+      <div className="p-4">
+        <p className="text-[0.65rem] font-extrabold uppercase tracking-wider opacity-90">Your focus</p>
+        <h3 className="font-cute text-lg font-black leading-tight">{title}</h3>
+        <p className="text-xs font-semibold opacity-90">{subtitle}</p>
+        <div className="mt-3 rounded-2xl bg-white/95 p-3">{children}</div>
+      </div>
+    </section>
+  )
+}
+
 function AlbumSection({
   title,
   icon,
@@ -685,11 +819,11 @@ function AlbumSection({
 }) {
   return (
     <section className="rounded-2xl p-4" style={{ background: soft }}>
-      <div className="mb-2 flex items-center gap-2">
+      <div className="mb-3 flex items-center gap-2 border-b border-white/60 pb-2.5">
         <div className="rounded-full bg-white/80 p-2 text-g-ink">
           <MedicalIcon name={icon} size={18} className="text-current" />
         </div>
-        <h3 className="font-cute text-base font-bold text-g-ink">{title}</h3>
+        <h3 className="font-cute text-lg font-black tracking-tight text-g-ink">{title}</h3>
         {focus && (
           <span className="rounded-full bg-white/80 px-2 py-0.5 text-[0.6rem] font-black uppercase tracking-wide text-g-ink-2">
             ★ Your focus

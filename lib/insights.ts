@@ -37,6 +37,31 @@ export interface WatchOut {
   body: string
 }
 
+export interface MonthlyPoint {
+  month: string // "YYYY-MM"
+  label: string // "May 2025"
+  value: number
+}
+
+/** Monthly averages of a numeric field (e.g. weight), for a compact trend chart. */
+export function monthlySeries(entries: TrackEntry[], key: "weightKg" | "bbt"): MonthlyPoint[] {
+  const buckets = new Map<string, number[]>()
+  for (const e of entries) {
+    const v = e[key]
+    if (typeof v !== "number") continue
+    const month = e.date.slice(0, 7)
+    if (!buckets.has(month)) buckets.set(month, [])
+    buckets.get(month)!.push(v)
+  }
+  return [...buckets.entries()]
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    .map(([month, vals]) => ({
+      month,
+      label: new Date(month + "-01T00:00:00").toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+      value: vals.reduce((a, b) => a + b, 0) / vals.length,
+    }))
+}
+
 function tally(entries: TrackEntry[], key: keyof TrackEntry): Map<string, number> {
   const m = new Map<string, number>()
   for (const e of entries) {
