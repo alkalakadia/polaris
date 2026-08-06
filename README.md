@@ -13,17 +13,17 @@ Live: **https://mypmos.vercel.app**
 
 - **Tracker (the moat)** — period/flow, mood, symptoms with severity, sleep, pain,
   skin & hair, cravings, digestion, movement, meds, measurements, notes, photos.
-- **Personalized to her goals** — at onboarding she picks up to 3 goals, and the
+- **Personalized to patient goals** — at onboarding patient picks up to 3 goals, and the
   Home, Log, Insights and gyno PDF all reshape around them. A "What I track" screen
   lets her pin / hide / reorder anything. Nothing is ever removed; it all flows into
   one Insights.
-- **Cycle & period tracking** — learns her real rhythm from logged periods, and
+- **Cycle & period tracking** — learns patient's real rhythm from logged periods, and
   does NOT guess a next period when cycles are irregular (shows "Learning your
   cycle" until it has enough data).
-- **Insights** — patterns from her own data, framed as "worth discussing," never a
+- **Insights** — patterns from patient's own data, framed as "worth discussing," never a
   diagnosis.
-- **Community, Learn** — real posts/comments (Supabase) and AI-generated,
-  research-grounded explainers (Gemini).
+- **Community, Learn** — real posts/comments (Supabase), AI-generated,
+  research-grounded explainers (Gemini), and chatbot grounded in medical research
 - **Gyno visit PDF** — a cute, clinician-first summary that leads with the
   Rotterdam pre-visit picture and her focus, keeping all the detail a doctor wants.
 - **Privacy & safety** — private media, consent + age gate, report/block, delete
@@ -68,8 +68,10 @@ or use `scripts/run-migration.mjs`.
 
 ## Team
 
-- **Alka Lakadia** — engineering lead, product
-- Team — using the app daily + contributing on UI / design / user-friendliness
+- **Alka Lakadia** — Engineering lead, Product
+- **Neha Srinivasula** — Product & Engineering (RAG pipeline for chatbot, feedback system, stakeholder research)
+- **Manasvi Khandelwal** — UI/Design
+- **Saanvi Gandhari** — UI/Design
 
 ## Disclaimer
 
